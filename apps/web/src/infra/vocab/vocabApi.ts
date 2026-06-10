@@ -1,0 +1,144 @@
+import { VocabResponseSchema, type VocabQuery, type WordDTO } from "@keylish/shared";
+import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
+
+const DB_NAME = "keylish-vocab-v1";
+const STORE_NAME = "responses";
+
+export type VocabSource = "api" | "cache" | "seed";
+
+export interface FetchVocabResult {
+  words: WordDTO[];
+  source: VocabSource;
+  error?: string;
+}
+
+export async function fetchVocab(params: Partial<VocabQuery> = {}): Promise<FetchVocabResult> {
+  const query = normalizeQuery(params);
+  const key = cacheKey(query);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  let error: string | undefined;
+
+  if (apiUrl) {
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/vocab?${toSearchParams(query)}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error(`API returned ${res.status}`);
+      const parsed = VocabResponseSchema.parse(await res.json());
+      if (parsed.length) {
+        await writeCache(key, parsed);
+        return { words: parsed, source: "api" };
+      }
+      error = "API returned an empty vocabulary set.";
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Unable to fetch vocabulary API.";
+    }
+  } else {
+    error = "NEXT_PUBLIC_API_URL is not configured.";
+  }
+
+  const cached = await readCache(key);
+  if (cached.length) return { words: cached, source: "cache", error };
+
+  return { words: filterSeed(query), source: "seed", error };
+}
+
+function normalizeQuery(params: Partial<VocabQuery>): VocabQuery {
+  return {
+    levels: params.levels?.length ? params.levels : undefined,
+    topics: params.topics?.length ? params.topics : undefined,
+    limit: params.limit ?? 20,
+    random: params.random ?? false,
+  };
+}
+
+function toSearchParams(query: VocabQuery) {
+  const params = new URLSearchParams();
+  if (query.levels?.length) params.set("levels", query.levels.join(","));
+  if (query.topics?.length) params.set("topics", query.topics.join(","));
+  params.set("limit", String(query.limit));
+  if (query.random) params.set("random", "1");
+  return params.toString();
+}
+
+function cacheKey(query: VocabQuery) {
+  const levels = [...(query.levels ?? [])].sort().join(",");
+  const topics = [...(query.topics ?? [])].sort().join(",");
+  return `vocab:${levels}:${topics}:${query.limit}:${query.random ? "1" : "0"}`;
+}
+
+function filterSeed(query: VocabQuery): WordDTO[] {
+  const rows = SEED_VOCABULARY.filter((word) => {
+    const levelOk = !query.levels?.length || (word.level != null && query.levels.includes(word.level));
+    const topicOk = !query.topics?.length || (word.topic != null && query.topics.some((topic) => topic === word.topic || topic === slugify(word.topic ?? "")));
+    return levelOk && topicOk;
+  });
+  const source = query.random ? shuffle(rows) : rows;
+  return source.slice(0, query.limit);
+}
+
+async function openDb() {
+  if (typeof indexedDB === "undefined") return null;
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore(STORE_NAME);
+    };
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve(req.result);
+  });
+}
+
+async function readCache(key: string): Promise<WordDTO[]> {
+  try {
+    const db = await openDb();
+    if (!db) return [];
+    return await new Promise<WordDTO[]>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const req = tx.objectStore(STORE_NAME).get(key);
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : []);
+      tx.oncomplete = () => db.close();
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function writeCache(key: string, words: WordDTO[]) {
+  try {
+    const db = await openDb();
+    if (!db) return;
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      tx.objectStore(STORE_NAME).put(words, key);
+      tx.onerror = () => reject(tx.error);
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+    });
+  } catch {
+    // Cache is opportunistic; fetch/fallback should stay usable if IndexedDB fails.
+  }
+}
+
+function shuffle<T>(rows: T[]) {
+  const copy = [...rows];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function slugify(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}

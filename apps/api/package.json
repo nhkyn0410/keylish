@@ -1,0 +1,38 @@
+{
+  "name": "@keylish/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "seed": "tsx scripts/seed.ts",
+    "build-dataset": "node ../../scripts/build-vocab.mjs"
+  },
+  "dependencies": {
+    "@keylish/db": "workspace:*",
+    "@keylish/shared": "workspace:*",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/platform-express": "^11.1.26",
+    "@nestjs/swagger": "^11.2.3",
+    "nestjs-zod": "^5.0.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.10",
+    "@nestjs/testing": "^11.1.9",
+    "@types/node": "^20",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
+    "tsx": "^4.20.6",
+    "typescript": "^5",
+    "vitest": "^4.0.15"
+  }
+}

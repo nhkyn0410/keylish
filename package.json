@@ -1,16 +1,35 @@
 {
-  "name": "KeyLish",
+  "name": "keylish",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "turbo dev --parallel",
+    "dev:web": "pnpm --filter @keylish/web dev",
+    "dev:api": "pnpm --filter @keylish/api dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "check": "pnpm lint && pnpm typecheck",
+    "db:generate": "pnpm --filter @keylish/db generate",
+    "db:migrate": "pnpm --filter @keylish/db migrate",
+    "db:deploy": "pnpm --filter @keylish/db deploy",
+    "db:studio": "pnpm --filter @keylish/db studio",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.27.0",
   "devDependencies": {
-    "turbo": "^2.9.17"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "turbo": "^2.9.17",
+    "typescript-eslint": "^8.61.0"
   }
 }
