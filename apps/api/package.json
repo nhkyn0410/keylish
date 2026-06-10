@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "seed": "tsx scripts/seed.ts",
-    "build-dataset": "node ../../scripts/build-vocab.mjs"
+    "build-dataset": "node ../../scripts/build-dataset.mjs"
   },
   "dependencies": {
     "@keylish/db": "workspace:*",
@@ -30,6 +30,7 @@
     "@nestjs/testing": "^11.1.9",
     "@types/node": "^20",
     "@types/supertest": "^6.0.3",
+    "dotenv": "^17.4.2",
     "supertest": "^7.1.4",
     "tsx": "^4.20.6",
     "typescript": "^5",

@@ -2,9 +2,9 @@
   "_meta": {
     "source": "Metadata (CEFR level, frequency, POS): Maximax67/Words-CEFR-Dataset (MIT). Vietnamese meanings + topics: curated for KeyLish v1.",
     "license": "Maximax67 metadata: MIT. Curated Vietnamese content: project-owned.",
-    "upgrade": "Pipeline can ingest a kaikki/Wiktionary EN→VI dump (run on a machine with bandwidth) to cover the long tail.",
+    "upgrade": "Full dataset (kaikki EN→VI long tail) is built by scripts/build-dataset.mjs and served from the API.",
     "count": 112,
-    "generatedAt": "2026-06-10T00:47:25.813Z"
+    "generatedAt": "2026-06-10T14:21:03.697Z"
   },
   "words": [
     {
