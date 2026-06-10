@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/* ============================================================
+   KeyLish — Neo-brutalism design tokens (nguồn: doc/03 Mục 8)
+   ============================================================ */
+@theme {
+  /* Bảng màu nền */
+  --color-neo-bg: #fffdf5; /* cream canvas */
+  --color-neo-ink: #000000; /* đen: text / viền / shadow */
+  --color-neo-white: #ffffff;
+  --color-neo-yellow: #ffd93d; /* primary CTA */
+  --color-neo-violet: #c4b5fd; /* info / focus / secondary */
+  --color-neo-red: #ff6b6b; /* error / incorrect */
+  --color-neo-green: #4ed88a; /* success / correct */
+
+  /* Alias semantic (đặt tên theo nghĩa — cùng giá trị) */
+  --color-primary: #ffd93d;
+  --color-success: #4ed88a;
+  --color-error: #ff6b6b;
+  --color-info: #c4b5fd;
+
+  /* Hard shadows — zero blur, offset bottom-right */
+  --shadow-neo-sm: 4px 4px 0 0 #000;
+  --shadow-neo: 8px 8px 0 0 #000;
+  --shadow-neo-lg: 12px 12px 0 0 #000;
+  --shadow-neo-xl: 16px 16px 0 0 #000;
+}
+
+/* Font Be Vietnam Pro — nạp ở layout qua next/font (biến --font-be-vietnam-pro) */
+@theme inline {
+  --font-sans: var(--font-be-vietnam-pro);
+}
+
+@layer base {
+  html {
+    height: 100%;
+  }
+  body {
+    @apply min-h-full bg-neo-bg text-neo-ink font-sans font-bold antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-black uppercase tracking-tight;
+  }
+}
+
+/* ============================================================
+   Driver.js — style theo neo-brutalism (popoverClass="keylish-neo")
+   ============================================================ */
+.driver-popover.keylish-neo {
+  background-color: var(--color-neo-bg);
+  border: 4px solid #000;
+  border-radius: 0;
+  box-shadow: 8px 8px 0 0 #000;
+  color: #000;
+  font-family: var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif;
+}
+.driver-popover.keylish-neo .driver-popover-title {
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.driver-popover.keylish-neo .driver-popover-description,
+.driver-popover.keylish-neo .driver-popover-progress-text {
+  font-weight: 700;
+}
+.driver-popover.keylish-neo button {
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  background-color: var(--color-neo-yellow) !important;
+  color: #000 !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+}

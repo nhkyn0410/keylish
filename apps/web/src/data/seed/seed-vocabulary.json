@@ -1,0 +1,905 @@
+{
+  "_meta": {
+    "source": "Metadata (CEFR level, frequency, POS): Maximax67/Words-CEFR-Dataset (MIT). Vietnamese meanings + topics: curated for KeyLish v1.",
+    "license": "Maximax67 metadata: MIT. Curated Vietnamese content: project-owned.",
+    "upgrade": "Pipeline can ingest a kaikki/Wiktionary EN→VI dump (run on a machine with bandwidth) to cover the long tail.",
+    "count": 112,
+    "generatedAt": "2026-06-10T00:47:25.813Z"
+  },
+  "words": [
+    {
+      "en": "work",
+      "vi": "công việc",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 996495981
+    },
+    {
+      "en": "water",
+      "vi": "nước",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 801336741
+    },
+    {
+      "en": "data",
+      "vi": "dữ liệu",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "B2",
+      "frequency": 644273786
+    },
+    {
+      "en": "research",
+      "vi": "nghiên cứu",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 605988986
+    },
+    {
+      "en": "city",
+      "vi": "thành phố",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 590480792
+    },
+    {
+      "en": "report",
+      "vi": "báo cáo",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 507463321
+    },
+    {
+      "en": "office",
+      "vi": "văn phòng",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 501871954
+    },
+    {
+      "en": "study",
+      "vi": "học",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 489308424
+    },
+    {
+      "en": "country",
+      "vi": "quốc gia",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 479324608
+    },
+    {
+      "en": "example",
+      "vi": "ví dụ",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 464621879
+    },
+    {
+      "en": "question",
+      "vi": "câu hỏi",
+      "topic": "Giao tiếp",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 441002870
+    },
+    {
+      "en": "book",
+      "vi": "quyển sách",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 391695126
+    },
+    {
+      "en": "name",
+      "vi": "tên",
+      "topic": "Giao tiếp",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 382225962
+    },
+    {
+      "en": "body",
+      "vi": "cơ thể",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 371133847
+    },
+    {
+      "en": "money",
+      "vi": "tiền",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 333346680
+    },
+    {
+      "en": "market",
+      "vi": "chợ",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 331072497
+    },
+    {
+      "en": "price",
+      "vi": "giá",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 316238140
+    },
+    {
+      "en": "plan",
+      "vi": "kế hoạch",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 297419990
+    },
+    {
+      "en": "knowledge",
+      "vi": "kiến thức",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 281035794
+    },
+    {
+      "en": "river",
+      "vi": "dòng sông",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 277273219
+    },
+    {
+      "en": "science",
+      "vi": "khoa học",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 273034984
+    },
+    {
+      "en": "project",
+      "vi": "dự án",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "B2",
+      "frequency": 270858749
+    },
+    {
+      "en": "language",
+      "vi": "ngôn ngữ",
+      "topic": "Giao tiếp",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 270090665
+    },
+    {
+      "en": "read",
+      "vi": "đọc",
+      "topic": "Học thuật",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 258198806
+    },
+    {
+      "en": "size",
+      "vi": "kích cỡ",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 254673131
+    },
+    {
+      "en": "road",
+      "vi": "con đường",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 243327174
+    },
+    {
+      "en": "help",
+      "vi": "giúp đỡ",
+      "topic": "Giao tiếp",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 238999023
+    },
+    {
+      "en": "meeting",
+      "vi": "cuộc họp",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 222024655
+    },
+    {
+      "en": "library",
+      "vi": "thư viện",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 221375437
+    },
+    {
+      "en": "subject",
+      "vi": "môn học",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 213309100
+    },
+    {
+      "en": "pay",
+      "vi": "trả tiền",
+      "topic": "Mua sắm",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 195215456
+    },
+    {
+      "en": "meet",
+      "vi": "gặp gỡ",
+      "topic": "Giao tiếp",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 186899622
+    },
+    {
+      "en": "hospital",
+      "vi": "bệnh viện",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 177461104
+    },
+    {
+      "en": "student",
+      "vi": "học sinh",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 160864270
+    },
+    {
+      "en": "computer",
+      "vi": "máy tính",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 155549148
+    },
+    {
+      "en": "answer",
+      "vi": "câu trả lời",
+      "topic": "Giao tiếp",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 143040551
+    },
+    {
+      "en": "friend",
+      "vi": "bạn bè",
+      "topic": "Giao tiếp",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 140136711
+    },
+    {
+      "en": "fish",
+      "vi": "cá",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 136323807
+    },
+    {
+      "en": "teacher",
+      "vi": "giáo viên",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 124221919
+    },
+    {
+      "en": "manager",
+      "vi": "quản lý",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 120809252
+    },
+    {
+      "en": "milk",
+      "vi": "sữa",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 108854157
+    },
+    {
+      "en": "pain",
+      "vi": "cơn đau",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 106302459
+    },
+    {
+      "en": "medicine",
+      "vi": "thuốc",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 99375545
+    },
+    {
+      "en": "please",
+      "vi": "làm ơn",
+      "topic": "Giao tiếp",
+      "pos": "động từ",
+      "level": "B1",
+      "frequency": 98740931
+    },
+    {
+      "en": "thank",
+      "vi": "cảm ơn",
+      "topic": "Giao tiếp",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 92699107
+    },
+    {
+      "en": "file",
+      "vi": "tệp tin",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 90996955
+    },
+    {
+      "en": "phone",
+      "vi": "điện thoại",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 89432472
+    },
+    {
+      "en": "map",
+      "vi": "bản đồ",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 87733395
+    },
+    {
+      "en": "talk",
+      "vi": "nói chuyện",
+      "topic": "Giao tiếp",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 87166668
+    },
+    {
+      "en": "message",
+      "vi": "tin nhắn",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 84856792
+    },
+    {
+      "en": "sugar",
+      "vi": "đường",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 84263532
+    },
+    {
+      "en": "device",
+      "vi": "thiết bị",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 82887382
+    },
+    {
+      "en": "exercise",
+      "vi": "tập thể dục",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 82109154
+    },
+    {
+      "en": "doctor",
+      "vi": "bác sĩ",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 80433294
+    },
+    {
+      "en": "mountain",
+      "vi": "ngọn núi",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 78455323
+    },
+    {
+      "en": "hotel",
+      "vi": "khách sạn",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 76390464
+    },
+    {
+      "en": "sell",
+      "vi": "bán",
+      "topic": "Mua sắm",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 75761333
+    },
+    {
+      "en": "buy",
+      "vi": "mua",
+      "topic": "Mua sắm",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 75255022
+    },
+    {
+      "en": "software",
+      "vi": "phần mềm",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 70980737
+    },
+    {
+      "en": "sign",
+      "vi": "ký tên",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 69499053
+    },
+    {
+      "en": "travel",
+      "vi": "du lịch",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 67866430
+    },
+    {
+      "en": "shop",
+      "vi": "cửa hàng",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 63727394
+    },
+    {
+      "en": "salary",
+      "vi": "tiền lương",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "B2",
+      "frequency": 59636331
+    },
+    {
+      "en": "eat",
+      "vi": "ăn",
+      "topic": "Sức khỏe",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 56930621
+    },
+    {
+      "en": "rice",
+      "vi": "cơm",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 56754653
+    },
+    {
+      "en": "customer",
+      "vi": "khách hàng",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 56739227
+    },
+    {
+      "en": "beach",
+      "vi": "bãi biển",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 56019471
+    },
+    {
+      "en": "coffee",
+      "vi": "cà phê",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 52362250
+    },
+    {
+      "en": "screen",
+      "vi": "màn hình",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 50745191
+    },
+    {
+      "en": "internet",
+      "vi": "mạng internet",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 46602249
+    },
+    {
+      "en": "clothes",
+      "vi": "quần áo",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 46181747
+    },
+    {
+      "en": "journey",
+      "vi": "chuyến đi",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 44302938
+    },
+    {
+      "en": "healthy",
+      "vi": "khỏe mạnh",
+      "topic": "Sức khỏe",
+      "pos": "tính từ",
+      "level": "A1",
+      "frequency": 44251037
+    },
+    {
+      "en": "sick",
+      "vi": "ốm",
+      "topic": "Sức khỏe",
+      "pos": "tính từ",
+      "level": "A1",
+      "frequency": 44109590
+    },
+    {
+      "en": "listen",
+      "vi": "lắng nghe",
+      "topic": "Giao tiếp",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 43046848
+    },
+    {
+      "en": "expensive",
+      "vi": "đắt",
+      "topic": "Mua sắm",
+      "pos": "tính từ",
+      "level": "A1",
+      "frequency": 42401156
+    },
+    {
+      "en": "sorry",
+      "vi": "xin lỗi",
+      "topic": "Giao tiếp",
+      "pos": "tính từ",
+      "level": "A1",
+      "frequency": 40568226
+    },
+    {
+      "en": "nurse",
+      "vi": "y tá",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 39862356
+    },
+    {
+      "en": "bread",
+      "vi": "bánh mì",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 38357032
+    },
+    {
+      "en": "bag",
+      "vi": "túi xách",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 38156067
+    },
+    {
+      "en": "sleep",
+      "vi": "ngủ",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 37756637
+    },
+    {
+      "en": "busy",
+      "vi": "bận rộn",
+      "topic": "Công sở",
+      "pos": "tính từ",
+      "level": "A1",
+      "frequency": 37060528
+    },
+    {
+      "en": "fever",
+      "vi": "sốt",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 35179245
+    },
+    {
+      "en": "desk",
+      "vi": "bàn làm việc",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 34812359
+    },
+    {
+      "en": "airport",
+      "vi": "sân bay",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 34637925
+    },
+    {
+      "en": "lesson",
+      "vi": "bài học",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 30428363
+    },
+    {
+      "en": "battery",
+      "vi": "pin",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 29622511
+    },
+    {
+      "en": "restaurant",
+      "vi": "nhà hàng",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 29185232
+    },
+    {
+      "en": "apple",
+      "vi": "quả táo",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 28430703
+    },
+    {
+      "en": "drink",
+      "vi": "uống",
+      "topic": "Sức khỏe",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 28198286
+    },
+    {
+      "en": "breakfast",
+      "vi": "bữa sáng",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 27376336
+    },
+    {
+      "en": "vegetable",
+      "vi": "rau củ",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 24498896
+    },
+    {
+      "en": "chicken",
+      "vi": "thịt gà",
+      "topic": "Ẩm thực",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 23014583
+    },
+    {
+      "en": "cheap",
+      "vi": "rẻ",
+      "topic": "Mua sắm",
+      "pos": "tính từ",
+      "level": "A2",
+      "frequency": 22748875
+    },
+    {
+      "en": "dictionary",
+      "vi": "từ điển",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 22529325
+    },
+    {
+      "en": "tired",
+      "vi": "mệt mỏi",
+      "topic": "Sức khỏe",
+      "pos": "động từ",
+      "level": "A1",
+      "frequency": 22259409
+    },
+    {
+      "en": "discount",
+      "vi": "giảm giá",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 20700937
+    },
+    {
+      "en": "ticket",
+      "vi": "vé",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 17745294
+    },
+    {
+      "en": "hungry",
+      "vi": "đói",
+      "topic": "Ẩm thực",
+      "pos": "tính từ",
+      "level": "A1",
+      "frequency": 17260930
+    },
+    {
+      "en": "email",
+      "vi": "thư điện tử",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "A1",
+      "frequency": 11930172
+    },
+    {
+      "en": "colleague",
+      "vi": "đồng nghiệp",
+      "topic": "Công sở",
+      "pos": "danh từ",
+      "level": "B2",
+      "frequency": 11873029
+    },
+    {
+      "en": "exam",
+      "vi": "kỳ thi",
+      "topic": "Học thuật",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 9762069
+    },
+    {
+      "en": "delicious",
+      "vi": "ngon",
+      "topic": "Ẩm thực",
+      "pos": "tính từ",
+      "level": "A1",
+      "frequency": 8357942
+    },
+    {
+      "en": "keyboard",
+      "vi": "bàn phím",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 8352510
+    },
+    {
+      "en": "passport",
+      "vi": "hộ chiếu",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 6893720
+    },
+    {
+      "en": "luggage",
+      "vi": "hành lý",
+      "topic": "Du lịch",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 5212379
+    },
+    {
+      "en": "password",
+      "vi": "mật khẩu",
+      "topic": "Công nghệ",
+      "pos": "danh từ",
+      "level": "B1",
+      "frequency": 4697776
+    },
+    {
+      "en": "wallet",
+      "vi": "ví",
+      "topic": "Mua sắm",
+      "pos": "danh từ",
+      "level": "A2",
+      "frequency": 3338069
+    },
+    {
+      "en": "download",
+      "vi": "tải xuống",
+      "topic": "Công nghệ",
+      "pos": "động từ",
+      "level": "A2",
+      "frequency": 2141961
+    },
+    {
+      "en": "goodbye",
+      "vi": "tạm biệt",
+      "topic": "Giao tiếp",
+      "pos": "danh từ",
+      "level": "C2",
+      "frequency": 1014587
+    },
+    {
+      "en": "hello",
+      "vi": "xin chào",
+      "topic": "Giao tiếp",
+      "level": "A2",
+      "frequency": 0
+    },
+    {
+      "en": "screenshot",
+      "vi": "ảnh chụp màn hình",
+      "topic": "Công nghệ",
+      "level": "A2",
+      "frequency": 0
+    }
+  ]
+}

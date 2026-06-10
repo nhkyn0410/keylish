@@ -23,7 +23,7 @@ Monorepo quản lý bằng **pnpm workspaces + Turborepo**.
 |---|---|---|
 | `apps/web` | Ứng dụng web | Next.js (App Router) · React · TypeScript · Tailwind CSS |
 | `apps/api` | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod |
-| `packages/db` | Tầng database | Prisma 7 (driver adapter `pg`) · PostgreSQL (Supabase) |
+| `packages/db` | Tầng database | Prisma 7 (driver adapter `pg`) · PostgreSQL (Neon) |
 | `packages/shared` | Schema & type dùng chung | Zod 4 |
 
 Công cụ chung: TypeScript 5 · Vitest · tsup · tsx.
@@ -61,8 +61,9 @@ Yêu cầu: **Node.js 20+** và **pnpm 10**.
 # 1. Cài dependencies
 pnpm install
 
-# 2. Cấu hình database (Supabase Postgres)
-#    Tạo .env trong packages/db với DATABASE_URL=postgresql://...
+# 2. Chạy Postgres local (Docker) — hoặc trỏ DATABASE_URL tới Neon
+docker compose up -d
+#    Tạo .env trong packages/db với DATABASE_URL=postgresql://... (xem .env.example)
 
 # 3. Generate Prisma client & migrate
 pnpm --filter @keylish/db generate
@@ -72,6 +73,16 @@ pnpm --filter @keylish/db migrate
 pnpm --filter @keylish/api dev   # API (NestJS)
 pnpm --filter @keylish/web dev   # Web (Next.js)
 ```
+
+## Triển khai
+
+| Thành phần | Nền tảng | Free tier |
+|---|---|---|
+| `apps/web` | [Vercel](https://vercel.com) | ✅ |
+| `apps/api` | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle) |
+| PostgreSQL | [Neon](https://neon.tech) | ✅ (tự thức khi có kết nối) |
+
+Hướng dẫn chi tiết từng bước: [doc/deploy.md](doc/deploy.md).
 
 ## Cấu trúc thư mục
 
