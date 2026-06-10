@@ -7,8 +7,10 @@ dist/
 build/
 out/
 .next/
+dist-ssr/
 .nuxt/
 .svelte-kit/
+.vercel/
 
 # Test and coverage output
 coverage/
@@ -19,6 +21,8 @@ coverage/
 .cache/
 .parcel-cache/
 .vite/
+.eslintcache
+*.tsbuildinfo
 
 # Logs
 logs/
@@ -43,3 +47,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Temporary files
+tmp/
+temp/
