@@ -20,9 +20,10 @@
     "migrate": "prisma migrate dev --schema prisma/schema.prisma",
     "deploy": "prisma migrate deploy --schema prisma/schema.prisma",
     "format": "prisma format --schema prisma/schema.prisma",
-    "lint": "tsc --noEmit",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "studio": "prisma studio --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

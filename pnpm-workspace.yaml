@@ -2,8 +2,11 @@ packages:
   - apps/*
   - packages/*
 
-ignoredBuiltDependencies:
+onlyBuiltDependencies:
   - '@prisma/engines'
-  - '@scarf/scarf'
   - esbuild
   - prisma
+  - sharp
+
+ignoredBuiltDependencies:
+  - '@scarf/scarf'

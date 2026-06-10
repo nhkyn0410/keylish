@@ -22,7 +22,7 @@ Monorepo quản lý bằng **pnpm workspaces + Turborepo**.
 | Workspace | Vai trò | Công nghệ |
 |---|---|---|
 | `apps/web` | Ứng dụng web | Next.js (App Router) · React · TypeScript · Tailwind CSS |
-| `apps/api` | API đọc kho từ vựng (read-only) | NestJS 11 · Fastify · Swagger · nestjs-zod |
+| `apps/api` | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod |
 | `packages/db` | Tầng database | Prisma 7 (driver adapter `pg`) · PostgreSQL (Supabase) |
 | `packages/shared` | Schema & type dùng chung | Zod 4 |
 
@@ -34,6 +34,8 @@ Backend V1 chỉ phục vụ **đọc kho từ vựng**:
 
 - `GET /api/v1/topics` — danh sách chủ đề
 - `GET /api/v1/vocab` — danh sách từ vựng (lọc theo topic / cấp độ)
+- `GET /api/health` - health check
+- `GET /api/docs` - OpenAPI UI
 
 ## Nguồn dữ liệu từ vựng
 
