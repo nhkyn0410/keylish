@@ -85,6 +85,42 @@ export async function fetchTopics(): Promise<{ topics: TopicDTO[]; source: Vocab
   return { topics: seedTopicDtos(), source: "seed", error };
 }
 
+/** API có được cấu hình không (NEXT_PUBLIC_API_URL). */
+export function apiConfigured(): boolean {
+  return !!process.env.NEXT_PUBLIC_API_URL;
+}
+
+/** Fire-and-forget: chạm /api/health để đánh thức Render sớm (prewarm cold start). */
+export function warmApi(): void {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  if (!apiUrl) return;
+  fetch(`${apiUrl}/api/health`, { cache: "no-store" }).catch(() => {});
+}
+
+const sleep = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms); });
+
+/**
+ * Chờ API thức rồi mới trả chủ đề thật: thử fetchTopics tới khi nguồn = "api"
+ * hoặc hết lượt. Dùng cho màn "Đang nạp từ vựng" để không rớt seed lúc Render
+ * cold start (502/503). Nếu không cấu hình API → trả seed ngay.
+ */
+export async function loadTopicsAwait(
+  isAborted: () => boolean = () => false,
+  attempts = 30,
+  delayMs = 3500,
+): Promise<{ topics: TopicDTO[]; source: VocabSource; error?: string }> {
+  let last = await fetchTopics();
+  if (!apiConfigured() || last.source === "api") return last;
+  for (let i = 1; i < attempts; i += 1) {
+    if (isAborted()) break;
+    await sleep(delayMs);
+    if (isAborted()) break;
+    last = await fetchTopics();
+    if (last.source === "api") return last;
+  }
+  return last;
+}
+
 /** Số từ thật khớp bộ lọc (DB qua API), fallback đếm trên seed offline. */
 export async function fetchVocabCount(filter: VocabFilter = {}): Promise<number> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");

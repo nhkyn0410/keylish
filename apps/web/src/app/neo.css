@@ -59,6 +59,90 @@
   .k-screen .k-site-wrap { padding-inline: 40px; }
 }
 
+/* ============================================================
+   App shell — vertical sidebar (variant D) on every shell screen
+   ============================================================ */
+.k-shell { display: flex; height: 100dvh; }
+.k-shell-main { flex: 1; min-width: 0; overflow-y: auto; background: var(--neo-bg); }
+
+.k-sidebar {
+  width: 264px; flex: 0 0 auto; height: 100%;
+  background: var(--neo-white);
+  border-right: 4px solid var(--neo-ink);
+  display: flex; flex-direction: column;
+}
+.k-side-brand { padding: 22px 20px; border-bottom: 4px solid var(--neo-ink); }
+.k-side-logo { display: inline-flex; color: inherit; text-decoration: none; }
+.k-side-nav {
+  flex: 1; min-height: 0; overflow: auto;
+  padding: 16px; display: flex; flex-direction: column; gap: 6px;
+}
+.k-side-divider { height: 2px; background: var(--neo-ink); opacity: .1; margin: 8px 6px; }
+.k-side-eyebrow { padding: 2px 10px 4px; opacity: .45; }
+
+.k-side-item {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 46px; padding: 10px 12px;
+  font-family: var(--font); font-weight: 800; font-size: 15px;
+  text-transform: uppercase; letter-spacing: .02em;
+  color: inherit; text-decoration: none;
+  /* viền trong suốt để mục active (viền đặc) không bị dịch 2px so với mục thường */
+  background: none; border: 2px solid transparent; text-align: left; cursor: pointer;
+  box-sizing: border-box;
+}
+.k-side-icon {
+  width: 22px; height: 22px; flex: 0 0 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.k-side-icon svg { display: block; width: 20px; height: 20px; }
+.k-side-item > .k-side-label { flex: 1; min-width: 0; }
+.k-side-item--active { font-weight: 900; background: var(--neo-yellow); border-color: var(--neo-ink); box-shadow: var(--sh-sm); }
+.k-side-item--idle { opacity: .78; transition: opacity .12s; }
+.k-side-item--idle:hover { opacity: 1; }
+.k-side-auth {
+  flex: 0 0 auto; padding: 16px; border-top: 4px solid var(--neo-ink);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.k-side-auth .k-btn { justify-content: center; }
+
+.k-welcome-backdrop {
+  position: fixed; inset: 0; z-index: 80;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: rgba(0,0,0,.62);
+}
+.k-welcome-modal {
+  width: min(560px, 100%); max-height: calc(100dvh - 48px); overflow: auto;
+  padding: 28px 32px 30px;
+  text-align: center;
+  background: var(--neo-bg);
+}
+.k-welcome-title { margin-top: 16px; font-size: 42px; line-height: .98; }
+.k-welcome-copy {
+  margin: 14px auto 0; max-width: 430px;
+  font-size: 16px; font-weight: 700; line-height: 1.55;
+  opacity: .68;
+}
+.k-welcome-actions { margin-top: 22px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 720px) {
+  .k-sidebar { width: 76px; }
+  .k-sidebar .k-side-label,
+  .k-sidebar .k-side-eyebrow,
+  .k-sidebar .k-badge,
+  .k-sidebar .k-side-auth { display: none; }
+  .k-side-nav { padding: 16px 10px; }
+  .k-side-item { justify-content: center; gap: 0; padding: 10px 0; }
+}
+
+@media (max-width: 520px) {
+  .k-welcome-backdrop { padding: 14px; }
+  .k-welcome-modal { padding: 22px 18px 24px; }
+  .k-welcome-modal img { max-width: min(240px, 70vw); }
+  .k-welcome-title { font-size: 32px; }
+  .k-welcome-actions .k-btn { width: 100%; }
+}
+
 /* ---- Texture (decorative margins only) ---- */
 .k-halftone {
   background-image: radial-gradient(#000 1.4px, transparent 1.5px);
@@ -268,7 +352,11 @@
 .k-spin { animation: k-spin 9s linear infinite; transform-origin: 50% 50%; }
 @keyframes k-spin { to { transform: rotate(360deg); } }
 
+/* Mascot nhún nhẹ khi đang nạp */
+.k-bob { animation: k-bob 1.1s ease-in-out infinite; }
+@keyframes k-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+
 @media (prefers-reduced-motion: reduce) {
-  .k-cell--cur, .k-inline .cur, .k-spin { animation: none; }
+  .k-cell--cur, .k-inline .cur, .k-spin, .k-bob { animation: none; }
   .k-cell--cur { background: var(--neo-violet); color: var(--neo-ink); }
 }

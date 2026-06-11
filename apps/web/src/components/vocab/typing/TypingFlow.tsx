@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Image from "next/image";
 import type { TopicDTO } from "@keylish/shared";
 import { SetupMethod, type Method, type VocabLoadState, type VocabSelection } from "./SetupMethod";
 import { TypingScreen } from "./TypingScreen";
 import { ListenScreen } from "./ListenScreen";
 import { Summary } from "./Summary";
-import { AppHeader } from "@/components/layout/AppHeader";
+import { AppShell } from "@/components/layout/AppShell";
 import type { SessionResult, VocabWord } from "./useTypingSession";
 import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
-import { fetchTopics, fetchVocab, seedTopicDtos } from "@/infra/vocab/vocabApi";
+import { fetchVocab, loadTopicsAwait, seedTopicDtos, warmApi } from "@/infra/vocab/vocabApi";
 
 const SESSION_SIZE = 20;
+const LOADING_MASCOT_SRC = "/mascot/loading-vocab.png";
+const LOADING_MASCOT_SIZE = 240;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -33,16 +35,38 @@ function ctxFrom(words: VocabWord[], method: Method, topicTitle: (value: string)
   };
 }
 
-type Step = "setup" | "loading" | "play" | "summary";
+type Step = "warming" | "setup" | "loading" | "play" | "summary";
+
+/** Màn "Đang nạp từ vựng" — cầm chân người dùng trong lúc đánh thức API (Render
+ *  cold start) và retry tải chủ đề, để không rớt về seed. */
+function WarmingGate() {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setSlow(true), 6000);
+    return () => window.clearTimeout(t);
+  }, []);
+  return (
+    <div className="k-screen">
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18, padding: 24, textAlign: "center" }}>
+        <Image src={LOADING_MASCOT_SRC} alt="" width={LOADING_MASCOT_SIZE} height={LOADING_MASCOT_SIZE} priority className="k-bob" style={{ width: LOADING_MASCOT_SIZE, height: "auto" }} />
+        <div className="k-badge k-badge--violet">Kho từ vựng</div>
+        <h1 className="k-display" style={{ fontSize: 40, lineHeight: 1 }}>Đang nạp từ vựng</h1>
+        <p style={{ maxWidth: 400, fontSize: 15, fontWeight: 700, opacity: 0.62, lineHeight: 1.5 }}>
+          {slow
+            ? "Máy chủ miễn phí đang khởi động lại — lần đầu mất ~30 giây. Cảm ơn bạn đã chờ một chút!"
+            : "Đang lấy danh sách chủ đề và từ phù hợp…"}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function LoadingSession({ loadState }: { loadState: VocabLoadState }) {
   return (
     <div className="k-screen">
-      <AppHeader>
-        <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Thoát</Link>
-      </AppHeader>
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <div className="k-card k-focus" style={{ width: 520, maxWidth: "100%", padding: "30px 34px", textAlign: "center", boxShadow: "var(--sh-2xl)" }}>
+          <Image src={LOADING_MASCOT_SRC} alt="" width={LOADING_MASCOT_SIZE} height={LOADING_MASCOT_SIZE} priority className="k-bob" style={{ width: LOADING_MASCOT_SIZE, height: "auto", margin: "0 auto 14px" }} />
           <div className="k-badge k-badge--violet" style={{ display: "inline-flex", marginBottom: 18 }}>Kho từ</div>
           <h1 className="k-display" style={{ fontSize: 42, lineHeight: 1 }}>Đang nạp phiên luyện</h1>
           <p style={{ margin: "12px auto 0", maxWidth: 360, fontSize: 15, fontWeight: 700, opacity: 0.62 }}>
@@ -55,7 +79,7 @@ function LoadingSession({ loadState }: { loadState: VocabLoadState }) {
 }
 
 export function TypingFlow() {
-  const [step, setStep] = useState<Step>("setup");
+  const [step, setStep] = useState<Step>("warming");
   const [method, setMethod] = useState<Method>("M2");
   const [pool, setPool] = useState<VocabWord[]>(SEED_VOCABULARY);
   const [words, setWords] = useState<VocabWord[]>([]);
@@ -66,17 +90,20 @@ export function TypingFlow() {
   const [sessionSize, setSessionSize] = useState(SESSION_SIZE);
 
   useEffect(() => {
-    let live = true;
-    fetchVocab({ limit: 100, random: false }).then((res) => {
-      if (!live) return;
-      if (res.words.length) setPool(res.words);
+    let aborted = false;
+    warmApi(); // đánh thức Render ngay khi vào màn luyện
+    loadTopicsAwait(() => aborted).then((res) => {
+      if (aborted) return;
+      if (res.topics.length) setTopicList(res.topics);
       setLoadState({ loading: false, source: res.source, error: res.error });
-    });
-    fetchTopics().then((res) => {
-      if (live && res.topics.length) setTopicList(res.topics);
+      setStep("setup");
+      // Nạp pool nền (không chặn) làm nguồn dự phòng cho retry/làm lại.
+      fetchVocab({ limit: 100, random: false }).then((r) => {
+        if (!aborted && r.words.length) setPool(r.words);
+      });
     });
     return () => {
-      live = false;
+      aborted = true;
     };
   }, []);
 
@@ -122,12 +149,18 @@ export function TypingFlow() {
     setStep("setup");
   }
 
-  if (step === "setup") return <SetupMethod topics={topicList} loadState={loadState} onStart={start} />;
-  if (step === "loading") return <LoadingSession loadState={loadState} />;
+  if (step === "warming") return <AppShell><WarmingGate /></AppShell>;
+  if (step === "setup") return <AppShell><SetupMethod topics={topicList} loadState={loadState} onStart={start} /></AppShell>;
+  if (step === "loading") return <AppShell><LoadingSession loadState={loadState} /></AppShell>;
   if (step === "summary" && result) {
     const { ctxLabel } = ctxFrom(words, method, topicTitle);
-    return <Summary result={result} contextLabel={ctxLabel} onReviewWrong={reviewWrong} onRetry={retry} onChangeMethod={changeMethod} />;
+    return (
+      <AppShell>
+        <Summary result={result} contextLabel={ctxLabel} onReviewWrong={reviewWrong} onRetry={retry} onChangeMethod={changeMethod} />
+      </AppShell>
+    );
   }
+  // play → focus mode (immersive, KHÔNG sidebar)
   const { ctx } = ctxFrom(words, method, topicTitle);
   return method === "M2" ? (
     <TypingScreen key={runId} words={words} contextLabel={ctx} onComplete={complete} onExit={changeMethod} />
