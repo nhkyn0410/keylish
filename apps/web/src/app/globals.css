@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Reserve the scrollbar gutter so route changes do not shift the header. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* ============================================================
    KeyLish — Neo-brutalism design tokens (nguồn: doc/03 Mục 8)
    ============================================================ */
@@ -41,7 +46,7 @@
   h1,
   h2,
   h3 {
-    @apply font-black uppercase tracking-tight;
+    @apply font-black uppercase tracking-normal;
   }
 }
 
@@ -72,4 +77,18 @@
   text-shadow: none !important;
   font-weight: 700 !important;
   text-transform: uppercase;
+}
+/* Nút Trước màu trắng để phân biệt với nút Tiếp (vàng) */
+.driver-popover.keylish-neo .driver-popover-prev-btn {
+  background-color: var(--color-neo-white) !important;
+}
+.driver-popover.keylish-neo .driver-popover-close-btn {
+  border: none !important;
+  background: transparent !important;
+}
+.driver-popover.keylish-neo .driver-popover-progress-text {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
 }

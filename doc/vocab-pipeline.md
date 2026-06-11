@@ -38,7 +38,7 @@ pnpm --filter @keylish/api build-dataset
 
 - Stream từng dòng kaikki (không nạp cả file vào RAM) → lọc entry có bản dịch tiếng Việt (`code: "vi"`, gồm cả translations cấp entry lẫn cấp sense) → lấy nghĩa VI + IPA + ví dụ.
 - Join với Maximax67 để gắn **CEFR level + frequency + POS**. Chỉ giữ từ có **đủ nghĩa VI + level**.
-- 112 từ lõi curated luôn được giữ, thắng về nghĩa VI và là những từ duy nhất có **chủ đề** (kaikki không có topic).
+- **Chủ đề**: 112 từ lõi giữ chủ đề biên soạn tay; phần còn lại được tự gán từ nhãn lĩnh vực kaikki (`senses[].topics`) qua bảng map `TOPIC_RULES` trong `build-dataset.mjs` (nhãn cụ thể ưu tiên trước nhãn ô dù) — ra **14 chủ đề**, phủ ~52% kho từ; từ không có nhãn thì `topic = null` (vẫn luyện được qua chế độ "Tất cả chủ đề" trên web).
 - Kết quả: `.data-tmp/dataset.json` (kèm `_meta` thống kê + license). Không có file kaikki thì script vẫn chạy ở chế độ curated-only (112 từ) kèm cảnh báo.
 
 ## Bước 3 — Seed vào Postgres

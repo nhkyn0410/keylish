@@ -88,7 +88,7 @@ async function main() {
     const deletedTopics = await client.topic.deleteMany({});
     console.log(`  đã xóa ${deletedWords.count.toLocaleString()} từ, ${deletedTopics.count} chủ đề`);
 
-    await client.topic.createMany({ data: topics });
+    await client.topic.createMany({ data: topics.map((t) => ({ slug: t.slug, title: t.title })) });
     const topicRows = await client.topic.findMany({ select: { id: true, slug: true } });
     const idBySlug = new Map(topicRows.map((t) => [t.slug, t.id]));
 

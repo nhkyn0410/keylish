@@ -80,19 +80,10 @@ export function Logo({ scale = 1 }: { scale?: number }) {
           </g>
         </svg>
       </div>
-      <span style={{ fontWeight: 900, fontSize: 24 * scale, letterSpacing: "-.02em", textTransform: "uppercase" }}>
+      <span style={{ fontWeight: 900, fontSize: 24 * scale, letterSpacing: 0, textTransform: "uppercase" }}>
         Key<span style={{ color: "var(--neo-red)", WebkitTextStroke: "1.5px #000" }}>Lish</span>
       </span>
     </div>
-  );
-}
-
-export function TopBar({ children, accent = "var(--neo-bg)" }: { children?: ReactNode; accent?: string }) {
-  return (
-    <header style={{ flex: "0 0 auto", height: 76, background: accent, borderBottom: "4px solid #000", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px", position: "relative", zIndex: 3 }}>
-      <Logo />
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>{children}</div>
-    </header>
   );
 }
 
@@ -110,10 +101,12 @@ export function StatPill({ icon, value, label, bg = "var(--neo-white)" }: { icon
 
 export function ProgressStrip({ idx, total, ctx = "", bg = "var(--neo-violet)" }: { idx: number; total: number; ctx?: string; bg?: string }) {
   return (
-    <div style={{ flex: "0 0 auto", background: bg, borderBottom: "4px solid #000", padding: "12px 32px", display: "flex", alignItems: "center", gap: 18 }}>
-      <div className="k-badge k-badge--white">Từ {idx} / {total}</div>
-      <div className="k-prog" style={{ flex: 1 }}><i style={{ width: (total ? idx / total * 100 : 0) + "%" }} /></div>
-      {ctx && <div style={{ fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: ".06em" }}>{ctx}</div>}
+    <div style={{ flex: "0 0 auto", background: bg, borderBottom: "4px solid #000" }}>
+      <div className="k-wrap" style={{ display: "flex", alignItems: "center", gap: 18, paddingTop: 12, paddingBottom: 12 }}>
+        <div className="k-badge k-badge--white">Từ {idx} / {total}</div>
+        <div className="k-prog" style={{ flex: 1 }}><i style={{ width: (total ? idx / total * 100 : 0) + "%" }} /></div>
+        {ctx && <div style={{ fontWeight: 800, fontSize: 14, textTransform: "uppercase", letterSpacing: ".06em" }}>{ctx}</div>}
+      </div>
     </div>
   );
 }

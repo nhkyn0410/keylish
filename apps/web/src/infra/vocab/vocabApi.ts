@@ -1,5 +1,10 @@
-import { VocabResponseSchema, type VocabQuery, type WordDTO } from "@keylish/shared";
-import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
+import { TopicDTOSchema, VocabCountSchema, VocabResponseSchema, type CefrLevel, type TopicDTO, type VocabQuery, type WordDTO } from "@keylish/shared";
+import { SEED_TOPICS, SEED_VOCABULARY } from "@/data/seed/vocabulary";
+
+export interface VocabFilter {
+  levels?: CefrLevel[];
+  topics?: string[];
+}
 
 const DB_NAME = "keylish-vocab-v1";
 const STORE_NAME = "responses";
@@ -41,6 +46,70 @@ export async function fetchVocab(params: Partial<VocabQuery> = {}): Promise<Fetc
   if (cached.length) return { words: cached, source: "cache", error };
 
   return { words: filterSeed(query), source: "seed", error };
+}
+
+/** Slug hóa tên chủ đề — dùng chung để so khớp topic title (seed) với slug (API). */
+export function topicSlug(value: string) {
+  return slugify(value);
+}
+
+/** Danh sách chủ đề suy ra từ seed offline (fallback khi không có API). */
+export function seedTopicDtos(): TopicDTO[] {
+  return SEED_TOPICS.map((title) => ({
+    slug: slugify(title),
+    title,
+    count: SEED_VOCABULARY.filter((w) => w.topic === title).length,
+  }));
+}
+
+export async function fetchTopics(): Promise<{ topics: TopicDTO[]; source: VocabSource; error?: string }> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  let error: string | undefined;
+
+  if (apiUrl) {
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/topics`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error(`API returned ${res.status}`);
+      const parsed = TopicDTOSchema.array().parse(await res.json());
+      if (parsed.length) return { topics: parsed, source: "api" };
+      error = "API returned an empty topic list.";
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Unable to fetch topics API.";
+    }
+  } else {
+    error = "NEXT_PUBLIC_API_URL is not configured.";
+  }
+
+  return { topics: seedTopicDtos(), source: "seed", error };
+}
+
+/** Số từ thật khớp bộ lọc (DB qua API), fallback đếm trên seed offline. */
+export async function fetchVocabCount(filter: VocabFilter = {}): Promise<number> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  if (apiUrl) {
+    try {
+      const params = new URLSearchParams();
+      if (filter.levels?.length) params.set("levels", filter.levels.join(","));
+      if (filter.topics?.length) params.set("topics", filter.topics.join(","));
+      const res = await fetch(`${apiUrl}/api/v1/vocab/count?${params.toString()}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (res.ok) return VocabCountSchema.parse(await res.json()).count;
+    } catch {
+      // rơi xuống đếm seed
+    }
+  }
+  return countSeed(filter);
+}
+
+function countSeed(filter: VocabFilter): number {
+  return SEED_VOCABULARY.filter((word) => {
+    const levelOk = !filter.levels?.length || (word.level != null && filter.levels.includes(word.level));
+    const topicOk = !filter.topics?.length || (word.topic != null && filter.topics.some((t) => t === word.topic || t === slugify(word.topic ?? "")));
+    return levelOk && topicOk;
+  }).length;
 }
 
 function normalizeQuery(params: Partial<VocabQuery>): VocabQuery {

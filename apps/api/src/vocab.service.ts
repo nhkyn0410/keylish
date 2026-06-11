@@ -66,4 +66,19 @@ export class VocabService {
       topic: topic?.slug ?? null,
     }));
   }
+
+  async count(query: unknown): Promise<number> {
+    const parsedResult = VocabQuerySchema.safeParse(query);
+    if (!parsedResult.success) {
+      throw new BadRequestException(parsedResult.error.message);
+    }
+
+    const { levels, topics } = parsedResult.data;
+    return this.database.client.word.count({
+      where: {
+        ...(levels?.length ? { level: { in: levels } } : {}),
+        ...(topics?.length ? { topic: { slug: { in: topics } } } : {}),
+      },
+    });
+  }
 }

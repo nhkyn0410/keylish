@@ -18,4 +18,13 @@ export class VocabController {
   findAll(@Query() query: Record<string, unknown>) {
     return this.vocabService.findAll(query);
   }
+
+  @Get("count")
+  @ApiOperation({ summary: "Count vocabulary items matching the filters" })
+  @ApiQuery({ name: "levels", required: false, isArray: true, enum: CefrLevelSchema.options })
+  @ApiQuery({ name: "topics", required: false, isArray: true, type: String })
+  @ApiOkResponse({ description: "Number of matching vocabulary items." })
+  async count(@Query() query: Record<string, unknown>) {
+    return { count: await this.vocabService.count(query) };
+  }
 }

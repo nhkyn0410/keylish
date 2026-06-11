@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Icon, Star, TopBar } from "./primitives";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { Icon, Star } from "./primitives";
 import type { SessionResult } from "./useTypingSession";
 
 function StatBlock({ value, label, sub, bg }: { value: string; label: string; sub?: string; bg: string }) {
@@ -24,14 +25,15 @@ export function Summary({
   const hasWrong = result.wrongWords.length > 0;
   return (
     <div className="k-screen">
-      <TopBar>
+      <AppHeader>
         <div className="k-badge k-badge--green"><Icon name="check" size={15} stroke={4} /> Phiên hoàn thành</div>
         <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Đóng</Link>
-      </TopBar>
+      </AppHeader>
 
-      <div style={{ flex: 1, padding: "30px 40px", display: "flex", flexDirection: "column", gap: 20, position: "relative", minHeight: 0, overflow: "auto" }}>
+      <div style={{ flex: 1, paddingTop: 30, paddingBottom: 30, position: "relative", minHeight: 0, overflow: "auto" }}>
         <Star size={56} fill="var(--neo-yellow)" spin style={{ position: "absolute", top: 10, right: 60, opacity: 0.85 }} />
 
+        <div className="k-wrap" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         <div>
           <div className="k-h-eyebrow" style={{ color: "#7a6a00", marginBottom: 6 }}>{contextLabel}</div>
           <h1 className="k-display" style={{ fontSize: 56 }}>Tổng kết phiên</h1>
@@ -76,6 +78,7 @@ export function Summary({
           <button type="button" className="k-btn" onClick={onChangeMethod}><Icon name="swap" size={18} /> Đổi phương pháp</button>
           <div style={{ flex: 1 }} />
           <Link href="/" className="k-btn k-btn--ghost k-b2">Về trang chủ</Link>
+        </div>
         </div>
       </div>
     </div>
