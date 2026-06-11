@@ -26,6 +26,60 @@ const MAX_VI_LENGTH = 90;
 const MAX_EXAMPLE_LENGTH = 140;
 const WORD_RE = /^[a-z][a-z'-]{0,29}$/;
 
+// Gán chủ đề từ nhãn lĩnh vực của kaikki (senses[].topics). Duyệt theo thứ tự,
+// rule khớp đầu tiên thắng — nhãn cụ thể đứng trước nhãn ô dù (sciences,
+// lifestyle là tag cha được wiktextract gắn kèm rất nhiều nghĩa).
+// 7 slug đầu trùng với chủ đề curated; 6 chủ đề sau là mở rộng theo dữ liệu.
+const TOPIC_RULES = [
+  ["cong-nghe", "Công nghệ", ["computing", "internet", "software", "electronics", "telecommunications", "electrical-engineering", "broadcasting"]],
+  ["suc-khoe", "Sức khỏe", ["medicine", "anatomy", "pathology", "healthcare", "pharmacology", "psychiatry", "surgery", "dentistry", "disease"]],
+  ["am-thuc", "Ẩm thực", ["food", "cooking", "cuisine", "baking", "beverages", "brewing"]],
+  ["du-lich", "Du lịch", ["transport", "travel", "tourism", "nautical", "aeronautics", "aviation", "aerospace", "automotive", "rail-transport", "geography"]],
+  ["cong-so", "Công sở", ["business", "finance", "economics", "management", "marketing", "accounting", "employment"]],
+  ["mua-sam", "Mua sắm", ["commerce", "retail", "clothing", "textiles", "fashion"]],
+  ["the-thao-tro-choi", "Thể thao & Trò chơi", ["sports", "ball-games", "card-games", "board-games", "games", "video-games", "cricket", "baseball", "golf", "football", "soccer", "hockey", "rugby", "basketball", "tennis", "athletics", "swimming", "martial-arts", "chess", "fishing", "hunting", "gambling"]],
+  ["nghe-thuat-giai-tri", "Nghệ thuật & Giải trí", ["music", "film", "theater", "television", "arts", "entertainment", "media", "publishing", "photography"]],
+  ["phap-luat-nha-nuoc", "Pháp luật & Nhà nước", ["law", "government", "politics", "military", "war", "police", "diplomacy"]],
+  ["ton-giao-tin-nguong", "Tôn giáo & Tín ngưỡng", ["religion", "christianity", "islam", "judaism", "buddhism", "theology", "mysticism", "mythology"]],
+  ["khoa-hoc-ky-thuat", "Khoa học & Kỹ thuật", ["biology", "physics", "chemistry", "astronomy", "geology", "botany", "zoology", "mathematics", "engineering", "manufacturing", "construction", "agriculture", "meteorology", "ecology"]],
+  ["hoc-thuat", "Học thuật", ["linguistics", "grammar", "philosophy", "education", "rhetoric", "literature", "history"]],
+  ["doi-song", "Đời sống", ["family", "home", "furniture", "gardening"]],
+];
+// LƯU Ý: không đưa nhãn ô dù (sciences, natural-sciences, physical-sciences,
+// human-sciences, social-sciences, lifestyle, hobbies) vào rule — wiktextract
+// gắn chúng kèm MỌI nhãn cụ thể trên cùng một nghĩa nên chúng phá bầu chọn.
+
+// Từ chức năng siêu phổ biến (the, of, one...) không thuộc chủ đề nào.
+const TOPIC_FREQ_CUTOFF = 1_000_000_000;
+
+// Mỗi NGHĨA chỉ bỏ đúng 1 phiếu: nhãn của nghĩa được map sang nhóm khớp đầu
+// tiên theo thứ tự TOPIC_RULES (nhóm cụ thể như Công nghệ xếp trước Khoa học,
+// vì wiktextract gắn kèm nhãn cha engineering/mathematics lên nghĩa computing).
+function voteOfSense(tags) {
+  for (const [slug, , ruleTags] of TOPIC_RULES) {
+    if (ruleTags.some((t) => tags.includes(t))) return slug;
+  }
+  return undefined;
+}
+
+// Bầu đa số giữa các nghĩa: nhóm thắng phải chiếm ≥ 2/3 số phiếu — từ đa
+// nghĩa trải đều nhiều lĩnh vực thì để null thay vì gán bừa.
+function topicFromVotes(votes) {
+  if (!votes || votes.length === 0) return undefined;
+  const tally = {};
+  for (const v of votes) tally[v] = (tally[v] ?? 0) + 1;
+  let winner;
+  let winnerVotes = 0;
+  for (const [slug, n] of Object.entries(tally)) {
+    if (n > winnerVotes) {
+      winner = slug;
+      winnerVotes = n;
+    }
+  }
+  if (winnerVotes * 3 >= votes.length * 2) return winner;
+  return undefined;
+}
+
 function findKaikkiFile() {
   const arg = process.argv[2];
   if (arg) {
@@ -54,6 +108,18 @@ function viTranslationsOf(entry) {
   collect(entry.translations);
   if (Array.isArray(entry.senses)) for (const s of entry.senses) collect(s?.translations);
   return out;
+}
+
+function senseVotesOf(entry) {
+  const votes = [];
+  if (!Array.isArray(entry.senses)) return votes;
+  for (const s of entry.senses) {
+    if (!Array.isArray(s?.topics)) continue;
+    const tags = s.topics.filter((t) => typeof t === "string").map((t) => t.toLowerCase());
+    const vote = voteOfSense(tags);
+    if (vote) votes.push(vote);
+  }
+  return votes;
 }
 
 function firstIpa(entry) {
@@ -118,11 +184,12 @@ async function streamKaikki(file, agg) {
     const vis = viTranslationsOf(entry);
     const cur = agg.get(word);
     if (!vis.length && !cur) continue;
-    const next = cur ?? { vis: [], ipa: undefined, example: undefined, pos: undefined };
+    const next = cur ?? { vis: [], ipa: undefined, example: undefined, pos: undefined, votes: [] };
     next.vis.push(...vis);
     next.ipa = next.ipa ?? firstIpa(entry);
     next.example = next.example ?? firstExample(entry);
     next.pos = next.pos ?? kaikkiPosToVn(entry.pos);
+    next.votes.push(...senseVotesOf(entry));
     if (!cur && next.vis.length) {
       agg.set(word, next);
       kept += 1;
@@ -151,6 +218,7 @@ async function main() {
 
   const words = [];
   const levelCount = {};
+  const topicCount = {};
   for (const [en, data] of agg) {
     const cur = curated.get(en);
     const id = idByWord[en];
@@ -160,6 +228,11 @@ async function main() {
     const vi = cur?.vi ?? pickVi(data.vis);
     if (!vi) continue;
     const lv = level ?? "A2";
+    const topic = cur
+      ? slugify(cur.topic)
+      : m && m.freq > TOPIC_FREQ_CUTOFF
+        ? undefined
+        : topicFromVotes(data.votes);
     words.push({
       en,
       vi,
@@ -168,10 +241,11 @@ async function main() {
       pos: (m ? pennToVn(posTags[m.posId]) : undefined) ?? data.pos,
       ipa: data.ipa,
       example: data.example,
-      topic: cur ? slugify(cur.topic) : undefined,
+      topic,
       source: cur ? "curated+maximax67" : "wiktionary+maximax67",
     });
     levelCount[lv] = (levelCount[lv] ?? 0) + 1;
+    topicCount[topic ?? "(không chủ đề)"] = (topicCount[topic ?? "(không chủ đề)"] ?? 0) + 1;
   }
 
   // Từ curated chưa gặp trong kaikki (hoặc không có kaikki) vẫn phải có mặt.
@@ -194,6 +268,21 @@ async function main() {
 
   words.sort((a, b) => b.frequency - a.frequency || a.en.localeCompare(b.en));
 
+  // Danh sách topic = 8 chủ đề curated + chủ đề mở rộng có đủ từ (≥10).
+  const MIN_TOPIC_WORDS = 10;
+  const topicsBySlug = new Map(TOPICS.map((t) => [t.slug, t.title]));
+  for (const [slug, title] of TOPIC_RULES) {
+    if (!topicsBySlug.has(slug) && (topicCount[slug] ?? 0) >= MIN_TOPIC_WORDS) topicsBySlug.set(slug, title);
+  }
+  for (const w of words) {
+    if (w.topic && !topicsBySlug.has(w.topic)) {
+      topicCount[w.topic] -= 1;
+      topicCount["(không chủ đề)"] = (topicCount["(không chủ đề)"] ?? 0) + 1;
+      w.topic = undefined;
+    }
+  }
+  const topics = [...topicsBySlug.entries()].map(([slug, title]) => ({ slug, title }));
+
   fs.writeFileSync(OUT, JSON.stringify({
     _meta: {
       sources: {
@@ -205,15 +294,20 @@ async function main() {
       scannedLines: scan.lines,
       count: words.length,
       byLevel: levelCount,
+      byTopic: topicCount,
       generatedAt: new Date().toISOString(),
     },
-    topics: TOPICS,
+    topics,
     words,
   }), "utf8");
 
   const secs = ((Date.now() - started) / 1000).toFixed(1);
   console.log(`Wrote ${words.length.toLocaleString()} words -> ${path.relative(ROOT, OUT)} (${secs}s)`);
   console.log("Theo cấp độ:", Object.entries(levelCount).sort().map(([k, v]) => `${k}=${v}`).join("  "));
+  console.log("Theo chủ đề:");
+  for (const [k, v] of Object.entries(topicCount).sort((a, b) => b[1] - a[1])) {
+    console.log(`  ${k}: ${v.toLocaleString()}`);
+  }
 }
 
 main().catch((err) => {

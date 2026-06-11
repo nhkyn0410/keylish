@@ -1,46 +1,15 @@
 "use client";
 
-import "driver.js/dist/driver.css";
+import { useRouter } from "next/navigation";
 import { NeoButton } from "@/components/ui/NeoButton";
+import { startHomeTour } from "@/lib/tour";
 
-/**
- * Demo onboarding tour bằng Driver.js (F-013).
- * Driver.js được nạp động (dynamic import) trong Client Component.
- */
+/** Onboarding tour trang chủ (F-013) — kết thúc tour thì dẫn sang /typing. */
 export function TourButton() {
-  async function startTour() {
-    const { driver } = await import("driver.js");
-    const tour = driver({
-      popoverClass: "keylish-neo",
-      showProgress: true,
-      nextBtnText: "Tiếp",
-      prevBtnText: "Trước",
-      doneBtnText: "Xong",
-      steps: [
-        {
-          element: "#demo-typing",
-          popover: {
-            title: "Gõ từ vựng",
-            description:
-              "Nơi bạn luyện gõ từng ký tự — đúng (xanh), sai (đỏ), con trỏ (đen).",
-          },
-        },
-        {
-          element: "#demo-buttons",
-          popover: {
-            title: "Nút thao tác",
-            description:
-              "Các nút theo phong cách keycap — nhấn xuống như phím bàn phím.",
-          },
-        },
-      ],
-    });
-    tour.drive();
-  }
-
+  const router = useRouter();
   return (
-    <NeoButton variant="info" type="button" onClick={startTour}>
-      Xem hướng dẫn (demo)
+    <NeoButton variant="info" type="button" onClick={() => startHomeTour(() => router.push("/typing"))}>
+      Xem hướng dẫn
     </NeoButton>
   );
 }

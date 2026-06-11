@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { TopicDTO } from "@keylish/shared";
 import { SetupMethod, type Method, type VocabLoadState, type VocabSelection } from "./SetupMethod";
 import { TypingScreen } from "./TypingScreen";
 import { ListenScreen } from "./ListenScreen";
 import { Summary } from "./Summary";
 import type { SessionResult, VocabWord } from "./useTypingSession";
 import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
-import { fetchVocab } from "@/infra/vocab/vocabApi";
+import { fetchTopics, fetchVocab, seedTopicDtos } from "@/infra/vocab/vocabApi";
 
 const SESSION_SIZE = 20;
 
@@ -20,13 +21,13 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function ctxFrom(words: VocabWord[], method: Method) {
+function ctxFrom(words: VocabWord[], method: Method, topicTitle: (value: string) => string) {
   const levels = (Array.from(new Set(words.map((w) => w.level).filter(Boolean))) as string[]).sort();
-  const topics = Array.from(new Set(words.map((w) => w.topic).filter(Boolean))) as string[];
+  const topics = (Array.from(new Set(words.map((w) => w.topic).filter(Boolean))) as string[]).map(topicTitle);
   const lv = levels.join("–") || "—";
   return {
     ctx: `${topics[0] ?? "Từ vựng"} · ${lv}`,
-    ctxLabel: `${method} · ${topics.slice(0, 2).join(", ") || "—"} · ${lv}`,
+    ctxLabel: `${method} · ${topics.slice(0, 2).join(", ") || "Tất cả chủ đề"} · ${lv}`,
   };
 }
 
@@ -54,6 +55,7 @@ export function TypingFlow() {
   const [result, setResult] = useState<SessionResult | null>(null);
   const [runId, setRunId] = useState(0);
   const [loadState, setLoadState] = useState<VocabLoadState>({ loading: true, source: "seed" });
+  const [topicList, setTopicList] = useState<TopicDTO[]>(seedTopicDtos);
 
   useEffect(() => {
     let live = true;
@@ -62,10 +64,15 @@ export function TypingFlow() {
       if (res.words.length) setPool(res.words);
       setLoadState({ loading: false, source: res.source, error: res.error });
     });
+    fetchTopics().then((res) => {
+      if (live && res.topics.length) setTopicList(res.topics);
+    });
     return () => {
       live = false;
     };
   }, []);
+
+  const topicTitle = (value: string) => topicList.find((t) => t.slug === value || t.title === value)?.title ?? value;
 
   function beginSession(p: VocabWord[]) {
     const src = p.length ? p : SEED_VOCABULARY;
@@ -106,13 +113,13 @@ export function TypingFlow() {
     setStep("setup");
   }
 
-  if (step === "setup") return <SetupMethod words={pool} loadState={loadState} onStart={start} />;
+  if (step === "setup") return <SetupMethod words={pool} topics={topicList} loadState={loadState} onStart={start} />;
   if (step === "loading") return <LoadingSession loadState={loadState} />;
   if (step === "summary" && result) {
-    const { ctxLabel } = ctxFrom(words, method);
+    const { ctxLabel } = ctxFrom(words, method, topicTitle);
     return <Summary result={result} contextLabel={ctxLabel} onReviewWrong={reviewWrong} onRetry={retry} onChangeMethod={changeMethod} />;
   }
-  const { ctx } = ctxFrom(words, method);
+  const { ctx } = ctxFrom(words, method, topicTitle);
   return method === "M2" ? (
     <TypingScreen key={runId} words={words} contextLabel={ctx} onComplete={complete} onExit={changeMethod} />
   ) : (

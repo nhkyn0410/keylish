@@ -1,5 +1,5 @@
-import { VocabResponseSchema, type VocabQuery, type WordDTO } from "@keylish/shared";
-import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
+import { TopicDTOSchema, VocabResponseSchema, type TopicDTO, type VocabQuery, type WordDTO } from "@keylish/shared";
+import { SEED_TOPICS, SEED_VOCABULARY } from "@/data/seed/vocabulary";
 
 const DB_NAME = "keylish-vocab-v1";
 const STORE_NAME = "responses";
@@ -41,6 +41,43 @@ export async function fetchVocab(params: Partial<VocabQuery> = {}): Promise<Fetc
   if (cached.length) return { words: cached, source: "cache", error };
 
   return { words: filterSeed(query), source: "seed", error };
+}
+
+/** Slug hóa tên chủ đề — dùng chung để so khớp topic title (seed) với slug (API). */
+export function topicSlug(value: string) {
+  return slugify(value);
+}
+
+/** Danh sách chủ đề suy ra từ seed offline (fallback khi không có API). */
+export function seedTopicDtos(): TopicDTO[] {
+  return SEED_TOPICS.map((title) => ({
+    slug: slugify(title),
+    title,
+    count: SEED_VOCABULARY.filter((w) => w.topic === title).length,
+  }));
+}
+
+export async function fetchTopics(): Promise<{ topics: TopicDTO[]; source: VocabSource; error?: string }> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  let error: string | undefined;
+
+  if (apiUrl) {
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/topics`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) throw new Error(`API returned ${res.status}`);
+      const parsed = TopicDTOSchema.array().parse(await res.json());
+      if (parsed.length) return { topics: parsed, source: "api" };
+      error = "API returned an empty topic list.";
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Unable to fetch topics API.";
+    }
+  } else {
+    error = "NEXT_PUBLIC_API_URL is not configured.";
+  }
+
+  return { topics: seedTopicDtos(), source: "seed", error };
 }
 
 function normalizeQuery(params: Partial<VocabQuery>): VocabQuery {
