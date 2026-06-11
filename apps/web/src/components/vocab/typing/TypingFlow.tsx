@@ -7,7 +7,7 @@ import { SetupMethod, type Method, type VocabLoadState, type VocabSelection } fr
 import { TypingScreen } from "./TypingScreen";
 import { ListenScreen } from "./ListenScreen";
 import { Summary } from "./Summary";
-import { TopBar } from "./primitives";
+import { AppHeader } from "@/components/layout/AppHeader";
 import type { SessionResult, VocabWord } from "./useTypingSession";
 import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
 import { fetchTopics, fetchVocab, seedTopicDtos } from "@/infra/vocab/vocabApi";
@@ -28,7 +28,7 @@ function ctxFrom(words: VocabWord[], method: Method, topicTitle: (value: string)
   const topics = (Array.from(new Set(words.map((w) => w.topic).filter(Boolean))) as string[]).map(topicTitle);
   const lv = levels.join("–") || "—";
   return {
-    ctx: `${topics[0] ?? "Từ vựng"} · ${lv}`,
+    ctx: lv,
     ctxLabel: `${method} · ${topics.slice(0, 2).join(", ") || "Tất cả chủ đề"} · ${lv}`,
   };
 }
@@ -38,9 +38,9 @@ type Step = "setup" | "loading" | "play" | "summary";
 function LoadingSession({ loadState }: { loadState: VocabLoadState }) {
   return (
     <div className="k-screen">
-      <TopBar>
+      <AppHeader>
         <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Thoát</Link>
-      </TopBar>
+      </AppHeader>
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <div className="k-card k-focus" style={{ width: 520, maxWidth: "100%", padding: "30px 34px", textAlign: "center", boxShadow: "var(--sh-2xl)" }}>
           <div className="k-badge k-badge--violet" style={{ display: "inline-flex", marginBottom: 18 }}>Kho từ</div>

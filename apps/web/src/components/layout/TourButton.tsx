@@ -1,15 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { NeoButton } from "@/components/ui/NeoButton";
 import { startHomeTour } from "@/lib/tour";
 
 /** Onboarding tour trang chủ (F-013) — kết thúc tour thì dẫn sang /typing. */
-export function TourButton() {
+export function TourButton({ className = "" }: { className?: string }) {
   const router = useRouter();
   return (
-    <NeoButton variant="info" type="button" onClick={() => startHomeTour(() => router.push("/typing"))}>
+    <button
+      className={`k-btn k-btn--info ${className}`}
+      type="button"
+      onClick={() => startHomeTour(() => router.push("/typing"))}
+    >
       Xem hướng dẫn
-    </NeoButton>
+    </button>
   );
 }

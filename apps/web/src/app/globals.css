@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Reserve the scrollbar gutter so route changes do not shift the header. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* ============================================================
    KeyLish — Neo-brutalism design tokens (nguồn: doc/03 Mục 8)
    ============================================================ */
@@ -41,7 +46,7 @@
   h1,
   h2,
   h3 {
-    @apply font-black uppercase tracking-tight;
+    @apply font-black uppercase tracking-normal;
   }
 }
 

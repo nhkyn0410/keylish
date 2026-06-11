@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Icon, Star, TopBar } from "./primitives";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { Icon, Star } from "./primitives";
 import type { SessionResult } from "./useTypingSession";
 
 function StatBlock({ value, label, sub, bg }: { value: string; label: string; sub?: string; bg: string }) {
@@ -24,10 +25,10 @@ export function Summary({
   const hasWrong = result.wrongWords.length > 0;
   return (
     <div className="k-screen">
-      <TopBar>
+      <AppHeader>
         <div className="k-badge k-badge--green"><Icon name="check" size={15} stroke={4} /> Phiên hoàn thành</div>
         <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Đóng</Link>
-      </TopBar>
+      </AppHeader>
 
       <div style={{ flex: 1, paddingTop: 30, paddingBottom: 30, position: "relative", minHeight: 0, overflow: "auto" }}>
         <Star size={56} fill="var(--neo-yellow)" spin style={{ position: "absolute", top: 10, right: 60, opacity: 0.85 }} />

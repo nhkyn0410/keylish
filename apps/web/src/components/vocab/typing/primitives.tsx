@@ -80,21 +80,10 @@ export function Logo({ scale = 1 }: { scale?: number }) {
           </g>
         </svg>
       </div>
-      <span style={{ fontWeight: 900, fontSize: 24 * scale, letterSpacing: "-.02em", textTransform: "uppercase" }}>
+      <span style={{ fontWeight: 900, fontSize: 24 * scale, letterSpacing: 0, textTransform: "uppercase" }}>
         Key<span style={{ color: "var(--neo-red)", WebkitTextStroke: "1.5px #000" }}>Lish</span>
       </span>
     </div>
-  );
-}
-
-export function TopBar({ children, accent = "var(--neo-bg)" }: { children?: ReactNode; accent?: string }) {
-  return (
-    <header style={{ flex: "0 0 auto", height: 76, background: accent, borderBottom: "4px solid #000", display: "flex", alignItems: "center", position: "relative", zIndex: 3 }}>
-      <div className="k-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
-        <Logo />
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>{children}</div>
-      </div>
-    </header>
   );
 }
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Cell, Icon, ProgressStrip, StatPill, TopBar } from "./primitives";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { Cell, Icon, ProgressStrip, StatPill } from "./primitives";
 import { useTypingSession, type SessionResult, type VocabWord } from "./useTypingSession";
 
 function speak(text: string) {
@@ -51,11 +52,11 @@ export function ListenScreen({
 
   return (
     <div className="k-screen">
-      <TopBar accent="var(--neo-violet)">
+      <AppHeader accent="var(--neo-violet)">
         <StatPill icon="flame" value={String(stats.streak)} label="streak" bg="#fff" />
         <StatPill icon="target" value={stats.accuracyPct + "%"} label="đúng" bg="#fff" />
         <button type="button" className="k-btn k-btn--sm k-btn--ghost k-b2" onClick={onExit}>Thoát</button>
-      </TopBar>
+      </AppHeader>
       <ProgressStrip idx={index + 1} total={total} ctx={contextLabel} bg="var(--neo-yellow)" />
 
       <div onClick={focusInput} style={{ flex: 1, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", padding: 28, minHeight: 0, overflow: "auto" }}>
