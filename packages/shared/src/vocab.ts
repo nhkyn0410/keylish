@@ -51,3 +51,9 @@ export type WordDTO = z.infer<typeof WordDTOSchema>;
 
 export const VocabResponseSchema = z.array(WordDTOSchema);
 export type VocabResponse = z.infer<typeof VocabResponseSchema>;
+
+export const VocabCountSchema = z.object({
+  count: z.number().int().nonnegative(),
+});
+
+export type VocabCount = z.infer<typeof VocabCountSchema>;

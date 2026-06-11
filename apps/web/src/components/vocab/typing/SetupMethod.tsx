@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { CefrLevel, TopicDTO } from "@keylish/shared";
-import { topicSlug } from "@/infra/vocab/vocabApi";
+import { fetchVocabCount } from "@/infra/vocab/vocabApi";
 import { isSetupTourDone, startSetupTour } from "@/lib/tour";
-import { Icon, Logo } from "./primitives";
-import type { VocabWord } from "./useTypingSession";
+import { Icon, TopBar } from "./primitives";
 
 export type Method = "M2" | "M1";
 export interface VocabSelection {
   levels: CefrLevel[];
   topics: string[]; // topic slugs — khớp filter `topics` của API
+  size: number;     // số từ muốn luyện trong phiên
 }
 
 export interface VocabLoadState {
@@ -21,10 +21,7 @@ export interface VocabLoadState {
 }
 
 const LEVELS: CefrLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
-
-function isCefrLevel(value: VocabWord["level"]): value is CefrLevel {
-  return typeof value === "string" && (LEVELS as string[]).includes(value);
-}
+const SESSION_SIZES = [20, 50, 100];
 
 function Chip({ label, on, onToggle, level }: { label: string; on: boolean; onToggle: () => void; level?: boolean }) {
   return (
@@ -79,12 +76,11 @@ function MethodRow({
 }
 
 export function SetupMethod({
-  words, topics: topicList, loadState, onStart,
+  topics: topicList, loadState, onStart,
 }: {
-  words: VocabWord[];
   topics: TopicDTO[];
   loadState: VocabLoadState;
-  onStart: (m: Method, filtered: VocabWord[], selection: VocabSelection) => void;
+  onStart: (m: Method, selection: VocabSelection) => void;
 }) {
   const [levels, setLevels] = useState<Record<string, boolean>>({ A1: true, A2: true });
   // Key = topic slug. Mặc định KHÔNG chọn gì = luyện tất cả chủ đề (kể cả từ
@@ -92,6 +88,8 @@ export function SetupMethod({
   const [topics, setTopics] = useState<Record<string, boolean>>({});
   const [onlyUnlearned, setOnlyUnlearned] = useState(true);
   const [method, setMethod] = useState<Method>("M2");
+  const [size, setSize] = useState(20);
+  const [matchCount, setMatchCount] = useState<number | null>(null);
 
   // Tour hướng dẫn tự chạy đúng một lần (F-013); xem lại bằng nút "?".
   useEffect(() => {
@@ -104,39 +102,43 @@ export function SetupMethod({
   const selTopics = topicList.filter((t) => topics[t.slug]);
   const selSlugs = selTopics.map((t) => t.slug);
   const allTopics = selSlugs.length === 0;
-  const filtered = words.filter(
-    (w) =>
-      (selLevels.length === 0 || (isCefrLevel(w.level) && selLevels.includes(w.level))) &&
-      (allTopics || (w.topic != null && selSlugs.includes(topicSlug(w.topic)))),
-  );
+  const levelsKey = selLevels.join(",");
+  const topicsKey = selSlugs.join(",");
+
+  // Số từ thật khớp bộ lọc, lấy từ DB (debounce khi đổi cấp độ/chủ đề).
+  useEffect(() => {
+    let live = true;
+    setMatchCount(null);
+    const timer = window.setTimeout(() => {
+      const levelList = levelsKey ? (levelsKey.split(",") as CefrLevel[]) : undefined;
+      const topicArr = topicsKey ? topicsKey.split(",") : undefined;
+      fetchVocabCount({ levels: levelList, topics: topicArr }).then((n) => {
+        if (live) setMatchCount(n);
+      });
+    }, 300);
+    return () => {
+      live = false;
+      window.clearTimeout(timer);
+    };
+  }, [levelsKey, topicsKey]);
+
+  const sessionWords = matchCount == null ? size : Math.min(size, matchCount);
+  const canStart = matchCount != null && matchCount > 0;
   const toggle = (set: React.Dispatch<React.SetStateAction<Record<string, boolean>>>, key: string) =>
     set((s) => ({ ...s, [key]: !s[key] }));
 
-  // Container căn giữa, giới hạn bề ngang + padding 2 bên (đồng bộ max-w-7xl của site).
-  const inner: React.CSSProperties = {
-    width: "100%", maxWidth: 1280, marginLeft: "auto", marginRight: "auto",
-    paddingLeft: 40, paddingRight: 40, boxSizing: "border-box",
-  };
-
   return (
     <div className="k-screen">
-      <header style={{ flex: "0 0 auto", height: 76, background: "var(--neo-bg)", borderBottom: "4px solid #000", display: "flex", alignItems: "center" }}>
-        <div style={{ ...inner, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-          <Link href="/" aria-label="Về trang chủ" style={{ display: "flex", alignItems: "center", textDecoration: "none", color: "inherit" }}>
-            <Logo />
-          </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div className="k-badge k-badge--white" style={{ boxShadow: "none" }}>
-              {loadState.loading ? "Đang nạp" : loadState.source === "api" ? "API" : loadState.source === "cache" ? "Cache" : "Seed"}
-            </div>
-            <button type="button" className="k-btn k-btn--sm k-btn--ghost k-b2" aria-label="Xem hướng dẫn" title="Xem hướng dẫn" onClick={() => startSetupTour()}>?</button>
-            <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Thoát</Link>
-          </div>
+      <TopBar>
+        <div className="k-badge k-badge--white" style={{ boxShadow: "none" }}>
+          {loadState.loading ? "Đang nạp" : loadState.source === "api" ? "API" : loadState.source === "cache" ? "Cache" : "Seed"}
         </div>
-      </header>
+        <button type="button" className="k-btn k-btn--sm k-btn--ghost k-b2" aria-label="Xem hướng dẫn" title="Xem hướng dẫn" onClick={() => startSetupTour()}>?</button>
+        <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Thoát</Link>
+      </TopBar>
 
       <div style={{ flex: "0 0 auto", paddingTop: 24, paddingBottom: 14 }}>
-        <div style={{ ...inner, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20 }}>
+        <div className="k-wrap" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 20 }}>
           <div>
             <div className="k-h-eyebrow" style={{ color: "#7a6a00", marginBottom: 6 }}>KeyLish · Gõ từ vựng đa mode</div>
             <h1 className="k-display" style={{ fontSize: 46, lineHeight: 1 }}>Thiết lập phiên luyện</h1>
@@ -148,7 +150,7 @@ export function SetupMethod({
       </div>
 
       <div style={{ flex: 1, minHeight: 0, paddingBottom: 18, overflow: "auto" }}>
-        <div style={{ ...inner, display: "flex", gap: 26 }}>
+        <div className="k-wrap" style={{ display: "flex", gap: 26 }}>
         {/* LEFT — Nguồn */}
         <div style={{ flex: "1.12 1 0", display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -202,6 +204,23 @@ export function SetupMethod({
           <MethodRow icon="swap" title="Nghĩa VI → Gõ EN" sub="M2 · char-by-char" tag="Ưu tiên" tagColor="k-badge--green" selected={method === "M2"} onSelect={() => setMethod("M2")} />
           <MethodRow icon="volume" title="Nghe → Gõ" sub="M1 · TTS giọng trình duyệt" tag="v1" tagColor="k-badge--violet" selected={method === "M1"} onSelect={() => setMethod("M1")} />
 
+          <div id="tour-size" className="k-card" style={{ padding: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div className="k-badge k-badge--green">Số từ</div>
+              <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.6 }}>Mỗi phiên luyện</span>
+            </div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {SESSION_SIZES.map((s) => (
+                <Chip key={s} label={String(s)} level on={size === s} onToggle={() => setSize(s)} />
+              ))}
+            </div>
+            {matchCount != null && matchCount < size && matchCount > 0 && (
+              <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.6, marginTop: 10 }}>
+                Bộ lọc chỉ có {matchCount} từ — phiên này luyện {matchCount} từ.
+              </div>
+            )}
+          </div>
+
           <div className="k-b2" style={{ padding: "14px 16px", background: "#F1EFE6", boxShadow: "none", display: "flex", alignItems: "center", gap: 10 }}>
             <Icon name="lock" size={18} stroke={2.5} style={{ opacity: 0.5, flex: "0 0 auto" }} />
             <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.6 }}>+5 phương pháp khác (M3–M6, M10) mở sau v1</span>
@@ -212,11 +231,11 @@ export function SetupMethod({
 
       {/* bottom action bar */}
       <div style={{ flex: "0 0 auto", borderTop: "4px solid #000", background: "var(--neo-white)", paddingTop: 16, paddingBottom: 16 }}>
-        <div style={{ ...inner, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+        <div className="k-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-            <span className="k-stat-num" style={{ fontSize: 44 }}>{filtered.length}</span>
-            <span style={{ fontWeight: 900, fontSize: 16, textTransform: "uppercase", letterSpacing: ".05em" }}>từ</span>
+            <span className="k-stat-num" style={{ fontSize: 44 }}>{matchCount == null ? "…" : matchCount}</span>
+            <span style={{ fontWeight: 900, fontSize: 16, textTransform: "uppercase", letterSpacing: ".05em" }}>từ khớp</span>
           </div>
           <div style={{ width: 4, height: 40, background: "#000" }} />
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -228,8 +247,8 @@ export function SetupMethod({
             {loadState.error && <span className="k-badge k-badge--red" style={{ boxShadow: "none" }}>Fallback</span>}
           </div>
         </div>
-        <button id="tour-start" type="button" className="k-btn k-btn--primary k-btn--lg" style={{ flex: "0 0 auto" }} disabled={filtered.length === 0} onClick={() => onStart(method, filtered, { levels: selLevels, topics: selSlugs })}>
-          Bắt đầu luyện <Icon name="arrow" size={22} />
+        <button id="tour-start" type="button" className="k-btn k-btn--primary k-btn--lg" style={{ flex: "0 0 auto" }} disabled={!canStart} onClick={() => onStart(method, { levels: selLevels, topics: selSlugs, size })}>
+          Luyện {sessionWords} từ <Icon name="arrow" size={22} />
         </button>
         </div>
       </div>

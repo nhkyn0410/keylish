@@ -46,6 +46,12 @@
 }
 .k-screen h1, .k-screen h2, .k-screen h3, .k-screen p, .k-screen div, .k-screen span { margin: 0; }
 
+/* Shared max-width container — keeps header / progress / content aligned at the
+   same width across every practice screen (no jump when switching screens).
+   Scoped under .k-screen so `margin-inline:auto` beats the `.k-screen div`
+   margin reset above (which has higher specificity than a lone `.k-wrap`). */
+.k-screen .k-wrap { width: 100%; max-width: 1280px; margin-inline: auto; padding-inline: 40px; }
+
 /* ---- Texture (decorative margins only) ---- */
 .k-halftone {
   background-image: radial-gradient(#000 1.4px, transparent 1.5px);

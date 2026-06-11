@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { TopicDTO } from "@keylish/shared";
 import { SetupMethod, type Method, type VocabLoadState, type VocabSelection } from "./SetupMethod";
 import { TypingScreen } from "./TypingScreen";
 import { ListenScreen } from "./ListenScreen";
 import { Summary } from "./Summary";
+import { TopBar } from "./primitives";
 import type { SessionResult, VocabWord } from "./useTypingSession";
 import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
 import { fetchTopics, fetchVocab, seedTopicDtos } from "@/infra/vocab/vocabApi";
@@ -35,13 +37,18 @@ type Step = "setup" | "loading" | "play" | "summary";
 
 function LoadingSession({ loadState }: { loadState: VocabLoadState }) {
   return (
-    <div className="k-screen" style={{ alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div className="k-card k-focus" style={{ width: 520, maxWidth: "100%", padding: "30px 34px", textAlign: "center", boxShadow: "var(--sh-2xl)" }}>
-        <div className="k-badge k-badge--violet" style={{ display: "inline-flex", marginBottom: 18 }}>Kho từ</div>
-        <h1 className="k-display" style={{ fontSize: 42, lineHeight: 1 }}>Đang nạp phiên luyện</h1>
-        <p style={{ margin: "12px auto 0", maxWidth: 360, fontSize: 15, fontWeight: 700, opacity: 0.62 }}>
-          {loadState.error ? "Dùng cache hoặc seed để phiên không bị gián đoạn." : "Đang lấy danh sách từ phù hợp với bộ lọc."}
-        </p>
+    <div className="k-screen">
+      <TopBar>
+        <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Thoát</Link>
+      </TopBar>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div className="k-card k-focus" style={{ width: 520, maxWidth: "100%", padding: "30px 34px", textAlign: "center", boxShadow: "var(--sh-2xl)" }}>
+          <div className="k-badge k-badge--violet" style={{ display: "inline-flex", marginBottom: 18 }}>Kho từ</div>
+          <h1 className="k-display" style={{ fontSize: 42, lineHeight: 1 }}>Đang nạp phiên luyện</h1>
+          <p style={{ margin: "12px auto 0", maxWidth: 360, fontSize: 15, fontWeight: 700, opacity: 0.62 }}>
+            {loadState.error ? "Dùng cache hoặc seed để phiên không bị gián đoạn." : "Đang lấy danh sách từ phù hợp với bộ lọc."}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -56,6 +63,7 @@ export function TypingFlow() {
   const [runId, setRunId] = useState(0);
   const [loadState, setLoadState] = useState<VocabLoadState>({ loading: true, source: "seed" });
   const [topicList, setTopicList] = useState<TopicDTO[]>(seedTopicDtos);
+  const [sessionSize, setSessionSize] = useState(SESSION_SIZE);
 
   useEffect(() => {
     let live = true;
@@ -74,26 +82,27 @@ export function TypingFlow() {
 
   const topicTitle = (value: string) => topicList.find((t) => t.slug === value || t.title === value)?.title ?? value;
 
-  function beginSession(p: VocabWord[]) {
+  function beginSession(p: VocabWord[], sz: number) {
     const src = p.length ? p : SEED_VOCABULARY;
-    setWords(shuffle(src).slice(0, SESSION_SIZE));
+    setWords(shuffle(src).slice(0, sz));
     setRunId((x) => x + 1);
     setStep("play");
   }
-  async function start(m: Method, filtered: VocabWord[], selection: VocabSelection) {
+  async function start(m: Method, selection: VocabSelection) {
     setMethod(m);
+    setSessionSize(selection.size);
     setStep("loading");
     setLoadState((state) => ({ ...state, loading: true }));
     const res = await fetchVocab({
       levels: selection.levels,
       topics: selection.topics,
-      limit: 100,
+      limit: selection.size,
       random: true,
     });
-    const nextPool = res.words.length ? res.words : filtered.length ? filtered : SEED_VOCABULARY;
+    const nextPool = res.words.length ? res.words : SEED_VOCABULARY;
     setPool(nextPool);
     setLoadState({ loading: false, source: res.source, error: res.error });
-    beginSession(nextPool);
+    beginSession(nextPool, selection.size);
   }
   function complete(r: SessionResult) {
     setResult(r);
@@ -107,13 +116,13 @@ export function TypingFlow() {
     }
   }
   function retry() {
-    beginSession(pool);
+    beginSession(pool, sessionSize);
   }
   function changeMethod() {
     setStep("setup");
   }
 
-  if (step === "setup") return <SetupMethod words={pool} topics={topicList} loadState={loadState} onStart={start} />;
+  if (step === "setup") return <SetupMethod topics={topicList} loadState={loadState} onStart={start} />;
   if (step === "loading") return <LoadingSession loadState={loadState} />;
   if (step === "summary" && result) {
     const { ctxLabel } = ctxFrom(words, method, topicTitle);
