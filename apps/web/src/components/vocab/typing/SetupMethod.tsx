@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import type { CefrLevel, TopicDTO } from "@keylish/shared";
 import { fetchVocabCount } from "@/infra/vocab/vocabApi";
 import { isSetupTourDone, startSetupTour } from "@/lib/tour";
-import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon } from "./primitives";
 
 export type Method = "M2" | "M1";
@@ -233,30 +231,6 @@ export function SetupMethod({
 
   return (
     <div className="k-screen">
-      <AppHeader>
-        <div className="k-badge k-badge--white" style={{ boxShadow: "none" }}>
-          {loadState.loading
-            ? "Đang nạp"
-            : loadState.source === "api"
-              ? "API"
-              : loadState.source === "cache"
-                ? "Cache"
-                : "Seed"}
-        </div>
-        <button
-          type="button"
-          className="k-btn k-btn--sm k-btn--ghost k-b2"
-          aria-label="Xem hướng dẫn"
-          title="Xem hướng dẫn"
-          onClick={() => startSetupTour()}
-        >
-          ?
-        </button>
-        <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">
-          Thoát
-        </Link>
-      </AppHeader>
-
       <div style={{ flex: "0 0 auto", paddingTop: 24, paddingBottom: 14 }}>
         <div
           className="k-wrap"
@@ -267,10 +241,38 @@ export function SetupMethod({
             gap: 20,
           }}
         >
-          <div>
-            <h1 className="k-display" style={{ fontSize: 46, lineHeight: 1 }}>
-              Thiết lập phiên luyện
-            </h1>
+          <h1 className="k-display" style={{ fontSize: 46, lineHeight: 1 }}>
+            Thiết lập phiên luyện
+          </h1>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flex: "0 0 auto",
+            }}
+          >
+            <div
+              className="k-badge k-badge--white"
+              style={{ boxShadow: "none" }}
+            >
+              {loadState.loading
+                ? "Đang nạp"
+                : loadState.source === "api"
+                  ? "API"
+                  : loadState.source === "cache"
+                    ? "Cache"
+                    : "Seed"}
+            </div>
+            <button
+              type="button"
+              className="k-btn k-btn--sm k-btn--ghost k-b2"
+              aria-label="Xem hướng dẫn"
+              title="Xem hướng dẫn"
+              onClick={() => startSetupTour()}
+            >
+              ?
+            </button>
           </div>
         </div>
       </div>
@@ -351,7 +353,6 @@ export function SetupMethod({
 
           {/* RIGHT — Phương pháp */}
           <div
-            id="tour-methods"
             style={{
               flex: "0.95 1 0",
               display: "flex",
@@ -360,31 +361,32 @@ export function SetupMethod({
               minWidth: 0,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <StepNum n="2" color="var(--neo-violet)" />
-              <div>
-                <div style={{ fontWeight: 900, fontSize: 22 }}>Phương pháp</div>
+            <div id="tour-methods" style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <StepNum n="2" color="var(--neo-violet)" />
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: 22 }}>Phương pháp</div>
+                </div>
               </div>
+              <MethodRow
+                icon="swap"
+                title="Nghĩa VI → Gõ EN"
+                sub="M2 · char-by-char"
+                tag="Ưu tiên"
+                tagColor="k-badge--green"
+                selected={method === "M2"}
+                onSelect={() => setMethod("M2")}
+              />
+              <MethodRow
+                icon="volume"
+                title="Nghe → Gõ"
+                sub="M1 · TTS giọng trình duyệt"
+                tag=""
+                tagColor="k-badge--violet"
+                selected={method === "M1"}
+                onSelect={() => setMethod("M1")}
+              />
             </div>
-
-            <MethodRow
-              icon="swap"
-              title="Nghĩa VI → Gõ EN"
-              sub="M2 · char-by-char"
-              tag="Ưu tiên"
-              tagColor="k-badge--green"
-              selected={method === "M2"}
-              onSelect={() => setMethod("M2")}
-            />
-            <MethodRow
-              icon="volume"
-              title="Nghe → Gõ"
-              sub="M1 · TTS giọng trình duyệt"
-              tag="v1"
-              tagColor="k-badge--violet"
-              selected={method === "M1"}
-              onSelect={() => setMethod("M1")}
-            />
 
             <div id="tour-size" className="k-card" style={{ padding: 20 }}>
               <div
@@ -396,9 +398,6 @@ export function SetupMethod({
                 }}
               >
                 <div className="k-badge k-badge--green">Số từ</div>
-                <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.6 }}>
-                  Mỗi phiên luyện
-                </span>
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {SESSION_SIZES.map((s) => (

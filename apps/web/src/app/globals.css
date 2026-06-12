@@ -54,41 +54,153 @@ html {
    Driver.js — style theo neo-brutalism (popoverClass="keylish-neo")
    ============================================================ */
 .driver-popover.keylish-neo {
+  /* KHÔNG ép position — để driver dùng position:fixed + toạ độ của nó. Popover
+     fixed vẫn là containing block cho mascot ::before/::after (absolute). */
+  overflow: visible !important;
+  width: min(440px, calc(100vw - 40px)) !important;
+  max-width: min(440px, calc(100vw - 40px)) !important;
   background-color: var(--color-neo-bg);
   border: 4px solid #000;
   border-radius: 0;
   box-shadow: 8px 8px 0 0 #000;
   color: #000;
   font-family: var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif;
+  padding: 20px 22px !important;
+}
+.driver-popover.keylish-neo,
+.driver-popover.keylish-neo * {
+  font-family:
+    var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+/* Mascot dùng chiều cao cố định; overhang = transform theo bề rộng của chính nó. */
+.driver-popover.keylish-neo.keylish-tip::before,
+.driver-popover.keylish-neo.keylish-tip::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: contain;
+  height: 180px;
+  aspect-ratio: 1;
+  bottom: -4px;
+}
+.driver-popover.keylish-neo.keylish-tip.keylish-tip-left::before {
+  left: 0;
+  transform: translateX(-88%) rotate(-5deg);
+  background-image: url("/mascot/tip-2.png");
+}
+.driver-popover.keylish-neo.keylish-tip.keylish-tip-right::after {
+  right: 0;
+  transform: translateX(88%) rotate(5deg);
+  background-image: url("/mascot/tip-1.png");
+}
+/* Chỉ nâng z-index cho nội dung (KHÔNG dùng `> *` vì sẽ phá position:absolute
+   của nút X và mũi tên). */
+.driver-popover.keylish-neo .driver-popover-title,
+.driver-popover.keylish-neo .driver-popover-description,
+.driver-popover.keylish-neo .driver-popover-footer {
+  position: relative;
+  z-index: 2;
 }
 .driver-popover.keylish-neo .driver-popover-title {
   font-weight: 900;
   text-transform: uppercase;
+  font-size: 19px;
+  line-height: 1.2;
+  padding-right: 28px;
 }
 .driver-popover.keylish-neo .driver-popover-description,
 .driver-popover.keylish-neo .driver-popover-progress-text {
   font-weight: 700;
 }
+.driver-popover.keylish-neo .driver-popover-description {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.driver-popover.keylish-neo .driver-popover-footer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin-top: 18px !important;
+}
+.driver-popover.keylish-neo .driver-popover-navigation-btns {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex: 1 1 auto !important;
+  flex-wrap: wrap !important;
+}
 .driver-popover.keylish-neo button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
   border: 2px solid #000 !important;
   border-radius: 0 !important;
   background-color: var(--color-neo-yellow) !important;
   color: #000 !important;
   text-shadow: none !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
+  font-size: 14px !important;
+  line-height: 1.1 !important;
+  min-height: 40px !important;
+  max-width: 178px !important;
+  padding: 9px 20px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
   text-transform: uppercase;
 }
 /* Nút Trước màu trắng để phân biệt với nút Tiếp (vàng) */
 .driver-popover.keylish-neo .driver-popover-prev-btn {
   background-color: var(--color-neo-white) !important;
 }
+/* Nút X — neo absolute góc trên phải (đè lại sau khi bỏ rule `> *`). */
 .driver-popover.keylish-neo .driver-popover-close-btn {
+  position: absolute !important;
+  top: 6px !important;
+  right: 8px !important;
+  z-index: 3 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
   border: none !important;
   background: transparent !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
 }
 .driver-popover.keylish-neo .driver-popover-progress-text {
   font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   opacity: 0.6;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+@media (max-width: 720px) {
+  .driver-popover.keylish-neo.keylish-tip::before,
+  .driver-popover.keylish-neo.keylish-tip::after {
+    display: none;
+  }
+  .driver-popover.keylish-neo {
+    padding: 18px !important;
+  }
+}
+@media (max-width: 420px) {
+  .driver-popover.keylish-neo .driver-popover-footer {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+  .driver-popover.keylish-neo .driver-popover-navigation-btns {
+    justify-content: stretch !important;
+  }
+  .driver-popover.keylish-neo button {
+    flex: 1 1 0 !important;
+  }
 }

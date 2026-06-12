@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon, Star } from "./primitives";
 import type { SessionResult } from "./useTypingSession";
 
@@ -25,17 +24,15 @@ export function Summary({
   const hasWrong = result.wrongWords.length > 0;
   return (
     <div className="k-screen">
-      <AppHeader>
-        <div className="k-badge k-badge--green"><Icon name="check" size={15} stroke={4} /> Phiên hoàn thành</div>
-        <Link href="/" className="k-btn k-btn--sm k-btn--ghost k-b2">Đóng</Link>
-      </AppHeader>
-
       <div style={{ flex: 1, paddingTop: 30, paddingBottom: 30, position: "relative", minHeight: 0, overflow: "auto" }}>
         <Star size={56} fill="var(--neo-yellow)" spin style={{ position: "absolute", top: 10, right: 60, opacity: 0.85 }} />
 
         <div className="k-wrap" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         <div>
-          <div className="k-h-eyebrow" style={{ color: "#7a6a00", marginBottom: 6 }}>{contextLabel}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
+            <div className="k-badge k-badge--green"><Icon name="check" size={15} stroke={4} /> Phiên hoàn thành</div>
+            <span className="k-h-eyebrow" style={{ color: "#7a6a00" }}>{contextLabel}</span>
+          </div>
           <h1 className="k-display" style={{ fontSize: 56 }}>Tổng kết phiên</h1>
         </div>
 

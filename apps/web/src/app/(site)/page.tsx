@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeWelcomeTour } from "@/components/layout/HomeWelcomeTour";
 import { TourButton } from "@/components/layout/TourButton";
 import { Icon, type IconName } from "@/components/vocab/typing/primitives";
 
@@ -152,11 +153,12 @@ function StateLegend({
 export default function Home() {
   return (
     <div className="overflow-hidden bg-neo-bg">
+      <HomeWelcomeTour />
       <section id="tour-hero" className="border-b-4 border-black">
         <div className="k-site-wrap py-8 sm:py-12">
           <div className="max-w-[860px]">
             <div className="k-badge k-badge--violet mb-6">
-              KeyLish v1 · typed vocabulary
+              KeyLish · typed vocabulary
             </div>
             <h1 className="max-w-[780px] flex flex-col items-start gap-2 text-[42px] tracking-normal sm:gap-3 sm:text-[64px] lg:text-[76px]">
               <span>Học tiếng Anh</span>
