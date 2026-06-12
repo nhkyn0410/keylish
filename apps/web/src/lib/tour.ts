@@ -36,7 +36,8 @@ export async function startHomeTour(onFinish?: () => void) {
         popover: {
           popoverClass: TIP_RIGHT_CLASS,
           title: "Bắt đầu từ một phiên ngắn",
-          description: "KeyLish biến việc học từ vựng thành một phiên gõ rõ ràng: chọn nguồn từ, chọn cách luyện, rồi tập trung vào từng từ.",
+          description:
+            "KeyLish biến việc học từ vựng thành một phiên gõ rõ ràng: chọn nguồn từ, chọn cách luyện, rồi tập trung vào từng từ.",
           side: "bottom",
           align: "start",
         },
@@ -46,7 +47,8 @@ export async function startHomeTour(onFinish?: () => void) {
         popover: {
           popoverClass: TIP_LEFT_CLASS,
           title: "Thấy đúng sai ngay khi gõ",
-          description: "Mỗi ký tự có trạng thái riêng: đúng, sai, con trỏ hiện tại và phần còn lại. Bạn biết cần sửa ở đâu ngay lập tức.",
+          description:
+            "Mỗi ký tự có trạng thái riêng: đúng, sai, con trỏ hiện tại và phần còn lại. Bạn biết cần sửa ở đâu ngay lập tức.",
           side: "right",
           align: "center",
         },
@@ -56,7 +58,8 @@ export async function startHomeTour(onFinish?: () => void) {
         popover: {
           popoverClass: TIP_RIGHT_CLASS,
           title: "Thiết lập theo đúng nhu cầu",
-          description: "Lọc cấp độ CEFR, chọn chủ đề, chọn M2 hoặc M1, rồi luyện 20, 50 hoặc 100 từ trong một vòng gọn.",
+          description:
+            "Lọc cấp độ CEFR, chọn chủ đề, chọn M2 hoặc M1, rồi luyện 20, 50 hoặc 100 từ trong một vòng gọn.",
           side: "bottom",
           align: "start",
         },
@@ -66,7 +69,8 @@ export async function startHomeTour(onFinish?: () => void) {
         popover: {
           popoverClass: TIP_LEFT_CLASS,
           title: "Vào màn luyện thử",
-          description: "Khi vào màn luyện lần đầu, KeyLish sẽ tiếp tục hướng dẫn cách chọn cấp độ, chủ đề và phương pháp.",
+          description:
+            "Khi vào màn luyện lần đầu, KeyLish sẽ tiếp tục hướng dẫn cách chọn cấp độ, chủ đề và phương pháp.",
           side: "top",
           align: "start",
           doneBtnText: "Vào luyện ngay",
@@ -123,7 +127,8 @@ export async function startSetupTour() {
         popover: {
           popoverClass: TIP_RIGHT_CLASS,
           title: "1 · Cấp độ CEFR",
-          description: "Chọn một hay nhiều cấp A1–C2. Kho hiện có hơn 10.000 từ kèm nghĩa tiếng Việt.",
+          description:
+            "Chọn một hay nhiều cấp A1–C2. Kho hiện có hơn 10.000 từ kèm nghĩa tiếng Việt.",
           side: "right",
         },
       },
@@ -150,7 +155,8 @@ export async function startSetupTour() {
         popover: {
           popoverClass: TIP_LEFT_CLASS,
           title: "4 · Số từ mỗi phiên",
-          description: "Chọn 20, 50 hoặc 100 từ. Nếu bộ lọc có ít từ hơn lựa chọn, KeyLish sẽ tự rút phiên về đúng số từ hiện có.",
+          description:
+            "Chọn 20, 50 hoặc 100 từ. Nếu bộ lọc có ít từ hơn lựa chọn, KeyLish sẽ tự rút phiên về đúng số từ hiện có.",
           side: "left",
         },
       },
@@ -159,7 +165,8 @@ export async function startSetupTour() {
         popover: {
           popoverClass: TIP_RIGHT_CLASS,
           title: "5 · Bắt đầu!",
-          description: "Kiểm tra số từ khớp bộ lọc ở thanh dưới, rồi nhấn nút để vào phiên luyện với số từ vừa chọn.",
+          description:
+            "Kiểm tra số từ khớp bộ lọc ở thanh dưới, rồi nhấn nút để vào phiên luyện với số từ vừa chọn.",
           side: "top",
           align: "end",
         },

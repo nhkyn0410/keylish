@@ -1,4 +1,12 @@
-import { TopicDTOSchema, VocabCountSchema, VocabResponseSchema, type CefrLevel, type TopicDTO, type VocabQuery, type WordDTO } from "@keylish/shared";
+import {
+  TopicDTOSchema,
+  VocabCountSchema,
+  VocabResponseSchema,
+  type CefrLevel,
+  type TopicDTO,
+  type VocabQuery,
+  type WordDTO,
+} from "@keylish/shared";
 import { SEED_TOPICS, SEED_VOCABULARY } from "@/data/seed/vocabulary";
 
 export interface VocabFilter {
@@ -62,7 +70,11 @@ export function seedTopicDtos(): TopicDTO[] {
   }));
 }
 
-export async function fetchTopics(): Promise<{ topics: TopicDTO[]; source: VocabSource; error?: string }> {
+export async function fetchTopics(): Promise<{
+  topics: TopicDTO[];
+  source: VocabSource;
+  error?: string;
+}> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
   let error: string | undefined;
 
@@ -97,7 +109,10 @@ export function warmApi(): void {
   fetch(`${apiUrl}/api/health`, { cache: "no-store" }).catch(() => {});
 }
 
-const sleep = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms); });
+const sleep = (ms: number) =>
+  new Promise<void>((r) => {
+    setTimeout(r, ms);
+  });
 
 /**
  * Chờ API thức rồi mới trả chủ đề thật: thử fetchTopics tới khi nguồn = "api"
@@ -107,7 +122,7 @@ const sleep = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms); });
 export async function loadTopicsAwait(
   isAborted: () => boolean = () => false,
   attempts = 30,
-  delayMs = 3500,
+  delayMs = 3500
 ): Promise<{ topics: TopicDTO[]; source: VocabSource; error?: string }> {
   let last = await fetchTopics();
   if (!apiConfigured() || last.source === "api") return last;
@@ -142,8 +157,12 @@ export async function fetchVocabCount(filter: VocabFilter = {}): Promise<number>
 
 function countSeed(filter: VocabFilter): number {
   return SEED_VOCABULARY.filter((word) => {
-    const levelOk = !filter.levels?.length || (word.level != null && filter.levels.includes(word.level));
-    const topicOk = !filter.topics?.length || (word.topic != null && filter.topics.some((t) => t === word.topic || t === slugify(word.topic ?? "")));
+    const levelOk =
+      !filter.levels?.length || (word.level != null && filter.levels.includes(word.level));
+    const topicOk =
+      !filter.topics?.length ||
+      (word.topic != null &&
+        filter.topics.some((t) => t === word.topic || t === slugify(word.topic ?? "")));
     return levelOk && topicOk;
   }).length;
 }
@@ -174,8 +193,12 @@ function cacheKey(query: VocabQuery) {
 
 function filterSeed(query: VocabQuery): WordDTO[] {
   const rows = SEED_VOCABULARY.filter((word) => {
-    const levelOk = !query.levels?.length || (word.level != null && query.levels.includes(word.level));
-    const topicOk = !query.topics?.length || (word.topic != null && query.topics.some((topic) => topic === word.topic || topic === slugify(word.topic ?? "")));
+    const levelOk =
+      !query.levels?.length || (word.level != null && query.levels.includes(word.level));
+    const topicOk =
+      !query.topics?.length ||
+      (word.topic != null &&
+        query.topics.some((topic) => topic === word.topic || topic === slugify(word.topic ?? "")));
     return levelOk && topicOk;
   });
   const source = query.random ? shuffle(rows) : rows;

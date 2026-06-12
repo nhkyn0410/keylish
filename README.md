@@ -19,12 +19,12 @@ KeyLish là ứng dụng web luyện gõ tiếng Anh, trong đó việc học t�
 
 Monorepo quản lý bằng **pnpm workspaces + Turborepo**.
 
-| Workspace | Vai trò | Công nghệ |
-|---|---|---|
-| `apps/web` | Ứng dụng web | Next.js (App Router) · React · TypeScript · Tailwind CSS |
-| `apps/api` | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod |
-| `packages/db` | Tầng database | Prisma 7 (driver adapter `pg`) · PostgreSQL (Neon) |
-| `packages/shared` | Schema & type dùng chung | Zod 4 |
+| Workspace         | Vai trò                         | Công nghệ                                                |
+| ----------------- | ------------------------------- | -------------------------------------------------------- |
+| `apps/web`        | Ứng dụng web                    | Next.js (App Router) · React · TypeScript · Tailwind CSS |
+| `apps/api`        | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod     |
+| `packages/db`     | Tầng database                   | Prisma 7 (driver adapter `pg`) · PostgreSQL (Neon)       |
+| `packages/shared` | Schema & type dùng chung        | Zod 4                                                    |
 
 Công cụ chung: TypeScript 5 · Vitest · tsup · tsx.
 
@@ -41,10 +41,10 @@ Backend V1 chỉ phục vụ **đọc kho từ vựng**:
 
 Kho từ vựng được build từ hai nguồn miễn phí:
 
-| Nguồn | Cung cấp | License |
-|---|---|---|
-| [Maximax67/Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset) | Từ EN + cấp độ CEFR + tần suất + POS (~172k từ) | MIT |
-| [kaikki.org — English Wiktionary (Wiktextract)](https://kaikki.org/dictionary/English/) | Nghĩa EN→VI + IPA + ví dụ + POS (JSONL) | CC BY-SA + GFDL |
+| Nguồn                                                                                   | Cung cấp                                        | License         |
+| --------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------- |
+| [Maximax67/Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset)         | Từ EN + cấp độ CEFR + tần suất + POS (~172k từ) | MIT             |
+| [kaikki.org — English Wiktionary (Wiktextract)](https://kaikki.org/dictionary/English/) | Nghĩa EN→VI + IPA + ví dụ + POS (JSONL)         | CC BY-SA + GFDL |
 
 Pipeline xử lý dữ liệu nằm trong `apps/api`:
 
@@ -76,11 +76,11 @@ pnpm --filter @keylish/web dev   # Web (Next.js)
 
 ## Triển khai
 
-| Thành phần | Nền tảng | Free tier |
-|---|---|---|
-| `apps/web` | [Vercel](https://vercel.com) | ✅ |
-| `apps/api` | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle) |
-| PostgreSQL | [Neon](https://neon.tech) | ✅ (tự thức khi có kết nối) |
+| Thành phần | Nền tảng                                                | Free tier                   |
+| ---------- | ------------------------------------------------------- | --------------------------- |
+| `apps/web` | [Vercel](https://vercel.com)                            | ✅                          |
+| `apps/api` | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)       |
+| PostgreSQL | [Neon](https://neon.tech)                               | ✅ (tự thức khi có kết nối) |
 
 Hướng dẫn chi tiết từng bước: [doc/deploy.md](doc/deploy.md).
 

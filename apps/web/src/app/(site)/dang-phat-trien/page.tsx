@@ -26,16 +26,39 @@ export default function ComingSoonPage() {
         boxSizing: "border-box",
       }}
     >
-      <Image src="/mascot/notfound.png" alt="" width={MASCOT_SIZE} height={MASCOT_SIZE} priority style={{ width: MASCOT_SIZE, height: "auto" }} />
+      <Image
+        src="/mascot/notfound.png"
+        alt=""
+        width={MASCOT_SIZE}
+        height={MASCOT_SIZE}
+        priority
+        style={{ width: MASCOT_SIZE, height: "auto" }}
+      />
       <div className="k-badge k-badge--violet">Đang phát triển</div>
       <h1 className="k-display" style={{ fontSize: 44, lineHeight: 1, maxWidth: 620 }}>
         Tính năng này đang được phát triển
       </h1>
-      <p style={{ maxWidth: 460, fontSize: 16, fontWeight: 600, lineHeight: 1.6, color: "rgba(0,0,0,.7)" }}>
-        KeyLish đang tập trung vào luyện gõ từ vựng. Tính năng bạn vừa chọn sẽ
-        xuất hiện trong các bản cập nhật tới — quay lại sau nhé!
+      <p
+        style={{
+          maxWidth: 460,
+          fontSize: 16,
+          fontWeight: 600,
+          lineHeight: 1.6,
+          color: "rgba(0,0,0,.7)",
+        }}
+      >
+        KeyLish đang tập trung vào luyện gõ từ vựng. Tính năng bạn vừa chọn sẽ xuất hiện trong các
+        bản cập nhật tới — quay lại sau nhé!
       </p>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 6 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          justifyContent: "center",
+          marginTop: 6,
+        }}
+      >
         <Link href="/" className="k-btn k-btn--primary">
           Về trang chủ <Icon name="arrow" size={18} />
         </Link>

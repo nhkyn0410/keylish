@@ -20,7 +20,7 @@ export const VocabQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   random: z.preprocess(
     (value) => value === true || value === "1" || value === "true",
-    z.boolean().default(false),
+    z.boolean().default(false)
   ),
 });
 

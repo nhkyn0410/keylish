@@ -3,10 +3,10 @@ packages:
   - packages/*
 
 onlyBuiltDependencies:
-  - '@prisma/engines'
+  - "@prisma/engines"
   - esbuild
   - prisma
   - sharp
 
 ignoredBuiltDependencies:
-  - '@scarf/scarf'
+  - "@scarf/scarf"

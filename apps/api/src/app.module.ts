@@ -1,13 +1,9 @@
 import { Module } from "@nestjs/common";
-import { DatabaseService } from "./database.service";
-import { HealthController } from "./health.controller";
-import { TopicsController } from "./topics.controller";
-import { TopicsService } from "./topics.service";
-import { VocabController } from "./vocab.controller";
-import { VocabService } from "./vocab.service";
+import { HealthModule } from "./health/health.module";
+import { TopicsModule } from "./topics/topics.module";
+import { VocabModule } from "./vocab/vocab.module";
 
 @Module({
-  controllers: [HealthController, TopicsController, VocabController],
-  providers: [DatabaseService, TopicsService, VocabService],
+  imports: [HealthModule, TopicsModule, VocabModule],
 })
 export class AppModule {}

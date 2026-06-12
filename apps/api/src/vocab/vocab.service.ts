@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { VocabQuerySchema, type WordDTO } from "@keylish/shared";
 import type { CefrLevel } from "@keylish/db";
-import { DatabaseService } from "./database.service";
+import { DatabaseService } from "../database/database.service";
 
 type WordRow = {
   id: string;
@@ -36,7 +36,7 @@ export class VocabService {
     }
 
     const parsed = parsedResult.data;
-    const rows = await this.database.client.word.findMany({
+    const rows = (await this.database.client.word.findMany({
       where: {
         ...(parsed.levels?.length ? { level: { in: parsed.levels } } : {}),
         ...(parsed.topics?.length ? { topic: { slug: { in: parsed.topics } } } : {}),
@@ -57,7 +57,7 @@ export class VocabService {
           select: { slug: true },
         },
       },
-    }) as WordRow[];
+    })) as WordRow[];
 
     const selected = parsed.random ? shuffle(rows).slice(0, parsed.limit) : rows;
 

@@ -9,6 +9,12 @@ import { ListenScreen } from "./ListenScreen";
 import { Summary } from "./Summary";
 import { AppShell } from "@/components/layout/AppShell";
 import type { SessionResult, VocabWord } from "./useTypingSession";
+import {
+  DEFAULT_PRACTICE_SETTINGS,
+  settingsForDrill,
+  type Drill,
+  type PracticeSettings,
+} from "./practiceSettings";
 import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
 import { fetchVocab, loadTopicsAwait, seedTopicDtos, warmApi } from "@/infra/vocab/vocabApi";
 
@@ -26,8 +32,12 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function ctxFrom(words: VocabWord[], method: Method, topicTitle: (value: string) => string) {
-  const levels = (Array.from(new Set(words.map((w) => w.level).filter(Boolean))) as string[]).sort();
-  const topics = (Array.from(new Set(words.map((w) => w.topic).filter(Boolean))) as string[]).map(topicTitle);
+  const levels = (
+    Array.from(new Set(words.map((w) => w.level).filter(Boolean))) as string[]
+  ).sort();
+  const topics = (Array.from(new Set(words.map((w) => w.topic).filter(Boolean))) as string[]).map(
+    topicTitle
+  );
   const lv = levels.join("–") || "—";
   return {
     ctx: lv,
@@ -47,10 +57,31 @@ function WarmingGate() {
   }, []);
   return (
     <div className="k-screen">
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18, padding: 24, textAlign: "center" }}>
-        <Image src={LOADING_MASCOT_SRC} alt="" width={LOADING_MASCOT_SIZE} height={LOADING_MASCOT_SIZE} priority className="k-bob" style={{ width: LOADING_MASCOT_SIZE, height: "auto" }} />
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 18,
+          padding: 24,
+          textAlign: "center",
+        }}
+      >
+        <Image
+          src={LOADING_MASCOT_SRC}
+          alt=""
+          width={LOADING_MASCOT_SIZE}
+          height={LOADING_MASCOT_SIZE}
+          priority
+          className="k-bob"
+          style={{ width: LOADING_MASCOT_SIZE, height: "auto" }}
+        />
         <div className="k-badge k-badge--violet">Kho từ vựng</div>
-        <h1 className="k-display" style={{ fontSize: 40, lineHeight: 1 }}>Đang nạp từ vựng</h1>
+        <h1 className="k-display" style={{ fontSize: 40, lineHeight: 1 }}>
+          Đang nạp từ vựng
+        </h1>
         <p style={{ maxWidth: 400, fontSize: 15, fontWeight: 700, opacity: 0.62, lineHeight: 1.5 }}>
           {slow
             ? "Máy chủ miễn phí đang khởi động lại — lần đầu mất ~30 giây. Cảm ơn bạn đã chờ một chút!"
@@ -64,13 +95,55 @@ function WarmingGate() {
 function LoadingSession({ loadState }: { loadState: VocabLoadState }) {
   return (
     <div className="k-screen">
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-        <div className="k-card k-focus" style={{ width: 520, maxWidth: "100%", padding: "30px 34px", textAlign: "center", boxShadow: "var(--sh-2xl)" }}>
-          <Image src={LOADING_MASCOT_SRC} alt="" width={LOADING_MASCOT_SIZE} height={LOADING_MASCOT_SIZE} priority className="k-bob" style={{ width: LOADING_MASCOT_SIZE, height: "auto", margin: "0 auto 14px" }} />
-          <div className="k-badge k-badge--violet" style={{ display: "inline-flex", marginBottom: 18 }}>Kho từ</div>
-          <h1 className="k-display" style={{ fontSize: 42, lineHeight: 1 }}>Đang nạp phiên luyện</h1>
-          <p style={{ margin: "12px auto 0", maxWidth: 360, fontSize: 15, fontWeight: 700, opacity: 0.62 }}>
-            {loadState.error ? "Dùng cache hoặc seed để phiên không bị gián đoạn." : "Đang lấy danh sách từ phù hợp với bộ lọc."}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}
+      >
+        <div
+          className="k-card k-focus"
+          style={{
+            width: 520,
+            maxWidth: "100%",
+            padding: "30px 34px",
+            textAlign: "center",
+            boxShadow: "var(--sh-2xl)",
+          }}
+        >
+          <Image
+            src={LOADING_MASCOT_SRC}
+            alt=""
+            width={LOADING_MASCOT_SIZE}
+            height={LOADING_MASCOT_SIZE}
+            priority
+            className="k-bob"
+            style={{ width: LOADING_MASCOT_SIZE, height: "auto", margin: "0 auto 14px" }}
+          />
+          <div
+            className="k-badge k-badge--violet"
+            style={{ display: "inline-flex", marginBottom: 18 }}
+          >
+            Kho từ
+          </div>
+          <h1 className="k-display" style={{ fontSize: 42, lineHeight: 1 }}>
+            Đang nạp phiên luyện
+          </h1>
+          <p
+            style={{
+              margin: "12px auto 0",
+              maxWidth: 360,
+              fontSize: 15,
+              fontWeight: 700,
+              opacity: 0.62,
+            }}
+          >
+            {loadState.error
+              ? "Dùng cache hoặc seed để phiên không bị gián đoạn."
+              : "Đang lấy danh sách từ phù hợp với bộ lọc."}
           </p>
         </div>
       </div>
@@ -88,6 +161,10 @@ export function TypingFlow() {
   const [loadState, setLoadState] = useState<VocabLoadState>({ loading: true, source: "seed" });
   const [topicList, setTopicList] = useState<TopicDTO[]>(seedTopicDtos);
   const [sessionSize, setSessionSize] = useState(SESSION_SIZE);
+  const [drill, setDrill] = useState<Drill>("practice");
+  const [practiceSettings, setPracticeSettings] = useState<PracticeSettings>(
+    DEFAULT_PRACTICE_SETTINGS
+  );
 
   useEffect(() => {
     let aborted = false;
@@ -107,7 +184,8 @@ export function TypingFlow() {
     };
   }, []);
 
-  const topicTitle = (value: string) => topicList.find((t) => t.slug === value || t.title === value)?.title ?? value;
+  const topicTitle = (value: string) =>
+    topicList.find((t) => t.slug === value || t.title === value)?.title ?? value;
 
   function beginSession(p: VocabWord[], sz: number) {
     const src = p.length ? p : SEED_VOCABULARY;
@@ -115,9 +193,15 @@ export function TypingFlow() {
     setRunId((x) => x + 1);
     setStep("play");
   }
-  async function start(m: Method, selection: VocabSelection) {
+  async function start(
+    m: Method,
+    selection: VocabSelection,
+    session: { drill: Drill; settings: PracticeSettings }
+  ) {
     setMethod(m);
     setSessionSize(selection.size);
+    setDrill(session.drill);
+    setPracticeSettings(settingsForDrill(session.drill, session.settings));
     setStep("loading");
     setLoadState((state) => ({ ...state, loading: true }));
     const res = await fetchVocab({
@@ -149,22 +233,58 @@ export function TypingFlow() {
     setStep("setup");
   }
 
-  if (step === "warming") return <AppShell><WarmingGate /></AppShell>;
-  if (step === "setup") return <AppShell><SetupMethod topics={topicList} loadState={loadState} onStart={start} /></AppShell>;
-  if (step === "loading") return <AppShell><LoadingSession loadState={loadState} /></AppShell>;
+  if (step === "warming")
+    return (
+      <AppShell>
+        <WarmingGate />
+      </AppShell>
+    );
+  if (step === "setup")
+    return (
+      <AppShell>
+        <SetupMethod topics={topicList} loadState={loadState} onStart={start} />
+      </AppShell>
+    );
+  if (step === "loading")
+    return (
+      <AppShell>
+        <LoadingSession loadState={loadState} />
+      </AppShell>
+    );
   if (step === "summary" && result) {
     const { ctxLabel } = ctxFrom(words, method, topicTitle);
     return (
       <AppShell>
-        <Summary result={result} contextLabel={ctxLabel} onReviewWrong={reviewWrong} onRetry={retry} onChangeMethod={changeMethod} />
+        <Summary
+          result={result}
+          contextLabel={ctxLabel}
+          onReviewWrong={reviewWrong}
+          onRetry={retry}
+          onChangeMethod={changeMethod}
+        />
       </AppShell>
     );
   }
   // play → focus mode (immersive, KHÔNG sidebar)
   const { ctx } = ctxFrom(words, method, topicTitle);
+  const drillCtx = `${drill === "test" ? "Kiểm tra" : "Luyện tập"} · ${ctx}`;
   return method === "M2" ? (
-    <TypingScreen key={runId} words={words} contextLabel={ctx} onComplete={complete} onExit={changeMethod} />
+    <TypingScreen
+      key={runId}
+      words={words}
+      contextLabel={drillCtx}
+      onComplete={complete}
+      onExit={changeMethod}
+      settings={practiceSettings}
+      drill={drill}
+    />
   ) : (
-    <ListenScreen key={runId} words={words} contextLabel={ctx} onComplete={complete} onExit={changeMethod} />
+    <ListenScreen
+      key={runId}
+      words={words}
+      contextLabel={ctx}
+      onComplete={complete}
+      onExit={changeMethod}
+    />
   );
 }

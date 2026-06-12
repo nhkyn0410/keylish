@@ -19,29 +19,49 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const inPath = path.resolve(ROOT, inArg);
 const outPath = path.resolve(ROOT, outArg);
 const THRESHOLD = Number(thArg ?? 60); // khoảng cách màu để coi là "nền"
-const FEATHER = THRESHOLD * 1.8;       // vùng chuyển → alpha mờ dần
+const FEATHER = THRESHOLD * 1.8; // vùng chuyển → alpha mờ dần
 
-const { data, info } = await sharp(inPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+const { data, info } = await sharp(inPath)
+  .ensureAlpha()
+  .raw()
+  .toBuffer({ resolveWithObject: true });
 const { width: W, height: H, channels: C } = info;
 
 // Màu nền tham chiếu = trung bình 4 góc.
-const corners = [0, (W - 1), (H - 1) * W, H * W - 1];
-let br = 0, bg = 0, bb = 0;
-for (const px of corners) { br += data[px * C]; bg += data[px * C + 1]; bb += data[px * C + 2]; }
-br /= 4; bg /= 4; bb /= 4;
+const corners = [0, W - 1, (H - 1) * W, H * W - 1];
+let br = 0,
+  bg = 0,
+  bb = 0;
+for (const px of corners) {
+  br += data[px * C];
+  bg += data[px * C + 1];
+  bb += data[px * C + 2];
+}
+br /= 4;
+bg /= 4;
+bb /= 4;
 
 const dist = (i) => {
-  const dr = data[i * C] - br, dg = data[i * C + 1] - bg, db = data[i * C + 2] - bb;
+  const dr = data[i * C] - br,
+    dg = data[i * C + 1] - bg,
+    db = data[i * C + 2] - bb;
   return Math.sqrt(dr * dr + dg * dg + db * db);
 };
 
 // BFS từ mọi pixel ở mép.
 const visited = new Uint8Array(W * H);
 const stack = [];
-for (let x = 0; x < W; x++) { stack.push(x); stack.push((H - 1) * W + x); }
-for (let y = 0; y < H; y++) { stack.push(y * W); stack.push(y * W + W - 1); }
+for (let x = 0; x < W; x++) {
+  stack.push(x);
+  stack.push((H - 1) * W + x);
+}
+for (let y = 0; y < H; y++) {
+  stack.push(y * W);
+  stack.push(y * W + W - 1);
+}
 
-let cut = 0, feathered = 0;
+let cut = 0,
+  feathered = 0;
 while (stack.length) {
   const i = stack.pop();
   if (visited[i]) continue;
@@ -58,13 +78,18 @@ while (stack.length) {
   } else {
     continue; // chạm vào hình → dừng
   }
-  const x = i % W, y = (i / W) | 0;
+  const x = i % W,
+    y = (i / W) | 0;
   if (x > 0) stack.push(i - 1);
   if (x < W - 1) stack.push(i + 1);
   if (y > 0) stack.push(i - W);
   if (y < H - 1) stack.push(i + W);
 }
 
-await sharp(data, { raw: { width: W, height: H, channels: C } }).png().toFile(outPath);
-console.log(`Nền ref rgb(${br | 0},${bg | 0},${bb | 0}) · xóa ${cut.toLocaleString()} px, feather ${feathered.toLocaleString()} px`);
+await sharp(data, { raw: { width: W, height: H, channels: C } })
+  .png()
+  .toFile(outPath);
+console.log(
+  `Nền ref rgb(${br | 0},${bg | 0},${bb | 0}) · xóa ${cut.toLocaleString()} px, feather ${feathered.toLocaleString()} px`
+);
 console.log(`-> ${path.relative(ROOT, outPath)}`);

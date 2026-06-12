@@ -2,11 +2,8 @@
 
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon, ProgressStrip, Star, StatPill } from "./primitives";
-import {
-  useTypingSession,
-  type SessionResult,
-  type VocabWord,
-} from "./useTypingSession";
+import { useTypingSession, type SessionResult, type VocabWord } from "./useTypingSession";
+import { DEFAULT_PRACTICE_SETTINGS, type PracticeSettings } from "./practiceSettings";
 
 function firstMismatch(target: string, typed: string) {
   let i = 0;
@@ -22,10 +19,12 @@ function ExampleChip({
   en,
   example,
   width,
+  cloze = false,
 }: {
   en: string;
   example: string;
   width: string;
+  cloze?: boolean;
 }) {
   const parts = example.split(new RegExp(`(${escapeRegExp(en)})`, "i"));
   return (
@@ -39,7 +38,7 @@ function ExampleChip({
         maxWidth: "100%",
         background: "var(--neo-violet)",
         boxShadow: "var(--sh-sm)",
-        padding: "14px 18px",
+        padding: "20px 18px",
         textTransform: "none",
       }}
     >
@@ -71,20 +70,73 @@ function ExampleChip({
               key={i}
               style={{
                 display: "inline-block",
-                background: "var(--neo-white)",
+                background: cloze ? "transparent" : "var(--neo-white)",
                 padding: "0 6px",
                 border: "2px solid #000",
+                borderTop: cloze ? "none" : undefined,
+                borderInline: cloze ? "none" : undefined,
                 fontWeight: 900,
                 lineHeight: 1.25,
+                minWidth: cloze ? `${Math.max(en.length, 3) * 0.62}em` : undefined,
+                color: cloze ? "transparent" : undefined,
               }}
+              aria-label={cloze ? "từ cần điền" : undefined}
             >
-              {p}
+              {cloze ? " " : p}
             </span>
           ) : (
             <span key={i}>{p}</span>
-          ),
+          )
         )}
       </p>
+    </div>
+  );
+}
+
+/** Phản hồi tối giản (feedback="mark"): chỉ báo sai, KHÔNG lộ đáp án. */
+function WrongMark({
+  onContinue,
+  willRepeat,
+  autoAdvanceMs,
+}: {
+  onContinue: () => void;
+  willRepeat: boolean;
+  autoAdvanceMs?: number;
+}) {
+  return (
+    <div
+      className="k-b"
+      style={{
+        background: "var(--neo-red-soft)",
+        boxShadow: "var(--sh-sm)",
+        padding: "16px 20px",
+        width: "100%",
+        maxWidth: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        flexWrap: "wrap",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Icon name="x" size={20} stroke={4} style={{ color: "var(--neo-red)" }} />
+        <span style={{ fontWeight: 900, fontSize: 18 }}>Chưa đúng</span>
+        {willRepeat && (
+          <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>
+            · từ này sẽ lặp lại ở cuối vòng
+          </span>
+        )}
+      </div>
+      {autoAdvanceMs != null ? (
+        <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>
+          Tự chuyển sau {Math.round(autoAdvanceMs / 1000)} giây
+        </span>
+      ) : (
+        <button type="button" className="k-btn k-btn--primary k-btn--sm" onClick={onContinue}>
+          Tiếp tục <Icon name="arrow" size={16} />
+        </button>
+      )}
     </div>
   );
 }
@@ -93,10 +145,14 @@ function Correction({
   target,
   typed,
   onContinue,
+  willRepeat = true,
+  showAnswer = true,
 }: {
   target: string;
   typed: string;
   onContinue: () => void;
+  willRepeat?: boolean;
+  showAnswer?: boolean; // true = lộ cả từ (reveal); false = chỉ ký tự lỗi (char)
 }) {
   const mis = firstMismatch(target, typed);
   const wrongCh = typed[mis] ?? "—";
@@ -131,27 +187,25 @@ function Correction({
               opacity: 0.6,
             }}
           >
-            Đáp án đúng
+            {showAnswer ? "Đáp án đúng" : "Chưa đúng"}
           </span>
-          <span style={{ fontWeight: 900, fontSize: 26 }}>
-            {target.slice(0, mis)}
-            <span
-              style={{
-                background: "var(--neo-green)",
-                padding: "0 4px",
-                border: "2px solid #000",
-              }}
-            >
-              {rightCh}
+          {showAnswer && (
+            <span style={{ fontWeight: 900, fontSize: 26 }}>
+              {target.slice(0, mis)}
+              <span
+                style={{
+                  background: "var(--neo-green)",
+                  padding: "0 4px",
+                  border: "2px solid #000",
+                }}
+              >
+                {rightCh}
+              </span>
+              {target.slice(mis + 1)}
             </span>
-            {target.slice(mis + 1)}
-          </span>
+          )}
         </div>
-        <button
-          type="button"
-          className="k-btn k-btn--primary k-btn--sm"
-          onClick={onContinue}
-        >
+        <button type="button" className="k-btn k-btn--primary k-btn--sm" onClick={onContinue}>
           Tiếp tục <Icon name="arrow" size={16} />
         </button>
       </div>
@@ -169,7 +223,7 @@ function Correction({
         <span
           style={{
             color: "var(--neo-red)",
-            textDecoration: "line-through",
+            textDecorationLine: "line-through",
             textDecorationThickness: 3,
             fontWeight: 800,
           }}
@@ -178,9 +232,9 @@ function Correction({
         </span>
         <Icon name="arrow" size={14} />
         <span style={{ color: "#149040", fontWeight: 900 }}>{rightCh}</span>
-        <span style={{ opacity: 0.55 }}>
-          · từ này sẽ lặp lại ở cuối vòng (M9)
-        </span>
+        {willRepeat && (
+          <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>
+        )}
       </div>
     </div>
   );
@@ -191,12 +245,17 @@ export function TypingScreen({
   contextLabel,
   onComplete,
   onExit,
+  settings = DEFAULT_PRACTICE_SETTINGS,
+  drill = "practice",
 }: {
   words: VocabWord[];
   contextLabel: string;
   onComplete: (r: SessionResult) => void;
   onExit: () => void;
+  settings?: PracticeSettings;
+  drill?: "practice" | "test";
 }) {
+  const isTestMode = drill === "test";
   const {
     word,
     target,
@@ -209,33 +268,41 @@ export function TypingScreen({
     inputHandlers,
     focusInput,
     continueNext,
-  } = useTypingSession(words, true, onComplete);
+  } = useTypingSession(
+    words,
+    { reveal: false, repeat: settings.repeat, wrongAdvanceMs: isTestMode ? 3000 : undefined },
+    onComplete
+  );
 
   if (!word) return null;
+
+  const { hint, example: exampleMode, feedback } = settings;
+  const willRepeat = settings.repeat !== "none";
+  const strictCheck = isTestMode;
+  const showLiveCorrection = feedback !== "mark";
 
   const practiceCardWidth = "min(100%, 720px)";
   const answerBoxWidth = Math.min(620, Math.max(320, target.length * 34 + 120));
   const answerFontSize = target.length > 16 ? 36 : target.length > 11 ? 44 : 58;
-  const answerBackground =
-    status === "wrong" ? "var(--neo-red-soft)" : "var(--neo-white)";
+  const answerBackground = status === "wrong" ? "var(--neo-red-soft)" : "var(--neo-white)";
   const targetChars = Array.from(target);
 
   return (
     <div className="k-screen">
       <AppHeader>
-        <StatPill
-          icon="flame"
-          value={String(stats.streak)}
-          label="streak"
-          bg="var(--neo-yellow)"
-        />
-        <StatPill icon="target" value={stats.accuracyPct + "%"} label="đúng" />
+        {!isTestMode && (
+          <>
+            <StatPill
+              icon="flame"
+              value={String(stats.streak)}
+              label="streak"
+              bg="var(--neo-yellow)"
+            />
+            <StatPill icon="target" value={stats.accuracyPct + "%"} label="đúng" />
+          </>
+        )}
         <StatPill icon="clock" value={stats.elapsedStr} />
-        <button
-          type="button"
-          className="k-btn k-btn--sm k-btn--ghost k-b2"
-          onClick={onExit}
-        >
+        <button type="button" className="k-btn k-btn--sm k-btn--ghost k-b2" onClick={onExit}>
           Thoát
         </button>
       </AppHeader>
@@ -351,14 +418,11 @@ export function TypingScreen({
               {targetChars.map((ch, i) => {
                 const typedCh = typed[i];
                 const isTyped = i < typed.length;
-                const isBad = isTyped && typedCh !== ch;
+                const isBad = showLiveCorrection && isTyped && typedCh !== ch;
                 const showCursor = status !== "wrong" && i === typed.length;
 
                 return (
-                  <span
-                    key={`${ch}-${i}`}
-                    style={{ display: "inline-flex", alignItems: "center" }}
-                  >
+                  <span key={`${ch}-${i}`} style={{ display: "inline-flex", alignItems: "center" }}>
                     {showCursor && (
                       <span
                         style={{
@@ -377,10 +441,14 @@ export function TypingScreen({
                           ? isBad
                             ? "var(--neo-red)"
                             : "var(--neo-ink)"
-                          : "rgba(0,0,0,.28)",
+                          : hint === "full" || (hint === "first" && i === 0)
+                            ? "rgba(0,0,0,.28)"
+                            : "transparent",
                         display: "inline-block",
-                        textDecoration: isBad ? "line-through" : "none",
+                        textDecorationLine: isBad ? "line-through" : "none",
                         textDecorationThickness: 4,
+                        borderBottom:
+                          !isTyped && hint === "underline" ? "4px solid rgba(0,0,0,.4)" : undefined,
                       }}
                     >
                       {isTyped ? typedCh : ch}
@@ -428,7 +496,7 @@ export function TypingScreen({
               }}
             />
           </div>
-          {word.ipa && (
+          {word.ipa && !strictCheck && (
             <div
               style={{
                 marginTop: 28,
@@ -454,16 +522,27 @@ export function TypingScreen({
           }}
         >
           {status === "wrong" ? (
-            <Correction
-              target={target}
-              typed={typed}
-              onContinue={continueNext}
-            />
-          ) : word.example ? (
+            feedback === "mark" ? (
+              <WrongMark
+                onContinue={continueNext}
+                willRepeat={willRepeat}
+                autoAdvanceMs={isTestMode ? 3000 : undefined}
+              />
+            ) : (
+              <Correction
+                target={target}
+                typed={typed}
+                onContinue={continueNext}
+                willRepeat={willRepeat}
+                showAnswer={feedback === "reveal"}
+              />
+            )
+          ) : exampleMode !== "off" && word.example ? (
             <ExampleChip
               en={word.en}
               example={word.example}
               width={practiceCardWidth}
+              cloze={exampleMode === "cloze"}
             />
           ) : null}
         </div>

@@ -23,7 +23,7 @@ export const SEED_VOCABULARY: WordDTO[] = (seed.words as RawSeedWord[]).map((w) 
 }));
 
 export const SEED_TOPICS: string[] = Array.from(
-  new Set(SEED_VOCABULARY.map((w) => w.topic).filter(Boolean) as string[]),
+  new Set(SEED_VOCABULARY.map((w) => w.topic).filter(Boolean) as string[])
 );
 
 export const SEED_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;

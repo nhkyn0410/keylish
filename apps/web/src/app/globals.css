@@ -69,8 +69,7 @@ html {
 }
 .driver-popover.keylish-neo,
 .driver-popover.keylish-neo * {
-  font-family:
-    var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif !important;
+  font-family: var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif !important;
   letter-spacing: 0 !important;
 }
 /* Mascot dùng chiều cao cố định; overhang = transform theo bề rộng của chính nó. */
