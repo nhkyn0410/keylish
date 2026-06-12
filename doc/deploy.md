@@ -16,6 +16,7 @@ Cả 3 đều dùng free tier → chi phí **$0/tháng**. Chọn region **Singap
    - **Direct** (host không có `-pooler`) → dùng làm `DIRECT_URL` — cho migration.
 
    `packages/db/prisma.config.ts` đã ưu tiên `DIRECT_URL` khi chạy Prisma CLI.
+
 3. Migrate + seed từ máy local (PowerShell):
 
    ```powershell
@@ -35,11 +36,11 @@ Cả 3 đều dùng free tier → chi phí **$0/tháng**. Chọn region **Singap
 1. [dashboard.render.com](https://dashboard.render.com) → **New → Blueprint** → kết nối repo KeyLish.
 2. Render đọc `render.yaml`, hỏi các env secret — nhập:
 
-   | Biến | Giá trị |
-   |---|---|
-   | `DATABASE_URL` | Neon **pooled** connection string |
-   | `DIRECT_URL` | Neon **direct** connection string (dùng khi migrate trong lúc build) |
-   | `CORS_ORIGIN` | Domain Vercel, ví dụ `https://keylish.vercel.app` (điền sau bước 3 cũng được) |
+   | Biến           | Giá trị                                                                       |
+   | -------------- | ----------------------------------------------------------------------------- |
+   | `DATABASE_URL` | Neon **pooled** connection string                                             |
+   | `DIRECT_URL`   | Neon **direct** connection string (dùng khi migrate trong lúc build)          |
+   | `CORS_ORIGIN`  | Domain Vercel, ví dụ `https://keylish.vercel.app` (điền sau bước 3 cũng được) |
 
 3. **Apply** → chờ build & deploy.
 
@@ -62,11 +63,12 @@ Kiểm tra sau khi deploy (thay bằng URL thật của service):
    - Vercel tự nhận pnpm workspace qua lockfile ở root (không cần config thêm cho `@keylish/shared`)
 3. Environment Variables:
 
-   | Biến | Giá trị |
-   |---|---|
+   | Biến                  | Giá trị                            |
+   | --------------------- | ---------------------------------- |
    | `NEXT_PUBLIC_API_URL` | `https://keylish-api.onrender.com` |
 
    (Quy ước cho code web khi gọi API — khi implement phần gọi API hãy đọc biến này.)
+
 4. **Deploy** → nhận domain `https://<project>.vercel.app`.
 
 ## 4. Nối CORS
@@ -83,9 +85,9 @@ Quay lại Render → **Environment** → set `CORS_ORIGIN` = domain Vercel th�
 
 ## Vận hành về sau
 
-| Việc | Cách làm |
-|---|---|
-| Đổi schema DB | Sửa `schema.prisma` → `pnpm db:migrate` (local) → push; Render tự chạy `db:deploy` khi build |
-| Cập nhật dữ liệu vocab | Chạy lại `build-dataset` + `seed` từ local với env trỏ Neon |
-| Xem log API | Render dashboard → Logs |
-| Xem/sửa data trực tiếp | Neon dashboard → SQL Editor, hoặc pgAdmin trỏ direct URL |
+| Việc                   | Cách làm                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| Đổi schema DB          | Sửa `schema.prisma` → `pnpm db:migrate` (local) → push; Render tự chạy `db:deploy` khi build |
+| Cập nhật dữ liệu vocab | Chạy lại `build-dataset` + `seed` từ local với env trỏ Neon                                  |
+| Xem log API            | Render dashboard → Logs                                                                      |
+| Xem/sửa data trực tiếp | Neon dashboard → SQL Editor, hoặc pgAdmin trỏ direct URL                                     |

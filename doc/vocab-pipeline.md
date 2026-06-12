@@ -25,6 +25,7 @@ curl.exe -L -C - --retry 15 --retry-delay 5 --retry-all-errors `
 ```
 
 Ghi chú:
+
 - **Luôn ưu tiên bản `.jsonl.gz`** — script đọc thẳng file nén, không cần giải nén. Bản thô `.jsonl` ~3 GB tải lâu và dễ đứt giữa chừng.
 - Nếu download đứt: chạy lại đúng lệnh trên — `-C -` tự resume từ chỗ đứt, `--retry` tự thử lại.
 - `.data-tmp/` đã gitignored, dữ liệu thô không vào repo.
@@ -74,11 +75,11 @@ node scripts/build-vocab.mjs   # 112 từ → apps/web/src/data/seed/seed-vocabu
 
 ## Cập nhật dữ liệu về sau
 
-| Việc | Cách làm |
-|---|---|
-| Wiktionary có dump mới | Tải lại file `.gz` (Bước 1) → build-dataset → seed |
+| Việc                                  | Cách làm                                                                                 |
+| ------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Wiktionary có dump mới                | Tải lại file `.gz` (Bước 1) → build-dataset → seed                                       |
 | Sửa nghĩa VI / thêm chủ đề cho từ lõi | Sửa `VI` trong `scripts/vocab-shared.mjs` → build-dataset → seed (+ build-vocab cho web) |
-| Seed lên Neon production | Set env `DATABASE_URL`/`DIRECT_URL` trỏ Neon rồi chạy y hệt Bước 3 |
+| Seed lên Neon production              | Set env `DATABASE_URL`/`DIRECT_URL` trỏ Neon rồi chạy y hệt Bước 3                       |
 
 ## License dữ liệu
 

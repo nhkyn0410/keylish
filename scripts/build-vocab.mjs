@@ -34,20 +34,33 @@ for (const [en, vi, topic] of VI) {
 words.sort((a, b) => b.frequency - a.frequency);
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
-fs.writeFileSync(OUT, JSON.stringify({
-  _meta: {
-    source: "Metadata (CEFR level, frequency, POS): Maximax67/Words-CEFR-Dataset (MIT). Vietnamese meanings + topics: curated for KeyLish v1.",
-    license: "Maximax67 metadata: MIT. Curated Vietnamese content: project-owned.",
-    upgrade: "Full dataset (kaikki EN→VI long tail) is built by scripts/build-dataset.mjs and served from the API.",
-    count: words.length,
-    generatedAt: new Date().toISOString(),
-  },
-  words,
-}, null, 2), "utf8");
+fs.writeFileSync(
+  OUT,
+  JSON.stringify(
+    {
+      _meta: {
+        source:
+          "Metadata (CEFR level, frequency, POS): Maximax67/Words-CEFR-Dataset (MIT). Vietnamese meanings + topics: curated for KeyLish v1.",
+        license: "Maximax67 metadata: MIT. Curated Vietnamese content: project-owned.",
+        upgrade:
+          "Full dataset (kaikki EN→VI long tail) is built by scripts/build-dataset.mjs and served from the API.",
+        count: words.length,
+        generatedAt: new Date().toISOString(),
+      },
+      words,
+    },
+    null,
+    2
+  ),
+  "utf8"
+);
 
 console.log(`Wrote ${words.length} words -> ${path.relative(ROOT, OUT)}`);
 console.log("Missing in Maximax67:", missing.join(", ") || "(none)");
 for (const w of ["the", "go", "computer", "hospital", "apple"]) {
-  const id = idByWord[w]; const m = id ? bestByWordId[id] : null;
-  console.log(`  sanity ${w}: level=${m ? levelFromValue(m.level) : "?"} freq=${m ? m.freq : "?"} pos=${m ? pennToVn(posTags[m.posId]) : "?"}`);
+  const id = idByWord[w];
+  const m = id ? bestByWordId[id] : null;
+  console.log(
+    `  sanity ${w}: level=${m ? levelFromValue(m.level) : "?"} freq=${m ? m.freq : "?"} pos=${m ? pennToVn(posTags[m.posId]) : "?"}`
+  );
 }

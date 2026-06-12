@@ -9,12 +9,8 @@
     "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "noEmit": true
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }

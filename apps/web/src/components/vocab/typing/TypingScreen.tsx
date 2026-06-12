@@ -2,11 +2,7 @@
 
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon, ProgressStrip, Star, StatPill } from "./primitives";
-import {
-  useTypingSession,
-  type SessionResult,
-  type VocabWord,
-} from "./useTypingSession";
+import { useTypingSession, type SessionResult, type VocabWord } from "./useTypingSession";
 
 function firstMismatch(target: string, typed: string) {
   let i = 0;
@@ -18,15 +14,7 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function ExampleChip({
-  en,
-  example,
-  width,
-}: {
-  en: string;
-  example: string;
-  width: string;
-}) {
+function ExampleChip({ en, example, width }: { en: string; example: string; width: string }) {
   const parts = example.split(new RegExp(`(${escapeRegExp(en)})`, "i"));
   return (
     <div
@@ -82,7 +70,7 @@ function ExampleChip({
             </span>
           ) : (
             <span key={i}>{p}</span>
-          ),
+          )
         )}
       </p>
     </div>
@@ -147,11 +135,7 @@ function Correction({
             {target.slice(mis + 1)}
           </span>
         </div>
-        <button
-          type="button"
-          className="k-btn k-btn--primary k-btn--sm"
-          onClick={onContinue}
-        >
+        <button type="button" className="k-btn k-btn--primary k-btn--sm" onClick={onContinue}>
           Tiếp tục <Icon name="arrow" size={16} />
         </button>
       </div>
@@ -178,9 +162,7 @@ function Correction({
         </span>
         <Icon name="arrow" size={14} />
         <span style={{ color: "#149040", fontWeight: 900 }}>{rightCh}</span>
-        <span style={{ opacity: 0.55 }}>
-          · từ này sẽ lặp lại ở cuối vòng (M9)
-        </span>
+        <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng (M9)</span>
       </div>
     </div>
   );
@@ -216,26 +198,16 @@ export function TypingScreen({
   const practiceCardWidth = "min(100%, 720px)";
   const answerBoxWidth = Math.min(620, Math.max(320, target.length * 34 + 120));
   const answerFontSize = target.length > 16 ? 36 : target.length > 11 ? 44 : 58;
-  const answerBackground =
-    status === "wrong" ? "var(--neo-red-soft)" : "var(--neo-white)";
+  const answerBackground = status === "wrong" ? "var(--neo-red-soft)" : "var(--neo-white)";
   const targetChars = Array.from(target);
 
   return (
     <div className="k-screen">
       <AppHeader>
-        <StatPill
-          icon="flame"
-          value={String(stats.streak)}
-          label="streak"
-          bg="var(--neo-yellow)"
-        />
+        <StatPill icon="flame" value={String(stats.streak)} label="streak" bg="var(--neo-yellow)" />
         <StatPill icon="target" value={stats.accuracyPct + "%"} label="đúng" />
         <StatPill icon="clock" value={stats.elapsedStr} />
-        <button
-          type="button"
-          className="k-btn k-btn--sm k-btn--ghost k-b2"
-          onClick={onExit}
-        >
+        <button type="button" className="k-btn k-btn--sm k-btn--ghost k-b2" onClick={onExit}>
           Thoát
         </button>
       </AppHeader>
@@ -355,10 +327,7 @@ export function TypingScreen({
                 const showCursor = status !== "wrong" && i === typed.length;
 
                 return (
-                  <span
-                    key={`${ch}-${i}`}
-                    style={{ display: "inline-flex", alignItems: "center" }}
-                  >
+                  <span key={`${ch}-${i}`} style={{ display: "inline-flex", alignItems: "center" }}>
                     {showCursor && (
                       <span
                         style={{
@@ -454,17 +423,9 @@ export function TypingScreen({
           }}
         >
           {status === "wrong" ? (
-            <Correction
-              target={target}
-              typed={typed}
-              onContinue={continueNext}
-            />
+            <Correction target={target} typed={typed} onContinue={continueNext} />
           ) : word.example ? (
-            <ExampleChip
-              en={word.en}
-              example={word.example}
-              width={practiceCardWidth}
-            />
+            <ExampleChip en={word.en} example={word.example} width={practiceCardWidth} />
           ) : null}
         </div>
       </div>

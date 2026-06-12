@@ -15,7 +15,15 @@ import path from "node:path";
 import readline from "node:readline";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
-import { TOPICS, VI, kaikkiPosToVn, levelFromValue, loadMaximax, pennToVn, slugify } from "./vocab-shared.mjs";
+import {
+  TOPICS,
+  VI,
+  kaikkiPosToVn,
+  levelFromValue,
+  loadMaximax,
+  pennToVn,
+  slugify,
+} from "./vocab-shared.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DATA = path.join(ROOT, ".data-tmp");
@@ -31,18 +39,144 @@ const WORD_RE = /^[a-z][a-z'-]{0,29}$/;
 // lifestyle là tag cha được wiktextract gắn kèm rất nhiều nghĩa).
 // 7 slug đầu trùng với chủ đề curated; 6 chủ đề sau là mở rộng theo dữ liệu.
 const TOPIC_RULES = [
-  ["cong-nghe", "Công nghệ", ["computing", "internet", "software", "electronics", "telecommunications", "electrical-engineering", "broadcasting"]],
-  ["suc-khoe", "Sức khỏe", ["medicine", "anatomy", "pathology", "healthcare", "pharmacology", "psychiatry", "surgery", "dentistry", "disease"]],
+  [
+    "cong-nghe",
+    "Công nghệ",
+    [
+      "computing",
+      "internet",
+      "software",
+      "electronics",
+      "telecommunications",
+      "electrical-engineering",
+      "broadcasting",
+    ],
+  ],
+  [
+    "suc-khoe",
+    "Sức khỏe",
+    [
+      "medicine",
+      "anatomy",
+      "pathology",
+      "healthcare",
+      "pharmacology",
+      "psychiatry",
+      "surgery",
+      "dentistry",
+      "disease",
+    ],
+  ],
   ["am-thuc", "Ẩm thực", ["food", "cooking", "cuisine", "baking", "beverages", "brewing"]],
-  ["du-lich", "Du lịch", ["transport", "travel", "tourism", "nautical", "aeronautics", "aviation", "aerospace", "automotive", "rail-transport", "geography"]],
-  ["cong-so", "Công sở", ["business", "finance", "economics", "management", "marketing", "accounting", "employment"]],
+  [
+    "du-lich",
+    "Du lịch",
+    [
+      "transport",
+      "travel",
+      "tourism",
+      "nautical",
+      "aeronautics",
+      "aviation",
+      "aerospace",
+      "automotive",
+      "rail-transport",
+      "geography",
+    ],
+  ],
+  [
+    "cong-so",
+    "Công sở",
+    ["business", "finance", "economics", "management", "marketing", "accounting", "employment"],
+  ],
   ["mua-sam", "Mua sắm", ["commerce", "retail", "clothing", "textiles", "fashion"]],
-  ["the-thao-tro-choi", "Thể thao & Trò chơi", ["sports", "ball-games", "card-games", "board-games", "games", "video-games", "cricket", "baseball", "golf", "football", "soccer", "hockey", "rugby", "basketball", "tennis", "athletics", "swimming", "martial-arts", "chess", "fishing", "hunting", "gambling"]],
-  ["nghe-thuat-giai-tri", "Nghệ thuật & Giải trí", ["music", "film", "theater", "television", "arts", "entertainment", "media", "publishing", "photography"]],
-  ["phap-luat-nha-nuoc", "Pháp luật & Nhà nước", ["law", "government", "politics", "military", "war", "police", "diplomacy"]],
-  ["ton-giao-tin-nguong", "Tôn giáo & Tín ngưỡng", ["religion", "christianity", "islam", "judaism", "buddhism", "theology", "mysticism", "mythology"]],
-  ["khoa-hoc-ky-thuat", "Khoa học & Kỹ thuật", ["biology", "physics", "chemistry", "astronomy", "geology", "botany", "zoology", "mathematics", "engineering", "manufacturing", "construction", "agriculture", "meteorology", "ecology"]],
-  ["hoc-thuat", "Học thuật", ["linguistics", "grammar", "philosophy", "education", "rhetoric", "literature", "history"]],
+  [
+    "the-thao-tro-choi",
+    "Thể thao & Trò chơi",
+    [
+      "sports",
+      "ball-games",
+      "card-games",
+      "board-games",
+      "games",
+      "video-games",
+      "cricket",
+      "baseball",
+      "golf",
+      "football",
+      "soccer",
+      "hockey",
+      "rugby",
+      "basketball",
+      "tennis",
+      "athletics",
+      "swimming",
+      "martial-arts",
+      "chess",
+      "fishing",
+      "hunting",
+      "gambling",
+    ],
+  ],
+  [
+    "nghe-thuat-giai-tri",
+    "Nghệ thuật & Giải trí",
+    [
+      "music",
+      "film",
+      "theater",
+      "television",
+      "arts",
+      "entertainment",
+      "media",
+      "publishing",
+      "photography",
+    ],
+  ],
+  [
+    "phap-luat-nha-nuoc",
+    "Pháp luật & Nhà nước",
+    ["law", "government", "politics", "military", "war", "police", "diplomacy"],
+  ],
+  [
+    "ton-giao-tin-nguong",
+    "Tôn giáo & Tín ngưỡng",
+    [
+      "religion",
+      "christianity",
+      "islam",
+      "judaism",
+      "buddhism",
+      "theology",
+      "mysticism",
+      "mythology",
+    ],
+  ],
+  [
+    "khoa-hoc-ky-thuat",
+    "Khoa học & Kỹ thuật",
+    [
+      "biology",
+      "physics",
+      "chemistry",
+      "astronomy",
+      "geology",
+      "botany",
+      "zoology",
+      "mathematics",
+      "engineering",
+      "manufacturing",
+      "construction",
+      "agriculture",
+      "meteorology",
+      "ecology",
+    ],
+  ],
+  [
+    "hoc-thuat",
+    "Học thuật",
+    ["linguistics", "grammar", "philosophy", "education", "rhetoric", "literature", "history"],
+  ],
   ["doi-song", "Đời sống", ["family", "home", "furniture", "gardening"]],
 ];
 // LƯU Ý: không đưa nhãn ô dù (sciences, natural-sciences, physical-sciences,
@@ -136,7 +270,8 @@ function firstExample(entry) {
     if (!Array.isArray(s?.examples)) continue;
     for (const ex of s.examples) {
       const text = typeof ex?.text === "string" ? ex.text.trim() : "";
-      if (text.length >= 10 && text.length <= MAX_EXAMPLE_LENGTH && !text.includes("\n")) return text;
+      if (text.length >= 10 && text.length <= MAX_EXAMPLE_LENGTH && !text.includes("\n"))
+        return text;
     }
   }
   return undefined;
@@ -172,7 +307,10 @@ async function streamKaikki(file, agg) {
   let kept = 0;
   for await (const line of rl) {
     lines += 1;
-    if (lines % 200000 === 0) process.stdout.write(`  ...đã quét ${lines.toLocaleString()} dòng, ${agg.size.toLocaleString()} từ có nghĩa VI\r`);
+    if (lines % 200000 === 0)
+      process.stdout.write(
+        `  ...đã quét ${lines.toLocaleString()} dòng, ${agg.size.toLocaleString()} từ có nghĩa VI\r`
+      );
     let entry;
     try {
       entry = JSON.parse(line);
@@ -210,9 +348,13 @@ async function main() {
   if (kaikkiFile) {
     console.log(`Quét kaikki: ${path.relative(ROOT, kaikkiFile)}`);
     scan = await streamKaikki(kaikkiFile, agg);
-    console.log(`  ${scan.lines.toLocaleString()} dòng → ${agg.size.toLocaleString()} từ có bản dịch VI`);
+    console.log(
+      `  ${scan.lines.toLocaleString()} dòng → ${agg.size.toLocaleString()} từ có bản dịch VI`
+    );
   } else {
-    console.warn("⚠ Không thấy .data-tmp/kaikki-english.jsonl[.gz] — chỉ build từ danh sách curated (112 từ).");
+    console.warn(
+      "⚠ Không thấy .data-tmp/kaikki-english.jsonl[.gz] — chỉ build từ danh sách curated (112 từ)."
+    );
     console.warn("  Tải file theo doc/vocab-pipeline.md (Bước 1) để có kho đầy đủ.");
   }
 
@@ -256,7 +398,8 @@ async function main() {
     const m = id ? bestByWordId[id] : null;
     const lv = (m && levelFromValue(m.level)) || "A2";
     words.push({
-      en, vi,
+      en,
+      vi,
       level: lv,
       frequency: m ? m.freq : 0,
       pos: m ? pennToVn(posTags[m.posId]) : undefined,
@@ -272,7 +415,8 @@ async function main() {
   const MIN_TOPIC_WORDS = 10;
   const topicsBySlug = new Map(TOPICS.map((t) => [t.slug, t.title]));
   for (const [slug, title] of TOPIC_RULES) {
-    if (!topicsBySlug.has(slug) && (topicCount[slug] ?? 0) >= MIN_TOPIC_WORDS) topicsBySlug.set(slug, title);
+    if (!topicsBySlug.has(slug) && (topicCount[slug] ?? 0) >= MIN_TOPIC_WORDS)
+      topicsBySlug.set(slug, title);
   }
   for (const w of words) {
     if (w.topic && !topicsBySlug.has(w.topic)) {
@@ -283,27 +427,41 @@ async function main() {
   }
   const topics = [...topicsBySlug.entries()].map(([slug, title]) => ({ slug, title }));
 
-  fs.writeFileSync(OUT, JSON.stringify({
-    _meta: {
-      sources: {
-        "Maximax67/Words-CEFR-Dataset": "MIT — CEFR level, frequency, POS",
-        "kaikki.org English Wiktionary (Wiktextract)": "CC BY-SA + GFDL — EN→VI meanings, IPA, examples",
+  fs.writeFileSync(
+    OUT,
+    JSON.stringify({
+      _meta: {
+        sources: {
+          "Maximax67/Words-CEFR-Dataset": "MIT — CEFR level, frequency, POS",
+          "kaikki.org English Wiktionary (Wiktextract)":
+            "CC BY-SA + GFDL — EN→VI meanings, IPA, examples",
+        },
+        license:
+          "Derived data from Wiktionary remains CC BY-SA + GFDL. Curated Vietnamese content: project-owned.",
+        kaikkiFile: kaikkiFile ? path.basename(kaikkiFile) : null,
+        scannedLines: scan.lines,
+        count: words.length,
+        byLevel: levelCount,
+        byTopic: topicCount,
+        generatedAt: new Date().toISOString(),
       },
-      license: "Derived data from Wiktionary remains CC BY-SA + GFDL. Curated Vietnamese content: project-owned.",
-      kaikkiFile: kaikkiFile ? path.basename(kaikkiFile) : null,
-      scannedLines: scan.lines,
-      count: words.length,
-      byLevel: levelCount,
-      byTopic: topicCount,
-      generatedAt: new Date().toISOString(),
-    },
-    topics,
-    words,
-  }), "utf8");
+      topics,
+      words,
+    }),
+    "utf8"
+  );
 
   const secs = ((Date.now() - started) / 1000).toFixed(1);
-  console.log(`Wrote ${words.length.toLocaleString()} words -> ${path.relative(ROOT, OUT)} (${secs}s)`);
-  console.log("Theo cấp độ:", Object.entries(levelCount).sort().map(([k, v]) => `${k}=${v}`).join("  "));
+  console.log(
+    `Wrote ${words.length.toLocaleString()} words -> ${path.relative(ROOT, OUT)} (${secs}s)`
+  );
+  console.log(
+    "Theo cấp độ:",
+    Object.entries(levelCount)
+      .sort()
+      .map(([k, v]) => `${k}=${v}`)
+      .join("  ")
+  );
   console.log("Theo chủ đề:");
   for (const [k, v] of Object.entries(topicCount).sort((a, b) => b[1] - a[1])) {
     console.log(`  ${k}: ${v.toLocaleString()}`);

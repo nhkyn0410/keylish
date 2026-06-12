@@ -99,11 +99,7 @@ function MethodRow({
         alignItems: "center",
         gap: 16,
         position: "relative",
-        background: selected
-          ? "var(--neo-yellow-soft)"
-          : locked
-            ? "#F1EFE6"
-            : "var(--neo-white)",
+        background: selected ? "var(--neo-yellow-soft)" : locked ? "#F1EFE6" : "var(--neo-white)",
         boxShadow: locked ? "none" : undefined,
         opacity: locked ? 0.85 : 1,
       }}
@@ -121,45 +117,25 @@ function MethodRow({
         style={{
           width: 52,
           height: 52,
-          background: selected
-            ? "var(--neo-yellow)"
-            : locked
-              ? "#fff"
-              : "var(--neo-violet)",
+          background: selected ? "var(--neo-yellow)" : locked ? "#fff" : "var(--neo-violet)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flex: "0 0 auto",
         }}
       >
-        <Icon
-          name={icon}
-          size={28}
-          stroke={3}
-          style={{ opacity: locked ? 0.5 : 1 }}
-        />
+        <Icon name={icon} size={28} stroke={3} style={{ opacity: locked ? 0.5 : 1 }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 900, fontSize: 19, lineHeight: 1.1 }}>
-          {title}
-        </div>
-        <div
-          style={{ fontSize: 13, fontWeight: 700, opacity: 0.6, marginTop: 2 }}
-        >
-          {sub}
-        </div>
+        <div style={{ fontWeight: 900, fontSize: 19, lineHeight: 1.1 }}>{title}</div>
+        <div style={{ fontSize: 13, fontWeight: 700, opacity: 0.6, marginTop: 2 }}>{sub}</div>
       </div>
       {selected ? (
         <div className="k-badge k-badge--green" style={{ flex: "0 0 auto" }}>
           <Icon name="check" size={14} stroke={4} /> Đang chọn
         </div>
       ) : locked ? (
-        <Icon
-          name="lock"
-          size={20}
-          stroke={2.5}
-          style={{ opacity: 0.5, flex: "0 0 auto" }}
-        />
+        <Icon name="lock" size={20} stroke={2.5} style={{ opacity: 0.5, flex: "0 0 auto" }} />
       ) : (
         <div className="k-badge k-badge--white" style={{ flex: "0 0 auto" }}>
           Chọn
@@ -208,9 +184,7 @@ export function SetupMethod({
     let live = true;
     setMatchCount(null);
     const timer = window.setTimeout(() => {
-      const levelList = levelsKey
-        ? (levelsKey.split(",") as CefrLevel[])
-        : undefined;
+      const levelList = levelsKey ? (levelsKey.split(",") as CefrLevel[]) : undefined;
       const topicArr = topicsKey ? topicsKey.split(",") : undefined;
       fetchVocabCount({ levels: levelList, topics: topicArr }).then((n) => {
         if (live) setMatchCount(n);
@@ -226,7 +200,7 @@ export function SetupMethod({
   const canStart = matchCount != null && matchCount > 0;
   const toggle = (
     set: React.Dispatch<React.SetStateAction<Record<string, boolean>>>,
-    key: string,
+    key: string
   ) => set((s) => ({ ...s, [key]: !s[key] }));
 
   return (
@@ -252,10 +226,7 @@ export function SetupMethod({
               flex: "0 0 auto",
             }}
           >
-            <div
-              className="k-badge k-badge--white"
-              style={{ boxShadow: "none" }}
-            >
+            <div className="k-badge k-badge--white" style={{ boxShadow: "none" }}>
               {loadState.loading
                 ? "Đang nạp"
                 : loadState.source === "api"
@@ -277,9 +248,7 @@ export function SetupMethod({
         </div>
       </div>
 
-      <div
-        style={{ flex: 1, minHeight: 0, paddingBottom: 18, overflow: "auto" }}
-      >
+      <div style={{ flex: 1, minHeight: 0, paddingBottom: 18, overflow: "auto" }}>
         <div className="k-wrap" style={{ display: "flex", gap: 26 }}>
           {/* LEFT — Nguồn */}
           <div
@@ -334,11 +303,7 @@ export function SetupMethod({
                 <div className="k-badge k-badge--violet">Chủ đề</div>
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <Chip
-                  label="Tất cả"
-                  on={allTopics}
-                  onToggle={() => setTopics({})}
-                />
+                <Chip label="Tất cả" on={allTopics} onToggle={() => setTopics({})} />
                 {topicList.map((t) => (
                   <Chip
                     key={t.slug}
@@ -361,7 +326,15 @@ export function SetupMethod({
               minWidth: 0,
             }}
           >
-            <div id="tour-methods" style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
+            <div
+              id="tour-methods"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+                minWidth: 0,
+              }}
+            >
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <StepNum n="2" color="var(--neo-violet)" />
                 <div>
@@ -419,8 +392,7 @@ export function SetupMethod({
                     marginTop: 10,
                   }}
                 >
-                  Bộ lọc chỉ có {matchCount} từ — phiên này luyện {matchCount}{" "}
-                  từ.
+                  Bộ lọc chỉ có {matchCount} từ — phiên này luyện {matchCount} từ.
                 </div>
               )}
             </div>
@@ -436,12 +408,7 @@ export function SetupMethod({
                 gap: 10,
               }}
             >
-              <Icon
-                name="lock"
-                size={18}
-                stroke={2.5}
-                style={{ opacity: 0.5, flex: "0 0 auto" }}
-              />
+              <Icon name="lock" size={18} stroke={2.5} style={{ opacity: 0.5, flex: "0 0 auto" }} />
               <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.6 }}>
                 +5 phương pháp khác sẽ có trong tương lai
               </span>
@@ -487,23 +454,14 @@ export function SetupMethod({
             </div>
             <div style={{ width: 4, height: 40, background: "#000" }} />
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <span
-                className="k-badge k-badge--green"
-                style={{ boxShadow: "none" }}
-              >
+              <span className="k-badge k-badge--green" style={{ boxShadow: "none" }}>
                 {method === "M2" ? "M2 · Nghĩa VI → Gõ EN" : "M1 · Nghe → Gõ"}
               </span>
-              <span
-                className="k-badge k-badge--white"
-                style={{ boxShadow: "none" }}
-              >
+              <span className="k-badge k-badge--white" style={{ boxShadow: "none" }}>
                 {selLevels.join(", ") || "—"}
               </span>
               {allTopics ? (
-                <span
-                  className="k-badge k-badge--white"
-                  style={{ boxShadow: "none" }}
-                >
+                <span className="k-badge k-badge--white" style={{ boxShadow: "none" }}>
                   Tất cả chủ đề
                 </span>
               ) : (
@@ -518,10 +476,7 @@ export function SetupMethod({
                 ))
               )}
               {loadState.error && (
-                <span
-                  className="k-badge k-badge--red"
-                  style={{ boxShadow: "none" }}
-                >
+                <span className="k-badge k-badge--red" style={{ boxShadow: "none" }}>
                   Fallback
                 </span>
               )}
@@ -533,9 +488,7 @@ export function SetupMethod({
             className="k-btn k-btn--primary k-btn--lg"
             style={{ flex: "0 0 auto" }}
             disabled={!canStart}
-            onClick={() =>
-              onStart(method, { levels: selLevels, topics: selSlugs, size })
-            }
+            onClick={() => onStart(method, { levels: selLevels, topics: selSlugs, size })}
           >
             Luyện {sessionWords} từ <Icon name="arrow" size={22} />
           </button>

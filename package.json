@@ -13,6 +13,8 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "check": "pnpm lint && pnpm typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @keylish/db generate",
     "db:migrate": "pnpm --filter @keylish/db migrate",
     "db:deploy": "pnpm --filter @keylish/db run deploy",
@@ -29,8 +31,10 @@
     "@eslint/js": "^10.0.1",
     "eslint": "^10.4.1",
     "globals": "^17.6.0",
+    "prettier": "^3.8.4",
     "sharp": "^0.35.0",
     "turbo": "^2.9.17",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0"
   }
 }

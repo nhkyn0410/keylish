@@ -52,13 +52,25 @@ function loadDataset(): { topics: DatasetTopic[]; words: DatasetWord[]; from: st
   const datasetPath = path.join(ROOT, ".data-tmp", "dataset.json");
   if (fs.existsSync(datasetPath)) {
     const parsed = JSON.parse(fs.readFileSync(datasetPath, "utf8"));
-    return { topics: parsed.topics ?? [], words: parsed.words ?? [], from: path.relative(ROOT, datasetPath) };
+    return {
+      topics: parsed.topics ?? [],
+      words: parsed.words ?? [],
+      from: path.relative(ROOT, datasetPath),
+    };
   }
 
-  const fallbackPath = path.join(ROOT, "apps", "web", "src", "data", "seed", "seed-vocabulary.json");
+  const fallbackPath = path.join(
+    ROOT,
+    "apps",
+    "web",
+    "src",
+    "data",
+    "seed",
+    "seed-vocabulary.json"
+  );
   if (!fs.existsSync(fallbackPath)) {
     throw new Error(
-      "Không tìm thấy .data-tmp/dataset.json lẫn seed của web. Chạy `pnpm --filter @keylish/api build-dataset` trước (xem doc/vocab-pipeline.md).",
+      "Không tìm thấy .data-tmp/dataset.json lẫn seed của web. Chạy `pnpm --filter @keylish/api build-dataset` trước (xem doc/vocab-pipeline.md)."
     );
   }
   console.warn("⚠ Không thấy .data-tmp/dataset.json — dùng seed 112 từ của web làm fallback.");
@@ -68,7 +80,9 @@ function loadDataset(): { topics: DatasetTopic[]; words: DatasetWord[]; from: st
     topic: w.topic ? slugify(w.topic) : undefined,
     source: "curated+maximax67",
   }));
-  const titles = Array.from(new Set((parsed.words ?? []).map((w: DatasetWord) => w.topic).filter(Boolean))) as string[];
+  const titles = Array.from(
+    new Set((parsed.words ?? []).map((w: DatasetWord) => w.topic).filter(Boolean))
+  ) as string[];
   const topics = titles.map((title) => ({ slug: slugify(title), title }));
   return { topics, words, from: path.relative(ROOT, fallbackPath) };
 }
@@ -86,7 +100,9 @@ async function main() {
     console.log("Xóa dữ liệu cũ (Word → Topic)...");
     const deletedWords = await client.word.deleteMany({});
     const deletedTopics = await client.topic.deleteMany({});
-    console.log(`  đã xóa ${deletedWords.count.toLocaleString()} từ, ${deletedTopics.count} chủ đề`);
+    console.log(
+      `  đã xóa ${deletedWords.count.toLocaleString()} từ, ${deletedTopics.count} chủ đề`
+    );
 
     await client.topic.createMany({ data: topics.map((t) => ({ slug: t.slug, title: t.title })) });
     const topicRows = await client.topic.findMany({ select: { id: true, slug: true } });
@@ -103,12 +119,14 @@ async function main() {
         pos: w.pos ?? null,
         ipa: w.ipa ?? null,
         example: w.example ?? null,
-        topicId: w.topic ? idBySlug.get(w.topic) ?? null : null,
+        topicId: w.topic ? (idBySlug.get(w.topic) ?? null) : null,
         source: w.source ?? "wiktionary+maximax67",
       }));
       const res = await client.word.createMany({ data: batch, skipDuplicates: true });
       inserted += res.count;
-      process.stdout.write(`  đã nạp ${inserted.toLocaleString()} / ${words.length.toLocaleString()} từ\r`);
+      process.stdout.write(
+        `  đã nạp ${inserted.toLocaleString()} / ${words.length.toLocaleString()} từ\r`
+      );
     }
     process.stdout.write("\n");
 

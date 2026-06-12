@@ -51,7 +51,7 @@ export function fmtTime(sec: number) {
 export function useTypingSession(
   words: VocabWord[],
   reveal: boolean,
-  onComplete: (r: SessionResult) => void,
+  onComplete: (r: SessionResult) => void
 ) {
   const [queue, setQueue] = useState<VocabWord[]>(words);
   const [index, setIndex] = useState(0);
@@ -78,7 +78,7 @@ export function useTypingSession(
     startRef.current = performance.now();
     const id = window.setInterval(
       () => setElapsed(Math.floor((performance.now() - startRef.current) / 1000)),
-      1000,
+      1000
     );
     return () => {
       window.clearInterval(id);

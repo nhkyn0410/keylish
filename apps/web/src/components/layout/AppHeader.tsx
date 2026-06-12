@@ -14,10 +14,7 @@ export function AppHeader({
   const hasCustomActions = children != null;
 
   return (
-    <header
-      className="k-app-header border-b-4 border-black"
-      style={{ background: accent }}
-    >
+    <header className="k-app-header border-b-4 border-black" style={{ background: accent }}>
       <div className="k-site-wrap flex h-full items-center justify-between gap-4">
         <Link href="/" className="inline-flex items-center" aria-label="Về trang chủ KeyLish">
           <Logo />

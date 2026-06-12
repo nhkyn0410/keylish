@@ -36,7 +36,7 @@ export class VocabService {
     }
 
     const parsed = parsedResult.data;
-    const rows = await this.database.client.word.findMany({
+    const rows = (await this.database.client.word.findMany({
       where: {
         ...(parsed.levels?.length ? { level: { in: parsed.levels } } : {}),
         ...(parsed.topics?.length ? { topic: { slug: { in: parsed.topics } } } : {}),
@@ -57,7 +57,7 @@ export class VocabService {
           select: { slug: true },
         },
       },
-    }) as WordRow[];
+    })) as WordRow[];
 
     const selected = parsed.random ? shuffle(rows).slice(0, parsed.limit) : rows;
 

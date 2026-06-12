@@ -82,22 +82,15 @@ function MetricCard({ metric }: { metric: Metric }) {
   return (
     <div className="k-b k-sh-sm p-4" style={{ background: metric.bg }}>
       <div className="k-stat-num text-4xl sm:text-5xl">{metric.value}</div>
-      <div className="mt-2 text-sm font-black uppercase tracking-normal">
-        {metric.label}
-      </div>
-      <div className="text-xs font-bold uppercase tracking-normal opacity-60">
-        {metric.detail}
-      </div>
+      <div className="mt-2 text-sm font-black uppercase tracking-normal">{metric.label}</div>
+      <div className="text-xs font-bold uppercase tracking-normal opacity-60">{metric.detail}</div>
     </div>
   );
 }
 
 function LandingFeatureCard({ card }: { card: LandingCard }) {
   return (
-    <article
-      className="k-card k-card--hover p-5"
-      style={{ background: card.bg }}
-    >
+    <article className="k-card k-card--hover p-5" style={{ background: card.bg }}>
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="k-b2 k-sh-sm flex h-14 w-14 items-center justify-center bg-neo-white">
           <Icon name={card.icon} size={30} stroke={3} />
@@ -110,13 +103,7 @@ function LandingFeatureCard({ card }: { card: LandingCard }) {
   );
 }
 
-function StateLegend({
-  label,
-  state,
-}: {
-  label: string;
-  state: "ok" | "bad" | "cur" | "todo";
-}) {
+function StateLegend({ label, state }: { label: string; state: "ok" | "bad" | "cur" | "todo" }) {
   const color =
     state === "ok"
       ? "var(--neo-green)"
@@ -157,9 +144,7 @@ export default function Home() {
       <section id="tour-hero" className="border-b-4 border-black">
         <div className="k-site-wrap py-8 sm:py-12">
           <div className="max-w-[860px]">
-            <div className="k-badge k-badge--violet mb-6">
-              KeyLish · typed vocabulary
-            </div>
+            <div className="k-badge k-badge--violet mb-6">KeyLish · typed vocabulary</div>
             <h1 className="max-w-[780px] flex flex-col items-start gap-2 text-[42px] tracking-normal sm:gap-3 sm:text-[64px] lg:text-[76px]">
               <span>Học tiếng Anh</span>
               <span className="inline-flex w-fit border-4 border-black bg-neo-yellow px-4 py-2 leading-none shadow-neo-sm sm:px-5 sm:py-9">
@@ -167,9 +152,8 @@ export default function Home() {
               </span>
             </h1>
             <p className="mt-6 max-w-[620px] text-base font-semibold leading-7 text-neo-ink/75 sm:text-lg sm:leading-8">
-              Chọn cấp độ CEFR, lọc chủ đề, rồi luyện từ vựng bằng chính thao
-              tác gõ. KeyLish cho phản hồi ngay từng ký tự và đưa từ sai quay
-              lại cuối vòng.
+              Chọn cấp độ CEFR, lọc chủ đề, rồi luyện từ vựng bằng chính thao tác gõ. KeyLish cho
+              phản hồi ngay từng ký tự và đưa từ sai quay lại cuối vòng.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link href="/typing" className="k-btn k-btn--primary">
@@ -199,9 +183,8 @@ export default function Home() {
             Biết sai ở đâu ngay khi gõ
           </h2>
           <p className="mt-5 max-w-xl text-base font-semibold leading-7 text-neo-ink/70 sm:text-lg">
-            Trang luyện không chờ đến cuối bài mới báo lỗi. Mỗi ký tự có trạng
-            thái riêng, kèm dấu hiệu trực quan để không phụ thuộc vào màu sắc
-            đơn thuần.
+            Trang luyện không chờ đến cuối bài mới báo lỗi. Mỗi ký tự có trạng thái riêng, kèm dấu
+            hiệu trực quan để không phụ thuộc vào màu sắc đơn thuần.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <StateLegend label="Đúng" state="ok" />
@@ -225,10 +208,7 @@ export default function Home() {
                 Một phiên luyện rõ ràng
               </h2>
             </div>
-            <Link
-              href="/typing"
-              className="k-btn k-btn--sm k-btn--primary self-start sm:self-auto"
-            >
+            <Link href="/typing" className="k-btn k-btn--sm k-btn--primary self-start sm:self-auto">
               Vào màn luyện <Icon name="arrow" size={18} />
             </Link>
           </div>
@@ -248,8 +228,7 @@ export default function Home() {
               Bắt đầu một phiên 20 từ
             </h2>
             <p className="mt-3 max-w-2xl text-base font-bold leading-7 text-neo-ink/70">
-              Lần đầu vào màn luyện sẽ có hướng dẫn từng bước để chọn cấp độ,
-              chủ đề và phương pháp.
+              Lần đầu vào màn luyện sẽ có hướng dẫn từng bước để chọn cấp độ, chủ đề và phương pháp.
             </p>
           </div>
           <div className="flex flex-wrap gap-4">

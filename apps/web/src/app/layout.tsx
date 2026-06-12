@@ -12,8 +12,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: "KeyLish — Học tiếng Anh bằng cách gõ",
-  description:
-    "Luyện gõ từ vựng tiếng Anh theo cấp độ. Offline-first, riêng tư.",
+  description: "Luyện gõ từ vựng tiếng Anh theo cấp độ. Offline-first, riêng tư.",
 };
 
 export default function RootLayout({
