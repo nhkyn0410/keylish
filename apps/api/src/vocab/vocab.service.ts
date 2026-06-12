@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { VocabQuerySchema, type WordDTO } from "@keylish/shared";
 import type { CefrLevel } from "@keylish/db";
-import { DatabaseService } from "./database.service";
+import { DatabaseService } from "../database/database.service";
 
 type WordRow = {
   id: string;
