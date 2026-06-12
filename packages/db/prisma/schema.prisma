@@ -1,0 +1,43 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum CefrLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+model Topic {
+  id    String @id @default(cuid())
+  slug  String @unique
+  title String
+  words Word[]
+}
+
+model Word {
+  id        String     @id @default(cuid())
+  en        String
+  vi        String
+  level     CefrLevel?
+  frequency Int        @default(0)
+  pos       String?
+  ipa       String?
+  example   String?
+  topic     Topic?     @relation(fields: [topicId], references: [id])
+  topicId   String?
+  source    String     @default("wiktionary+maximax67")
+  updatedAt DateTime   @updatedAt
+
+  @@unique([en, level])
+  @@index([level])
+  @@index([topicId])
+  @@index([frequency])
+}

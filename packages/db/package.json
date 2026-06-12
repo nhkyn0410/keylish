@@ -20,21 +20,23 @@
     "migrate": "prisma migrate dev --schema prisma/schema.prisma",
     "deploy": "prisma migrate deploy --schema prisma/schema.prisma",
     "format": "prisma format --schema prisma/schema.prisma",
-    "lint": "tsc --noEmit",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "studio": "prisma studio --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.0.1",
+    "@prisma/client": "^7.8.0",
     "dotenv": "^17.4.2",
     "pg": "^8.21.0"
   },
   "devDependencies": {
+    "@types/node": "^20",
     "@types/pg": "^8.20.0",
-    "prisma": "^7.0.1",
-    "tsup": "^8.5.0",
-    "typescript": "^5",
-    "vitest": "^4.0.15"
+    "prisma": "^7.8.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
   }
 }
