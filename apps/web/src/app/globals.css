@@ -69,11 +69,11 @@ html {
 }
 .driver-popover.keylish-neo,
 .driver-popover.keylish-neo * {
-  font-family: var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif !important;
+  font-family:
+    var(--font-be-vietnam-pro), ui-sans-serif, system-ui, sans-serif !important;
   letter-spacing: 0 !important;
 }
-/* Mascot = 3/5 chiều cao khung; overhang = transform theo bề rộng của chính nó
-   (height:60% trên ::after absolute → tính theo chiều cao popover). */
+/* Mascot dùng chiều cao cố định; overhang = transform theo bề rộng của chính nó. */
 .driver-popover.keylish-neo.keylish-tip::before,
 .driver-popover.keylish-neo.keylish-tip::after {
   content: "";
@@ -83,7 +83,7 @@ html {
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: contain;
-  height: 90%;
+  height: 180px;
   aspect-ratio: 1;
   bottom: -4px;
 }

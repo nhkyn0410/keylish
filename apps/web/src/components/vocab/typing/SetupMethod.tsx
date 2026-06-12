@@ -353,7 +353,6 @@ export function SetupMethod({
 
           {/* RIGHT — Phương pháp */}
           <div
-            id="tour-methods"
             style={{
               flex: "0.95 1 0",
               display: "flex",
@@ -362,31 +361,32 @@ export function SetupMethod({
               minWidth: 0,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <StepNum n="2" color="var(--neo-violet)" />
-              <div>
-                <div style={{ fontWeight: 900, fontSize: 22 }}>Phương pháp</div>
+            <div id="tour-methods" style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <StepNum n="2" color="var(--neo-violet)" />
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: 22 }}>Phương pháp</div>
+                </div>
               </div>
+              <MethodRow
+                icon="swap"
+                title="Nghĩa VI → Gõ EN"
+                sub="M2 · char-by-char"
+                tag="Ưu tiên"
+                tagColor="k-badge--green"
+                selected={method === "M2"}
+                onSelect={() => setMethod("M2")}
+              />
+              <MethodRow
+                icon="volume"
+                title="Nghe → Gõ"
+                sub="M1 · TTS giọng trình duyệt"
+                tag=""
+                tagColor="k-badge--violet"
+                selected={method === "M1"}
+                onSelect={() => setMethod("M1")}
+              />
             </div>
-
-            <MethodRow
-              icon="swap"
-              title="Nghĩa VI → Gõ EN"
-              sub="M2 · char-by-char"
-              tag="Ưu tiên"
-              tagColor="k-badge--green"
-              selected={method === "M2"}
-              onSelect={() => setMethod("M2")}
-            />
-            <MethodRow
-              icon="volume"
-              title="Nghe → Gõ"
-              sub="M1 · TTS giọng trình duyệt"
-              tag=""
-              tagColor="k-badge--violet"
-              selected={method === "M1"}
-              onSelect={() => setMethod("M1")}
-            />
 
             <div id="tour-size" className="k-card" style={{ padding: 20 }}>
               <div
@@ -398,9 +398,6 @@ export function SetupMethod({
                 }}
               >
                 <div className="k-badge k-badge--green">Số từ</div>
-                <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.6 }}>
-                  Mỗi phiên luyện
-                </span>
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {SESSION_SIZES.map((s) => (

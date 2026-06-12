@@ -130,7 +130,7 @@ export async function startSetupTour() {
       {
         element: "#tour-topics",
         popover: {
-          popoverClass: TIP_LEFT_CLASS,
+          popoverClass: TIP_RIGHT_CLASS,
           title: "2 · Chủ đề (tùy chọn)",
           description: "Mặc định luyện tất cả. Chỉ chọn chủ đề khi muốn thu hẹp phạm vi.",
           side: "right",
@@ -139,18 +139,27 @@ export async function startSetupTour() {
       {
         element: "#tour-methods",
         popover: {
-          popoverClass: TIP_RIGHT_CLASS,
+          popoverClass: TIP_LEFT_CLASS,
           title: "3 · Phương pháp",
           description: "M2: nhìn nghĩa tiếng Việt → gõ từ tiếng Anh. M1: nghe phát âm → gõ lại.",
           side: "left",
         },
       },
       {
-        element: "#tour-start",
+        element: "#tour-size",
         popover: {
           popoverClass: TIP_LEFT_CLASS,
-          title: "Bắt đầu!",
-          description: "Số từ khớp bộ lọc hiển thị bên trái. Nhấn nút để vào phiên luyện 20 từ.",
+          title: "4 · Số từ mỗi phiên",
+          description: "Chọn 20, 50 hoặc 100 từ. Nếu bộ lọc có ít từ hơn lựa chọn, KeyLish sẽ tự rút phiên về đúng số từ hiện có.",
+          side: "left",
+        },
+      },
+      {
+        element: "#tour-start",
+        popover: {
+          popoverClass: TIP_RIGHT_CLASS,
+          title: "5 · Bắt đầu!",
+          description: "Kiểm tra số từ khớp bộ lọc ở thanh dưới, rồi nhấn nút để vào phiên luyện với số từ vừa chọn.",
           side: "top",
           align: "end",
         },
