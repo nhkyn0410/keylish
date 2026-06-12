@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import type { ChangeEvent, CompositionEvent } from "react";
+import type { ChangeEvent, CompositionEvent, KeyboardEvent } from "react";
 import type { CharState } from "./primitives";
+import type { RepeatMode } from "./practiceSettings";
+
+/** Cấu hình hành vi engine, suy ra từ phương pháp + tuỳ chọn luyện tập. */
+export interface SessionEngineConfig {
+  reveal: boolean; // lộ ký tự đích trong cells (M1 = false)
+  repeat: RepeatMode; // xử lý từ gõ sai trong phiên
+  wrongAdvanceMs?: number; // tự chuyển sau khi báo sai (dùng cho Kiểm tra)
+}
 
 export interface VocabWord {
   id?: string;
@@ -50,9 +58,10 @@ export function fmtTime(sec: number) {
 /** Real char-by-char typing session (IME/composition-safe). */
 export function useTypingSession(
   words: VocabWord[],
-  reveal: boolean,
+  config: SessionEngineConfig,
   onComplete: (r: SessionResult) => void
 ) {
+  const { reveal, repeat, wrongAdvanceMs } = config;
   const [queue, setQueue] = useState<VocabWord[]>(words);
   const [index, setIndex] = useState(0);
   const [typed, setTyped] = useState("");
@@ -118,9 +127,18 @@ export function useTypingSession(
     clearInput();
     setTyped("");
     setStatus("typing");
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     const ni = i + 1;
     if (ni >= q.length) finishSession();
     else setIndex(ni);
+  }
+
+  function scheduleAdvance(delayMs: number) {
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => doAdvance(queue, index), delayMs);
   }
 
   function syncView() {
@@ -146,17 +164,22 @@ export function useTypingSession(
       c.correct++;
       c.streak++;
       syncView();
-      timerRef.current = window.setTimeout(() => doAdvance(queue, index), 360);
+      scheduleAdvance(360);
     } else {
       c.wrong++;
       c.streak = 0;
       if (!wrongWords.current.some((w) => w.en === word.en)) wrongWords.current.push(word);
       syncView();
-      if (!requeued.current.has(target)) {
-        requeued.current.add(target);
+      // repeat: "none" = bỏ qua; "once" = đẩy lại cuối vòng một lần; "until" =
+      // đẩy lại mỗi lần sai cho tới khi gõ đúng.
+      const willRequeue =
+        repeat === "until" || (repeat === "once" && !requeued.current.has(target));
+      if (willRequeue) {
+        if (repeat === "once") requeued.current.add(target);
         setQueue((q) => [...q, word]);
       }
       setStatus("wrong");
+      if (wrongAdvanceMs != null) scheduleAdvance(wrongAdvanceMs);
     }
   }
 
@@ -164,7 +187,6 @@ export function useTypingSession(
     if (locked.current || status === "wrong" || !word) return;
     const v = clean(raw).slice(0, target.length);
     setTyped(v);
-    if (v.length === target.length) finalize(v);
   }
 
   const inputHandlers = {
@@ -178,6 +200,17 @@ export function useTypingSession(
     onCompositionEnd: (e: CompositionEvent<HTMLInputElement>) => {
       composing.current = false;
       applyValue(e.currentTarget.value);
+    },
+    onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key !== "Enter" || composing.current || e.nativeEvent.isComposing) return;
+      e.preventDefault();
+      if (status === "wrong") {
+        if (wrongAdvanceMs != null) return;
+        continueNext();
+        return;
+      }
+      if (locked.current || !word) return;
+      finalize(clean(e.currentTarget.value).slice(0, target.length));
     },
   };
 

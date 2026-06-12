@@ -9,6 +9,12 @@ import { ListenScreen } from "./ListenScreen";
 import { Summary } from "./Summary";
 import { AppShell } from "@/components/layout/AppShell";
 import type { SessionResult, VocabWord } from "./useTypingSession";
+import {
+  DEFAULT_PRACTICE_SETTINGS,
+  settingsForDrill,
+  type Drill,
+  type PracticeSettings,
+} from "./practiceSettings";
 import { SEED_VOCABULARY } from "@/data/seed/vocabulary";
 import { fetchVocab, loadTopicsAwait, seedTopicDtos, warmApi } from "@/infra/vocab/vocabApi";
 
@@ -155,6 +161,10 @@ export function TypingFlow() {
   const [loadState, setLoadState] = useState<VocabLoadState>({ loading: true, source: "seed" });
   const [topicList, setTopicList] = useState<TopicDTO[]>(seedTopicDtos);
   const [sessionSize, setSessionSize] = useState(SESSION_SIZE);
+  const [drill, setDrill] = useState<Drill>("practice");
+  const [practiceSettings, setPracticeSettings] = useState<PracticeSettings>(
+    DEFAULT_PRACTICE_SETTINGS
+  );
 
   useEffect(() => {
     let aborted = false;
@@ -183,9 +193,15 @@ export function TypingFlow() {
     setRunId((x) => x + 1);
     setStep("play");
   }
-  async function start(m: Method, selection: VocabSelection) {
+  async function start(
+    m: Method,
+    selection: VocabSelection,
+    session: { drill: Drill; settings: PracticeSettings }
+  ) {
     setMethod(m);
     setSessionSize(selection.size);
+    setDrill(session.drill);
+    setPracticeSettings(settingsForDrill(session.drill, session.settings));
     setStep("loading");
     setLoadState((state) => ({ ...state, loading: true }));
     const res = await fetchVocab({
@@ -251,13 +267,16 @@ export function TypingFlow() {
   }
   // play → focus mode (immersive, KHÔNG sidebar)
   const { ctx } = ctxFrom(words, method, topicTitle);
+  const drillCtx = `${drill === "test" ? "Kiểm tra" : "Luyện tập"} · ${ctx}`;
   return method === "M2" ? (
     <TypingScreen
       key={runId}
       words={words}
-      contextLabel={ctx}
+      contextLabel={drillCtx}
       onComplete={complete}
       onExit={changeMethod}
+      settings={practiceSettings}
+      drill={drill}
     />
   ) : (
     <ListenScreen

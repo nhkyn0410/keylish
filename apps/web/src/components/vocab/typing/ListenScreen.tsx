@@ -38,7 +38,7 @@ export function ListenScreen({
     inputHandlers,
     focusInput,
     continueNext,
-  } = useTypingSession(words, false, onComplete);
+  } = useTypingSession(words, { reveal: false, repeat: "once" }, onComplete);
   const [tts, setTts] = useState(true);
 
   useEffect(() => {
