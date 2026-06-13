@@ -4,7 +4,7 @@
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@keylish/web", "dev"],
+      "runtimeArgs": ["--filter", "@keylish/user-web", "dev"],
       "port": 3000
     }
   ]

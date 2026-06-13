@@ -21,7 +21,7 @@ Monorepo quản lý bằng **pnpm workspaces + Turborepo**.
 
 | Workspace         | Vai trò                         | Công nghệ                                                |
 | ----------------- | ------------------------------- | -------------------------------------------------------- |
-| `apps/web`        | Ứng dụng web                    | Next.js (App Router) · React · TypeScript · Tailwind CSS |
+| `apps/user-web`   | Ứng dụng web                    | Next.js (App Router) · React · TypeScript · Tailwind CSS |
 | `apps/api`        | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod     |
 | `packages/db`     | Tầng database                   | Prisma 7 (driver adapter `pg`) · PostgreSQL (Neon)       |
 | `packages/shared` | Schema & type dùng chung        | Zod 4                                                    |
@@ -71,16 +71,16 @@ pnpm --filter @keylish/db migrate
 
 # 4. Chạy dev
 pnpm --filter @keylish/api dev   # API (NestJS)
-pnpm --filter @keylish/web dev   # Web (Next.js)
+pnpm --filter @keylish/user-web dev   # Web (Next.js)
 ```
 
 ## Triển khai
 
-| Thành phần | Nền tảng                                                | Free tier                   |
-| ---------- | ------------------------------------------------------- | --------------------------- |
-| `apps/web` | [Vercel](https://vercel.com)                            | ✅                          |
-| `apps/api` | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)       |
-| PostgreSQL | [Neon](https://neon.tech)                               | ✅ (tự thức khi có kết nối) |
+| Thành phần      | Nền tảng                                                | Free tier                   |
+| --------------- | ------------------------------------------------------- | --------------------------- |
+| `apps/user-web` | [Vercel](https://vercel.com)                            | ✅                          |
+| `apps/api`      | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)       |
+| PostgreSQL      | [Neon](https://neon.tech)                               | ✅ (tự thức khi có kết nối) |
 
 Hướng dẫn chi tiết từng bước: [doc/deploy.md](doc/deploy.md).
 

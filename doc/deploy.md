@@ -3,7 +3,7 @@
 Kiến trúc production:
 
 ```
-Người dùng ── Vercel (apps/web, Next.js) ── Render (apps/api, NestJS) ── Neon (Postgres)
+Người dùng ── Vercel (apps/user-web, Next.js) ── Render (apps/api, NestJS) ── Neon (Postgres)
 ```
 
 Cả 3 đều dùng free tier → chi phí **$0/tháng**. Chọn region **Singapore** cho Render và Neon (gần Việt Nam).
@@ -58,7 +58,7 @@ Kiểm tra sau khi deploy (thay bằng URL thật của service):
 
 1. [vercel.com](https://vercel.com) → **Add New → Project** → import repo KeyLish.
 2. Cấu hình:
-   - **Root Directory**: `apps/web`
+   - **Root Directory**: `apps/user-web`
    - Framework: Next.js (tự nhận diện), build command mặc định
    - Vercel tự nhận pnpm workspace qua lockfile ở root (không cần config thêm cho `@keylish/shared`)
 3. Environment Variables:
