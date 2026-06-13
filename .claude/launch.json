@@ -2,10 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "web",
+      "name": "user-web",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@keylish/user-web", "dev"],
       "port": 3000
+    },
+    {
+      "name": "admin-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@keylish/admin-web", "dev"],
+      "port": 3002
     }
   ]
 }

@@ -3,10 +3,11 @@
 Kiến trúc production:
 
 ```
-Người dùng ── Vercel (apps/user-web, Next.js) ── Render (apps/api, NestJS) ── Neon (Postgres)
+Người dùng ── Vercel (apps/user-web, Next.js) ─┐
+Admin ─────── Vercel (apps/admin-web, Next.js) ─┴─ Render (apps/api, NestJS) ── Neon (Postgres)
 ```
 
-Cả 3 đều dùng free tier → chi phí **$0/tháng**. Chọn region **Singapore** cho Render và Neon (gần Việt Nam).
+Cả 4 thành phần chính đều có thể dùng free tier → chi phí **$0/tháng**. Chọn region **Singapore** cho Render và Neon (gần Việt Nam).
 
 ## 1. Neon — Database
 
@@ -40,7 +41,7 @@ Cả 3 đều dùng free tier → chi phí **$0/tháng**. Chọn region **Singap
    | -------------- | ----------------------------------------------------------------------------- |
    | `DATABASE_URL` | Neon **pooled** connection string                                             |
    | `DIRECT_URL`   | Neon **direct** connection string (dùng khi migrate trong lúc build)          |
-   | `CORS_ORIGIN`  | Domain Vercel, ví dụ `https://keylish.vercel.app` (điền sau bước 3 cũng được) |
+   | `CORS_ORIGIN`  | Domain Vercel của user/admin web, phân tách bằng dấu phẩy nếu có nhiều origin |
 
 3. **Apply** → chờ build & deploy.
 
@@ -54,7 +55,7 @@ Kiểm tra sau khi deploy (thay bằng URL thật của service):
 
 > ⚠️ **Free tier ngủ sau ~15 phút không có traffic**, request đầu tiên mất 30–60s đánh thức. Chấp nhận được cho v1 vì web local-first + có seed offline. Nếu khó chịu: nâng Render Starter hoặc chuyển Railway (~$5/tháng).
 
-## 3. Vercel — Web
+## 3. Vercel — User Web
 
 1. [vercel.com](https://vercel.com) → **Add New → Project** → import repo KeyLish.
 2. Cấu hình:
@@ -71,15 +72,34 @@ Kiểm tra sau khi deploy (thay bằng URL thật của service):
 
 4. **Deploy** → nhận domain `https://<project>.vercel.app`.
 
-## 4. Nối CORS
+## 4. Vercel — Admin Web
 
-Quay lại Render → **Environment** → set `CORS_ORIGIN` = domain Vercel thật (nhiều origin phân tách bằng dấu phẩy, ví dụ thêm preview domain). Save → Render tự redeploy.
+Admin panel nên là một Vercel project riêng để tách domain và quyền vận hành.
 
-## 5. Checklist hoàn tất
+1. [vercel.com](https://vercel.com) → **Add New → Project** → import repo KeyLish.
+2. Cấu hình:
+   - **Root Directory**: `apps/admin-web`
+   - Framework: Next.js (tự nhận diện), build command mặc định
+3. Environment Variables:
+
+   | Biến                  | Giá trị                            |
+   | --------------------- | ---------------------------------- |
+   | `NEXT_PUBLIC_API_URL` | `https://keylish-api.onrender.com` |
+
+   Phase B chỉ là shell; biến này sẽ được dùng khi nối auth/admin API ở các phase sau.
+
+4. **Deploy** → nhận domain admin, ví dụ `https://keylish-admin.vercel.app`.
+
+## 5. Nối CORS
+
+Quay lại Render → **Environment** → set `CORS_ORIGIN` = domain Vercel thật của `apps/user-web` và `apps/admin-web` (nhiều origin phân tách bằng dấu phẩy, ví dụ thêm preview domain). Save → Render tự redeploy.
+
+## 6. Checklist hoàn tất
 
 - [ ] `GET /api/health` trả 200
 - [ ] `GET /api/v1/topics` và `/api/v1/vocab` trả dữ liệu
-- [ ] Web Vercel load bình thường
+- [ ] User Web Vercel load bình thường
+- [ ] Admin Web Vercel load bình thường
 - [ ] Web gọi API không bị lỗi CORS (kiểm tra DevTools console)
 - [ ] Push branch chính → cả Render lẫn Vercel tự deploy
 
