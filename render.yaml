@@ -10,9 +10,29 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22.16.0
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL
         sync: false
       - key: CORS_ORIGIN
+        sync: false
+      # Long random secret for hashing session/reset tokens. Required in prod.
+      - key: AUTH_TOKEN_PEPPER
+        generateValue: true
+      # Web and API live on different domains (Render + web host) → cross-site
+      # cookies need SameSite=None; Secure.
+      - key: AUTH_COOKIE_SAMESITE
+        value: none
+      # Browser origins allowed to send credentialed requests (web + admin).
+      - key: AUTH_ALLOWED_ORIGINS
+        sync: false
+      # user-web origin used to build password-reset links.
+      - key: WEB_APP_URL
+        sync: false
+      # Optional: password-reset email delivery via Resend.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: AUTH_RESET_EMAIL_FROM
         sync: false

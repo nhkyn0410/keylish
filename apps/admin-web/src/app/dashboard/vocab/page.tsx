@@ -53,7 +53,7 @@ type VocabForm = {
 
 function cleanOptional(value: string | undefined) {
   const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
+  return trimmed || null;
 }
 
 function toVocabInput(values: VocabForm): AdminVocabInput {

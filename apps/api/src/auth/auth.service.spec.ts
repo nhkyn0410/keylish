@@ -1,5 +1,6 @@
 import { ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MailService } from "../mail/mail.service";
 import { AuthService } from "./auth.service";
 
 type MockDatabase = {
@@ -29,7 +30,7 @@ function createService() {
     },
   };
 
-  return { database, service: new AuthService(database as never) };
+  return { database, service: new AuthService(database as never, new MailService()) };
 }
 
 describe("AuthService security foundation", () => {

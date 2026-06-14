@@ -114,7 +114,6 @@ model UserSession {
   id             String    @id @default(cuid())
   userId         String
   tokenHash      String    @unique
-  csrfSecretHash String?
   userAgent      String?
   ipHash         String?
   createdAt      DateTime  @default(now())
@@ -133,7 +132,6 @@ model AdminSession {
   id             String    @id @default(cuid())
   adminId        String
   tokenHash      String    @unique
-  csrfSecretHash String?
   userAgent      String?
   ipHash         String?
   createdAt      DateTime  @default(now())

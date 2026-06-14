@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma } from "@keylish/db";
 import { z } from "zod";
 import { UpdateUserStatusSchema } from "../auth/auth.dto";
 import { DatabaseService } from "../database/database.service";
@@ -128,7 +129,7 @@ export class AdminService {
       },
     });
 
-    if (!user) throw new BadRequestException("User not found.");
+    if (!user) throw new NotFoundException("User not found.");
 
     return {
       id: user.id,
@@ -148,20 +149,28 @@ export class AdminService {
       throw new BadRequestException(parsed.error.message);
     }
 
-    const user = await this.database.client.user.update({
-      where: { id },
-      data: { status: parsed.data.status as UserStatusValue },
-      select: {
-        id: true,
-        email: true,
-        displayName: true,
-        avatarUrl: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
-    });
+    let user;
+    try {
+      user = await this.database.client.user.update({
+        where: { id },
+        data: { status: parsed.data.status as UserStatusValue },
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          deletedAt: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        throw new NotFoundException("User not found.");
+      }
+      throw error;
+    }
 
     return {
       id: user.id,

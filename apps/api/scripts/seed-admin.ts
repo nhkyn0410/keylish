@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { createPrismaClient } from "@keylish/db";
 import { AuthService } from "../src/auth/auth.service";
+import { MailService } from "../src/mail/mail.service";
 
 async function main() {
   const username = process.env.ADMIN_INITIAL_USERNAME?.trim();
@@ -14,7 +15,7 @@ async function main() {
   const connectionString =
     process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/keylish";
   const resources = createPrismaClient(connectionString);
-  const auth = new AuthService({ client: resources.client } as never);
+  const auth = new AuthService({ client: resources.client } as never, new MailService());
   try {
     const result = await auth.seedAdmin(username, password);
     const message = result.created

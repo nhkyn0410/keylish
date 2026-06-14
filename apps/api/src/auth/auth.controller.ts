@@ -110,8 +110,15 @@ export class AuthController {
 
   @Post("user/change-password")
   @UseGuards(UserGuard, CsrfGuard)
-  async changeUserPassword(@Body() body: unknown, @Req() request: RequestWithAuth) {
-    return this.authService.changeUserPassword(request.userSession!, body);
+  @HttpCode(200)
+  async changeUserPassword(
+    @Body() body: unknown,
+    @Req() request: RequestWithAuth,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    const result = await this.authService.changeUserPassword(request.userSession!, body, request);
+    this.authService.setSessionCookies(response, "user", result.token, result.csrf.csrf);
+    return { ok: result.ok };
   }
 
   @Get("admin/csrf")
@@ -160,7 +167,14 @@ export class AuthController {
 
   @Post("admin/change-password")
   @UseGuards(AdminGuard, CsrfGuard)
-  async changeAdminPassword(@Body() body: unknown, @Req() request: RequestWithAuth) {
-    return this.authService.changeAdminPassword(request.adminSession!, body);
+  @HttpCode(200)
+  async changeAdminPassword(
+    @Body() body: unknown,
+    @Req() request: RequestWithAuth,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    const result = await this.authService.changeAdminPassword(request.adminSession!, body, request);
+    this.authService.setSessionCookies(response, "admin", result.token, result.csrf.csrf);
+    return { ok: result.ok };
   }
 }

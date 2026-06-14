@@ -21,8 +21,22 @@ function parseOrigins() {
   return [...new Set([...(configured ?? []), ...localOrigins])];
 }
 
+function assertProductionSecrets() {
+  if (process.env.NODE_ENV !== "production") return;
+  if (!process.env.AUTH_TOKEN_PEPPER?.trim()) {
+    throw new Error(
+      "AUTH_TOKEN_PEPPER must be set in production (a long random secret). Refusing to boot with the dev default."
+    );
+  }
+}
+
 async function bootstrap() {
+  assertProductionSecrets();
+
   const app = await NestFactory.create(AppModule);
+  // Render/most PaaS terminate TLS at a proxy; trust the first hop so req.ip is
+  // the real client IP (used for rate-limit buckets and ipHash), not the proxy.
+  app.getHttpAdapter().getInstance().set("trust proxy", 1);
   app.use(cookieParser());
 
   const allowedOrigins = parseOrigins();

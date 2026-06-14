@@ -62,6 +62,7 @@ function ExampleChip({
           fontSize: 14,
           fontWeight: 800,
           lineHeight: 1.55,
+          margin: 0,
         }}
       >
         {parts.map((p, i) =>
@@ -69,16 +70,18 @@ function ExampleChip({
             <span
               key={i}
               style={{
-                display: "inline-block",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
                 background: cloze ? "transparent" : "var(--neo-white)",
-                padding: "0 6px",
+                padding: "3px 8px",
                 border: "2px solid #000",
-                borderTop: cloze ? "none" : undefined,
-                borderInline: cloze ? "none" : undefined,
+                boxSizing: "border-box",
                 fontWeight: 900,
-                lineHeight: 1.25,
+                lineHeight: 1.1,
                 minWidth: cloze ? `${Math.max(en.length, 3) * 0.62}em` : undefined,
                 color: cloze ? "transparent" : undefined,
+                verticalAlign: "middle",
               }}
               aria-label={cloze ? "từ cần điền" : undefined}
             >

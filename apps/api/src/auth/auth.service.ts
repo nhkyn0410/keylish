@@ -1,14 +1,21 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
+  Logger,
   UnauthorizedException,
+  type OnModuleDestroy,
+  type OnModuleInit,
 } from "@nestjs/common";
 import { createHmac, randomBytes } from "node:crypto";
 import argon2 from "argon2";
-import { AuthProvider } from "@keylish/db";
+import { AuthProvider, Prisma } from "@keylish/db";
 import { z } from "zod";
 import { DatabaseService } from "../database/database.service";
+import { MailService } from "../mail/mail.service";
 import {
   AdminLoginSchema,
   ForgotPasswordSchema,
@@ -45,6 +52,11 @@ const ADMIN_SESSION_NAME = "__Host-admin";
 const USER_CSRF_NAME = "__Host-u-csrf";
 const ADMIN_CSRF_NAME = "__Host-a-csrf";
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+// Don't write `lastSeenAt` on every request — only when it is this stale.
+const SESSION_TOUCH_INTERVAL_MS = 10 * 60 * 1000;
+// Background cleanup cadence + how long revoked sessions are retained for audit.
+const PURGE_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const REVOKED_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type AuthSessionKind = "user" | "admin";
 
@@ -117,11 +129,24 @@ function cookieNames(domain: AuthDomain) {
   };
 }
 
+function cookieSameSite(): "lax" | "strict" | "none" {
+  const raw = process.env.AUTH_COOKIE_SAMESITE?.trim().toLowerCase();
+  if (raw === "lax" || raw === "strict" || raw === "none") return raw;
+  // Default to cross-site capable cookies in production (split web/API domains),
+  // and the stricter Lax locally where everything is same-site on localhost.
+  return isProduction() ? "none" : "lax";
+}
+
+function cookieSecure() {
+  // `SameSite=None` is only honored by browsers when the cookie is also Secure.
+  return isProduction() || cookieSameSite() === "none";
+}
+
 function cookieBase(maxAgeSeconds?: number) {
   return {
     httpOnly: false,
-    sameSite: "lax" as const,
-    secure: isProduction(),
+    sameSite: cookieSameSite(),
+    secure: cookieSecure(),
     path: "/",
     maxAge: maxAgeSeconds ? maxAgeSeconds * 1000 : undefined,
   };
@@ -130,8 +155,8 @@ function cookieBase(maxAgeSeconds?: number) {
 function sessionCookieBase(maxAgeSeconds?: number) {
   return {
     httpOnly: true,
-    sameSite: "lax" as const,
-    secure: isProduction(),
+    sameSite: cookieSameSite(),
+    secure: cookieSecure(),
     path: "/",
     maxAge: maxAgeSeconds ? maxAgeSeconds * 1000 : undefined,
   };
@@ -165,10 +190,47 @@ function rateLimitWindow(key: string, limit: number, windowMs: number) {
 }
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit, OnModuleDestroy {
   private readonly attempts = new Map<string, { count: number; resetAt: number }>();
+  private readonly logger = new Logger(AuthService.name);
+  private purgeTimer: ReturnType<typeof setInterval> | null = null;
+  private dummyHashPromise: Promise<string> | null = null;
 
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly mail: MailService
+  ) {}
+
+  onModuleInit() {
+    void this.purgeExpired();
+    this.purgeTimer = setInterval(() => void this.purgeExpired(), PURGE_INTERVAL_MS);
+    this.purgeTimer.unref?.();
+  }
+
+  onModuleDestroy() {
+    if (this.purgeTimer) clearInterval(this.purgeTimer);
+    this.purgeTimer = null;
+  }
+
+  async purgeExpired() {
+    try {
+      const now = new Date();
+      const revokedCutoff = new Date(Date.now() - REVOKED_RETENTION_MS);
+      await this.database.client.userSession.deleteMany({
+        where: { OR: [{ expiresAt: { lt: now } }, { revokedAt: { lt: revokedCutoff } }] },
+      });
+      await this.database.client.adminSession.deleteMany({
+        where: { OR: [{ expiresAt: { lt: now } }, { revokedAt: { lt: revokedCutoff } }] },
+      });
+      await this.database.client.userAuthToken.deleteMany({
+        where: { OR: [{ expiresAt: { lt: now } }, { usedAt: { not: null } }] },
+      });
+    } catch (error) {
+      this.logger.warn(
+        "purgeExpired failed: " + (error instanceof Error ? error.message : String(error))
+      );
+    }
+  }
 
   async hashPassword(password: string) {
     const memoryCost = Number(process.env.AUTH_ARGON2_MEMORY_KIB ?? 19456);
@@ -195,8 +257,21 @@ export class AuthService {
     return hashWithPepper(token);
   }
 
-  hashCsrf(token: string) {
-    return hashWithPepper(token, (process.env.AUTH_TOKEN_PEPPER ?? DEFAULT_TOKEN_PEPPER) + ":csrf");
+  // Verifying against a fixed dummy hash equalizes login response time whether or
+  // not the account exists, removing the timing oracle for user enumeration.
+  private async getDummyHash() {
+    if (!this.dummyHashPromise) {
+      this.dummyHashPromise = this.hashPassword("keylish-timing-equalizer-placeholder");
+    }
+    return this.dummyHashPromise;
+  }
+
+  private async absorbDummyVerify(password: string) {
+    try {
+      await this.verifyPassword(password, await this.getDummyHash());
+    } catch {
+      // Ignore — this only burns comparable CPU time.
+    }
   }
 
   issueCookieSet(_domain: AuthDomain): AuthCookieSet {
@@ -290,39 +365,47 @@ export class AuthService {
 
     const body = this.parseUserRegister(input);
     const emailNormalized = normalizeEmail(body.email);
+    this.assertRateLimit("user:register:acct:" + emailNormalized, 5, 60 * 60 * 1000);
+
     const passwordHash = await this.hashPassword(body.password);
     const csrf = this.issueCookieSet("user");
     const tokenHash = this.hashToken(csrf.session);
-    const csrfSecretHash = this.hashCsrf(csrf.csrf);
     const expiresAt = new Date(Date.now() + sessionTtlSeconds("user") * 1000);
 
-    const user = await this.database.client.$transaction(async (tx) => {
-      return tx.user.create({
-        data: {
-          email: body.email,
-          emailNormalized,
-          displayName: body.displayName ?? null,
-          avatarUrl: null,
-          identities: {
-            create: {
-              provider: AuthProvider.PASSWORD,
-              providerId: emailNormalized,
-              passwordHash,
+    let user;
+    try {
+      user = await this.database.client.$transaction(async (tx) => {
+        return tx.user.create({
+          data: {
+            email: body.email,
+            emailNormalized,
+            displayName: body.displayName ?? null,
+            avatarUrl: null,
+            identities: {
+              create: {
+                provider: AuthProvider.PASSWORD,
+                providerId: emailNormalized,
+                passwordHash,
+              },
+            },
+            sessions: {
+              create: {
+                tokenHash,
+                userAgent: this.userAgent(request),
+                ipHash: this.ipHash(request),
+                expiresAt,
+              },
             },
           },
-          sessions: {
-            create: {
-              tokenHash,
-              csrfSecretHash,
-              userAgent: this.userAgent(request),
-              ipHash: this.ipHash(request),
-              expiresAt,
-            },
-          },
-        },
-        select: { id: true, email: true, displayName: true, avatarUrl: true },
+          select: { id: true, email: true, displayName: true, avatarUrl: true },
+        });
       });
-    });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new ConflictException("Email is already registered.");
+      }
+      throw error;
+    }
 
     return { user, csrf, token: csrf.session };
   }
@@ -340,8 +423,11 @@ export class AuthService {
     const body = this.parseAdminLogin(input);
     const username = normalizeUsername(body.username);
     if (username.includes("@")) {
+      await this.absorbDummyVerify(body.password);
       throw new UnauthorizedException("Invalid credentials.");
     }
+
+    this.assertRateLimit("admin:login:acct:" + username, 10, 15 * 60 * 1000);
 
     const admin = await this.database.client.admin.findUnique({
       where: { usernameNormalized: username },
@@ -350,6 +436,7 @@ export class AuthService {
     const identity = admin?.identities.find((item) => item.provider === AuthProvider.PASSWORD);
 
     if (!admin || !identity) {
+      await this.absorbDummyVerify(body.password);
       throw new UnauthorizedException("Invalid credentials.");
     }
 
@@ -360,14 +447,12 @@ export class AuthService {
 
     const csrf = this.issueCookieSet("admin");
     const tokenHash = this.hashToken(csrf.session);
-    const csrfSecretHash = this.hashCsrf(csrf.csrf);
     const expiresAt = new Date(Date.now() + sessionTtlSeconds("admin") * 1000);
 
     await this.database.client.adminSession.create({
       data: {
         adminId: admin.id,
         tokenHash,
-        csrfSecretHash,
         userAgent: this.userAgent(request),
         ipHash: this.ipHash(request),
         expiresAt,
@@ -443,34 +528,53 @@ export class AuthService {
     });
   }
 
-  async changeUserPassword(session: UserSessionPayload, input: unknown) {
+  async changeUserPassword(session: UserSessionPayload, input: unknown, request: RequestLike) {
     const body = this.parsePasswordChange(input);
     const current = await this.getUserIdentity(session.userId);
     const ok = await this.verifyPassword(body.currentPassword, current.passwordHash);
     if (!ok) throw new UnauthorizedException("Invalid credentials.");
 
     const newHash = await this.hashPassword(body.newPassword);
+    const csrf = this.issueCookieSet("user");
+    const tokenHash = this.hashToken(csrf.session);
+    const expiresAt = new Date(Date.now() + sessionTtlSeconds("user") * 1000);
+
     await this.database.client.$transaction(async (tx) => {
       await tx.userIdentity.update({
         where: { id: current.id },
         data: { passwordHash: newHash },
       });
+      // Revoke all sessions (signs out other devices), then mint a fresh one so
+      // the device that changed the password stays signed in.
       await tx.userSession.updateMany({
         where: { userId: session.userId, revokedAt: null },
         data: { revokedAt: new Date() },
       });
+      await tx.userSession.create({
+        data: {
+          userId: session.userId,
+          tokenHash,
+          userAgent: this.userAgent(request),
+          ipHash: this.ipHash(request),
+          expiresAt,
+        },
+      });
     });
 
-    return { ok: true as const };
+    return { ok: true as const, csrf, token: csrf.session };
   }
 
-  async changeAdminPassword(session: AdminSessionPayload, input: unknown) {
+  async changeAdminPassword(session: AdminSessionPayload, input: unknown, request: RequestLike) {
     const body = this.parsePasswordChange(input);
     const current = await this.getAdminIdentity(session.adminId);
     const ok = await this.verifyPassword(body.currentPassword, current.passwordHash);
     if (!ok) throw new UnauthorizedException("Invalid credentials.");
 
     const newHash = await this.hashPassword(body.newPassword);
+    const csrf = this.issueCookieSet("admin");
+    const tokenHash = this.hashToken(csrf.session);
+    const expiresAt = new Date(Date.now() + sessionTtlSeconds("admin") * 1000);
+
     await this.database.client.$transaction(async (tx) => {
       await tx.adminIdentity.update({
         where: { id: current.id },
@@ -484,9 +588,18 @@ export class AuthService {
         where: { adminId: session.adminId, revokedAt: null },
         data: { revokedAt: new Date() },
       });
+      await tx.adminSession.create({
+        data: {
+          adminId: session.adminId,
+          tokenHash,
+          userAgent: this.userAgent(request),
+          ipHash: this.ipHash(request),
+          expiresAt,
+        },
+      });
     });
 
-    return { ok: true as const };
+    return { ok: true as const, csrf, token: csrf.session };
   }
 
   async forgotPassword(input: unknown, request: RequestLike) {
@@ -494,6 +607,8 @@ export class AuthService {
 
     const body = this.parseForgotPassword(input);
     const emailNormalized = normalizeEmail(body.email);
+    this.assertRateLimit("user:forgot:acct:" + emailNormalized, 5, 60 * 60 * 1000);
+
     const user = await this.database.client.user.findUnique({
       where: { emailNormalized },
       select: { id: true, status: true, deletedAt: true },
@@ -510,6 +625,8 @@ export class AuthService {
         expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
       },
     });
+
+    await this.mail.sendPasswordReset(body.email, token);
 
     return {
       ok: true as const,
@@ -575,7 +692,9 @@ export class AuthService {
       throw new UnauthorizedException("Authentication required.");
     }
 
-    await this.touchUserSession(record.id);
+    if (this.shouldTouch(record.lastSeenAt)) {
+      await this.touchUserSession(record.id);
+    }
 
     return {
       id: record.id,
@@ -594,7 +713,9 @@ export class AuthService {
       throw new UnauthorizedException("Authentication required.");
     }
 
-    await this.touchAdminSession(record.id);
+    if (this.shouldTouch(record.lastSeenAt)) {
+      await this.touchAdminSession(record.id);
+    }
 
     return {
       id: record.id,
@@ -654,6 +775,8 @@ export class AuthService {
 
   private async loginByEmail(email: string, password: string, request: RequestLike) {
     const emailNormalized = normalizeEmail(email);
+    this.assertRateLimit("user:login:acct:" + emailNormalized, 10, 15 * 60 * 1000);
+
     const user = await this.database.client.user.findUnique({
       where: { emailNormalized },
       include: { identities: true },
@@ -661,6 +784,7 @@ export class AuthService {
     const identity = user?.identities.find((item) => item.provider === AuthProvider.PASSWORD);
 
     if (!user || !identity || user.deletedAt || user.status !== "ACTIVE") {
+      await this.absorbDummyVerify(password);
       throw new UnauthorizedException("Invalid credentials.");
     }
 
@@ -671,14 +795,12 @@ export class AuthService {
 
     const csrf = this.issueCookieSet("user");
     const tokenHash = this.hashToken(csrf.session);
-    const csrfSecretHash = this.hashCsrf(csrf.csrf);
     const expiresAt = new Date(Date.now() + sessionTtlSeconds("user") * 1000);
 
     await this.database.client.userSession.create({
       data: {
         userId: user.id,
         tokenHash,
-        csrfSecretHash,
         userAgent: this.userAgent(request),
         ipHash: this.ipHash(request),
         expiresAt,
@@ -720,6 +842,11 @@ export class AuthService {
       where: { tokenHash: this.hashToken(token) },
       include: { admin: { select: { id: true, username: true, usernameNormalized: true } } },
     });
+  }
+
+  private shouldTouch(lastSeenAt: Date | null | undefined) {
+    if (!lastSeenAt) return true;
+    return Date.now() - lastSeenAt.getTime() > SESSION_TOUCH_INTERVAL_MS;
   }
 
   private async touchUserSession(id: string) {
@@ -815,7 +942,11 @@ export class AuthService {
     }
 
     if (bucket.count >= limit) {
-      throw new BadRequestException("Too many attempts. Please try again later.");
+      const retryAfter = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+      throw new HttpException(
+        { message: "Too many attempts. Please try again later.", retryAfter },
+        HttpStatus.TOO_MANY_REQUESTS
+      );
     }
 
     bucket.count += 1;

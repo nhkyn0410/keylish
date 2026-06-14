@@ -17,6 +17,10 @@ describe("AppModule routes", () => {
         findMany: vi.fn(),
         count: vi.fn(),
       },
+      // Stubs so AuthService.onModuleInit's background purge is a no-op in tests.
+      userSession: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      adminSession: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      userAuthToken: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
     },
   };
 
