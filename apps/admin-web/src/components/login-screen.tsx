@@ -1,17 +1,40 @@
 "use client";
 
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Input, Space, Typography } from "antd";
+import { Alert, Button, Card, Form, Input, Space, Typography } from "antd";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { adminLogin, getErrorMessage } from "@/infra/admin/adminApi";
+
+type LoginValues = {
+  username: string;
+  password: string;
+};
 
 export function LoginScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFinish(values: LoginValues) {
+    setLoading(true);
+    setError(null);
+    try {
+      await adminLogin(values);
+      router.replace("/dashboard/overview");
+      router.refresh();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <main className="admin-login">
-      <Card bordered={false} className="admin-login-card">
+      <Card className="admin-login-card" variant="borderless">
         <div className="admin-login__brand">
-          <Space direction="vertical" size={0}>
+          <Space orientation="vertical" size={0}>
             <Typography.Text className="admin-login__kicker">KeyLish Admin</Typography.Text>
             <Typography.Title level={2} className="admin-login__title">
               Sign in
@@ -27,7 +50,7 @@ export function LoginScreen() {
           className="admin-login__form"
           layout="vertical"
           requiredMark={false}
-          onFinish={() => router.push("/dashboard/overview")}
+          onFinish={handleFinish}
         >
           <Form.Item
             label="Username"
@@ -42,10 +65,16 @@ export function LoginScreen() {
             name="password"
             rules={[{ required: true, message: "Enter the password." }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="???????????????" size="large" />
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="At least 12 characters"
+              size="large"
+            />
           </Form.Item>
 
-          <Button block htmlType="submit" size="large" type="primary">
+          {error ? <Alert showIcon title={error} type="error" /> : null}
+
+          <Button block htmlType="submit" loading={loading} size="large" type="primary">
             Open dashboard
           </Button>
         </Form>

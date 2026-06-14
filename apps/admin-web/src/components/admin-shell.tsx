@@ -10,10 +10,11 @@ import {
   ReadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, Space, Typography } from "antd";
+import { Button, Layout, Menu, Result, Space, Spin, Typography } from "antd";
 import type { MenuProps } from "antd";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ApiError, adminLogout, getAdminSummary, getErrorMessage } from "@/infra/admin/adminApi";
 
 type NavItem = {
   key: string;
@@ -59,6 +60,32 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getAdminSummary()
+      .then(() => {
+        if (active) setAuthError(null);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        if (err instanceof ApiError && err.status === 401) {
+          router.replace("/");
+          return;
+        }
+        setAuthError(getErrorMessage(err));
+      })
+      .finally(() => {
+        if (active) setChecking(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
   const activeItem =
     NAV_ITEMS.find((item) => pathname === item.path || pathname.startsWith(item.path + "/")) ??
@@ -69,6 +96,44 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     icon: item.icon,
     label: item.label,
   }));
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      await adminLogout();
+    } catch {
+      // Local navigation still clears the panel even if the API session was already gone.
+    } finally {
+      setSigningOut(false);
+      router.replace("/");
+      router.refresh();
+    }
+  }
+
+  if (checking) {
+    return (
+      <main className="admin-login">
+        <Spin size="large" />
+      </main>
+    );
+  }
+
+  if (authError) {
+    return (
+      <main className="admin-login">
+        <Result
+          status="warning"
+          title="Cannot reach the protected admin API"
+          subTitle={authError}
+          extra={
+            <Button type="primary" onClick={() => router.replace("/")}>
+              Back to login
+            </Button>
+          }
+        />
+      </main>
+    );
+  }
 
   return (
     <Layout className="admin-shell">
@@ -84,7 +149,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="admin-shell__brand">
           <div className="admin-shell__mark">KL</div>
           {!collapsed ? (
-            <Space direction="vertical" size={0}>
+            <Space orientation="vertical" size={0}>
               <Typography.Text className="admin-shell__brand-title">KeyLish</Typography.Text>
               <Typography.Text className="admin-shell__brand-subtitle">Admin panel</Typography.Text>
             </Space>
@@ -115,7 +180,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed((value) => !value)}
             />
-            <Space direction="vertical" size={0}>
+            <Space orientation="vertical" size={0}>
               <Typography.Text type="secondary">Dashboard</Typography.Text>
               <Typography.Title className="admin-shell__heading" level={4}>
                 {activeItem.label}
@@ -123,7 +188,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </Space>
           </Space>
 
-          <Button icon={<LogoutOutlined />} onClick={() => router.push("/")}>
+          <Button icon={<LogoutOutlined />} loading={signingOut} onClick={handleSignOut}>
             Sign out
           </Button>
         </header>

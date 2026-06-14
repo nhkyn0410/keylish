@@ -65,7 +65,7 @@ export default function AnalyticsPage() {
         ))}
       </Row>
 
-      <Card className="admin-table-card" bordered={false} title="Traffic sources">
+      <Card className="admin-table-card" variant="borderless" title="Traffic sources">
         <Table columns={columns} dataSource={trafficSources} pagination={false} rowKey="key" />
       </Card>
     </DashboardSection>

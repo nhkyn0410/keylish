@@ -210,3 +210,38 @@ a {
 .admin-table-card .ant-table {
   background: var(--admin-surface);
 }
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+@media (max-width: 640px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-list-stack {
+  display: grid;
+  gap: 0;
+}
+
+.admin-list-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-list-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-list-row__description {
+  margin: 4px 0 0 !important;
+  color: var(--admin-muted);
+}

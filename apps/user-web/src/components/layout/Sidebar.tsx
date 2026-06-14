@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserSessionActions } from "@/components/auth/UserSessionActions";
 import { Icon, Logo, type IconName } from "@/components/vocab/typing/primitives";
 
 /* Icon đậm nét bổ sung không có trong primitives (port từ design navbar.jsx). */
@@ -147,14 +148,7 @@ export function Sidebar() {
         />
       </nav>
 
-      <div className="k-side-auth">
-        <Link href={DEV} className="k-btn k-btn--sm">
-          <span className="k-side-label">Đăng nhập</span>
-        </Link>
-        <Link href={DEV} className="k-btn k-btn--sm k-btn--primary">
-          <span className="k-side-label">Đăng ký</span> <Icon name="arrow" size={16} />
-        </Link>
-      </div>
+      <UserSessionActions />
     </aside>
   );
 }

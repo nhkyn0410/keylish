@@ -130,6 +130,13 @@ describe("AppModule routes", () => {
     });
   });
 
+  it("rejects unsafe auth requests without CSRF", async () => {
+    await request(app.getHttpServer())
+      .post("/api/user/login")
+      .send({ email: "linh@example.com", password: "correct horse battery staple" })
+      .expect(403);
+  });
+
   it("rejects invalid vocabulary filters", async () => {
     await request(app.getHttpServer()).get("/api/v1/vocab").query({ levels: "NOPE" }).expect(400);
   });

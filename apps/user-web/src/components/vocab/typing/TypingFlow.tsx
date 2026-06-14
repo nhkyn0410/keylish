@@ -162,9 +162,8 @@ export function TypingFlow() {
   const [topicList, setTopicList] = useState<TopicDTO[]>(seedTopicDtos);
   const [sessionSize, setSessionSize] = useState(SESSION_SIZE);
   const [drill, setDrill] = useState<Drill>("practice");
-  const [practiceSettings, setPracticeSettings] = useState<PracticeSettings>(
-    DEFAULT_PRACTICE_SETTINGS
-  );
+  const [practiceSettings, setPracticeSettings] =
+    useState<PracticeSettings>(DEFAULT_PRACTICE_SETTINGS);
 
   useEffect(() => {
     let aborted = false;

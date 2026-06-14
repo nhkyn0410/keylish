@@ -1,11 +1,1 @@
-import { Module } from "@nestjs/common";
-import { DatabaseModule } from "../database/database.module";
-import { TopicsController } from "./topics.controller";
-import { TopicsService } from "./topics.service";
-
-@Module({
-  imports: [DatabaseModule],
-  controllers: [TopicsController],
-  providers: [TopicsService],
-})
-export class TopicsModule {}
+import { Module } from "@nestjs/common";import { DatabaseModule } from "../database/database.module";import { AuthModule } from "../auth/auth.module";import { TopicsController, AdminTopicsController } from "./topics.controller";import { TopicsService } from "./topics.service";@Module({  imports: [DatabaseModule, AuthModule],  controllers: [TopicsController, AdminTopicsController],  providers: [TopicsService],})export class TopicsModule {}

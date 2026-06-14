@@ -232,9 +232,7 @@ function Correction({
         </span>
         <Icon name="arrow" size={14} />
         <span style={{ color: "#149040", fontWeight: 900 }}>{rightCh}</span>
-        {willRepeat && (
-          <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>
-        )}
+        {willRepeat && <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>}
       </div>
     </div>
   );

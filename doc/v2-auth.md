@@ -96,10 +96,10 @@ Chuyển DB từ **Neon** sang **Supabase** để thoát **trần compute-hour c
 
 Mô hình kết nối (Prisma + Supabase):
 
-| Env            | Dùng cho                  | Endpoint Supabase                                    |
-| -------------- | ------------------------- | ---------------------------------------------------- |
-| `DATABASE_URL` | runtime app (NestJS)      | **Transaction pooler** `:6543` + `?pgbouncer=true`   |
-| `DIRECT_URL`   | `prisma migrate` / CLI    | **Session pooler** `:5432`                           |
+| Env            | Dùng cho               | Endpoint Supabase                                  |
+| -------------- | ---------------------- | -------------------------------------------------- |
+| `DATABASE_URL` | runtime app (NestJS)   | **Transaction pooler** `:6543` + `?pgbouncer=true` |
+| `DIRECT_URL`   | `prisma migrate` / CLI | **Session pooler** `:5432`                         |
 
 - ⚠️ **IPv4/IPv6:** Render outbound chỉ IPv4, còn **Direct connection của Supabase là IPv6-only** → cả app lẫn migrate đều đi qua **pooler**, không dùng direct host. (`prisma.config.ts` đã ưu tiên `DIRECT_URL` cho CLI.)
 - Supabase **luôn-bật** (không autosuspend mỗi 5' như Neon) → **hết cold start phía DB**; chỉ còn cold start của **Render** (prewarm phía web lo).

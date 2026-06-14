@@ -16,9 +16,9 @@ type DashboardSectionProps = {
 
 export function DashboardSection({ title, description, extra, children }: DashboardSectionProps) {
   return (
-    <Space className="admin-section" direction="vertical" size={16}>
+    <Space className="admin-section" orientation="vertical" size={16}>
       <div className="admin-section__header">
-        <Space direction="vertical" size={4}>
+        <Space orientation="vertical" size={4}>
           <Typography.Title className="admin-section__title" level={3}>
             {title}
           </Typography.Title>
