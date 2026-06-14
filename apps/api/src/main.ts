@@ -16,7 +16,7 @@ function parseOrigins() {
     .map((origin) => origin.trim())
     .filter(Boolean);
   const localOrigins =
-    process.env.NODE_ENV === "production" ? [] : ["http://localhost:3000", "http://localhost:3002"];
+    process.env.NODE_ENV === "production" ? [] : ["http://localhost:3001", "http://localhost:3002"];
 
   return [...new Set([...(configured ?? []), ...localOrigins])];
 }
@@ -60,7 +60,7 @@ async function bootstrap() {
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("docs", app, swaggerDocument, { useGlobalPrefix: true });
 
-  const port = Number(process.env.PORT ?? 3001);
+  const port = Number(process.env.PORT ?? 3000);
   await app.listen(port, "0.0.0.0");
 }
 

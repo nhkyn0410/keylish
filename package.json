@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "turbo dev --parallel",
     "dev:user-web": "pnpm --filter @keylish/user-web dev",
-    "dev:web": "pnpm dev:user-web",
     "dev:admin-web": "pnpm --filter @keylish/admin-web dev",
     "dev:api": "pnpm --filter @keylish/api dev",
     "build": "turbo build",

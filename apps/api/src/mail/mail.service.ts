@@ -56,7 +56,7 @@ export class MailService {
   }
 
   private resetLink(token: string) {
-    const base = (process.env.WEB_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    const base = (process.env.WEB_APP_URL ?? "http://localhost:3001").replace(/\/$/, "");
     return base + "/reset-password?token=" + encodeURIComponent(token);
   }
 

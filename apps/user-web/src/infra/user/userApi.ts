@@ -40,7 +40,7 @@ function apiBaseUrl() {
   const configured = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
   if (configured) return configured;
   if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-    return "http://localhost:3001";
+    return "http://localhost:3000";
   }
   return "";
 }

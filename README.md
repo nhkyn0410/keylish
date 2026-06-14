@@ -71,8 +71,8 @@ pnpm --filter @keylish/db generate
 pnpm --filter @keylish/db migrate
 
 # 4. Chạy dev
-pnpm --filter @keylish/api dev        # API (NestJS)
-pnpm --filter @keylish/user-web dev   # User Web (Next.js)
+pnpm --filter @keylish/api dev        # API (NestJS, port 3000)
+pnpm --filter @keylish/user-web dev   # User Web (Next.js, port 3001)
 pnpm --filter @keylish/admin-web dev  # Admin Web (Next.js, port 3002)
 ```
 

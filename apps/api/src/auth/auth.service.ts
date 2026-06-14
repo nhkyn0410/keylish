@@ -101,7 +101,7 @@ function allowedOrigins() {
     ?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
-  const localOrigins = isProduction() ? [] : ["http://localhost:3000", "http://localhost:3002"];
+  const localOrigins = isProduction() ? [] : ["http://localhost:3001", "http://localhost:3002"];
   return new Set([...(configured ?? []), ...localOrigins]);
 }
 
