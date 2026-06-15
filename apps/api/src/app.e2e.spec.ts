@@ -21,6 +21,7 @@ describe("AppModule routes", () => {
       userSession: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
       adminSession: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
       userAuthToken: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      trafficHourly: { upsert: vi.fn(), findMany: vi.fn() },
     },
   };
 
@@ -161,6 +162,26 @@ describe("AppModule routes", () => {
     } finally {
       delete process.env.ADMIN_API_ENABLED;
     }
+  });
+
+  it("records a page view from an allowed origin", async () => {
+    database.client.trafficHourly.upsert.mockResolvedValue({});
+
+    await request(app.getHttpServer())
+      .post("/api/v1/track")
+      .set("Origin", "http://localhost:3001")
+      .expect(204);
+
+    expect(database.client.trafficHourly.upsert).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores page views from a disallowed origin", async () => {
+    await request(app.getHttpServer())
+      .post("/api/v1/track")
+      .set("Origin", "https://evil.example.com")
+      .expect(204);
+
+    expect(database.client.trafficHourly.upsert).not.toHaveBeenCalled();
   });
 
   it("rejects invalid vocabulary filters", async () => {

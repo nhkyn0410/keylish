@@ -143,15 +143,15 @@ export default function Home() {
       <HomeWelcomeTour />
       <section id="tour-hero" className="border-b-4 border-black">
         <div className="k-site-wrap py-8 sm:py-12">
-          <div className="max-w-[860px]">
+          <div className="max-w-215">
             <div className="k-badge k-badge--violet mb-6">KeyLish · typed vocabulary</div>
-            <h1 className="max-w-[780px] flex flex-col items-start gap-2 text-[42px] tracking-normal sm:gap-3 sm:text-[64px] lg:text-[76px]">
+            <h1 className="max-w-195 flex flex-col items-start gap-2 text-[42px] tracking-normal sm:gap-3 sm:text-[64px] lg:text-[76px]">
               <span>Học tiếng Anh</span>
               <span className="inline-flex w-fit border-4 border-black bg-neo-yellow px-4 py-2 leading-none shadow-neo-sm sm:px-5 sm:py-9">
                 bằng cách gõ
               </span>
             </h1>
-            <p className="mt-6 max-w-[620px] text-base font-semibold leading-7 text-neo-ink/75 sm:text-lg sm:leading-8">
+            <p className="mt-6 max-w-155 text-base font-semibold leading-7 text-neo-ink/75 sm:text-lg sm:leading-8">
               Chọn cấp độ CEFR, lọc chủ đề, rồi luyện từ vựng bằng chính thao tác gõ. KeyLish cho
               phản hồi ngay từng ký tự và đưa từ sai quay lại cuối vòng.
             </p>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
+import { TrafficBeacon } from "@/components/TrafficBeacon";
 import "./globals.css";
 import "./neo.css";
 
@@ -22,7 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className={`${beVietnamPro.variable} h-full antialiased`}>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        {children}
+        <TrafficBeacon />
+      </body>
     </html>
   );
 }

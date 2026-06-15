@@ -160,3 +160,11 @@ model UserAuthToken {
   @@index([userId, purpose])
   @@index([expiresAt])
 }
+
+/// Aggregate-on-write page-view counters: one row per UTC hour (no raw events,
+/// so the table stays tiny — 24 rows/day — regardless of traffic volume).
+model TrafficHourly {
+  hour      DateTime @id
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+}

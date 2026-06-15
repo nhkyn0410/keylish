@@ -248,6 +248,21 @@ export function deleteWord(id: string) {
   });
 }
 
+export type TrafficBucket = { hour: string; count: number };
+
+export type TrafficAnalytics = {
+  rangeDays: number;
+  totalViews: number;
+  buckets: TrafficBucket[];
+};
+
+export function getTrafficAnalytics(days = 30) {
+  return requestJson<TrafficAnalytics>(
+    "/api/admin/analytics/traffic" + toQuery({ days }),
+    { cache: "no-store" }
+  );
+}
+
 export function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Request failed.";
 }
