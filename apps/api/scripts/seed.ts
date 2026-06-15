@@ -62,7 +62,7 @@ function loadDataset(): { topics: DatasetTopic[]; words: DatasetWord[]; from: st
   const fallbackPath = path.join(
     ROOT,
     "apps",
-    "web",
+    "user-web",
     "src",
     "data",
     "seed",
