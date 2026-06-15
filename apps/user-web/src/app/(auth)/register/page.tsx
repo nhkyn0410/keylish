@@ -33,11 +33,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthFrame
-      eyebrow="User auth"
-      title="Tạo tài khoản học tập"
-      subtitle="V2.0.1 chỉ dùng email và mật khẩu. Chưa verify email, chưa OAuth, và session được quản lý bởi API."
-    >
+    <AuthFrame eyebrow="User auth" title="Tạo tài khoản học tập" subtitle="">
       <form className="grid gap-4" onSubmit={handleSubmit}>
         <label className="grid gap-2 text-sm font-black uppercase tracking-normal">
           Tên hiển thị

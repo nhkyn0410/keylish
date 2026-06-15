@@ -124,8 +124,8 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardSection
-      description="Lượt xem trang (pageviews) của web công khai, gộp theo giờ — múi giờ local."
-      extra={<Tag color="cyan">Pageviews</Tag>}
+      description="Lượt truy cập web công khai (1 lần/phiên), gộp theo giờ — múi giờ local."
+      extra={<Tag color="cyan">Lượt truy cập</Tag>}
       title="Analytics"
     >
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
@@ -141,8 +141,8 @@ export default function AnalyticsPage() {
       <Spin spinning={loading}>
         <Row gutter={[16, 16]}>
           {[
-            ["Tổng lượt xem", stats.total, `Trong ${days} ngày`],
-            ["Hôm nay", stats.today, "Pageviews"],
+            ["Tổng lượt truy cập", stats.total, `Trong ${days} ngày`],
+            ["Hôm nay", stats.today, "Lượt truy cập"],
             ["Khung giờ đông nhất", stats.peakHourLabel, "Theo giờ local"],
             ["Ngày đông nhất", stats.peakDayLabel, "DD/MM"],
           ].map(([title, value, note]) => (
@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
         ) : (
           <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
             <Col xs={24} xl={14}>
-              <Card className="admin-table-card" variant="borderless" title="Lượt xem theo ngày">
+              <Card className="admin-table-card" variant="borderless" title="Lượt truy cập theo ngày">
                 <Bars items={stats.dayItems} color="#1677ff" />
               </Card>
             </Col>
@@ -177,7 +177,7 @@ export default function AnalyticsPage() {
               <Card
                 className="admin-table-card"
                 variant="borderless"
-                title="Lượt xem theo giờ trong ngày (0–23h)"
+                title="Lượt truy cập theo giờ trong ngày (0–23h)"
               >
                 <Bars items={stats.hourItems} color="#13c2c2" />
               </Card>

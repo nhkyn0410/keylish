@@ -1,7 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+
+const VISIT_FLAG = "kl_visited";
 
 function apiBase() {
   const configured = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
@@ -13,15 +14,22 @@ function apiBase() {
 }
 
 /**
- * Fires one page-view beacon per route change. Only active in production so
- * local browsing doesn't pollute the real counters. The API drops hits whose
- * Origin isn't allow-listed, and aggregates per UTC hour (no raw events).
+ * Records ONE visit per browser session — not per page view. The sessionStorage
+ * flag means internal SPA navigation and reloads within the same tab session
+ * don't add extra counts. Only active in production. The API drops hits whose
+ * Origin isn't allow-listed and aggregates per UTC hour (no raw events).
  */
 export function TrafficBeacon() {
-  const pathname = usePathname();
-
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return;
+
+    try {
+      if (sessionStorage.getItem(VISIT_FLAG)) return;
+      sessionStorage.setItem(VISIT_FLAG, "1");
+    } catch {
+      // sessionStorage unavailable (e.g. some private modes) — count anyway.
+    }
+
     const base = apiBase();
     if (!base) return;
 
@@ -35,7 +43,7 @@ export function TrafficBeacon() {
     } catch {
       // Analytics must never break navigation.
     }
-  }, [pathname]);
+  }, []);
 
   return null;
 }
