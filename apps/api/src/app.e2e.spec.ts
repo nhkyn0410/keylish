@@ -141,6 +141,28 @@ describe("AppModule routes", () => {
       .expect(403);
   });
 
+  it("hides admin routes with 404 when the admin API is disabled", async () => {
+    process.env.ADMIN_API_ENABLED = "false";
+    try {
+      await request(app.getHttpServer())
+        .post("/api/admin/login")
+        .send({ username: "root", password: "correct horse battery staple" })
+        .expect(404);
+      await request(app.getHttpServer()).get("/api/admin/dashboard/summary").expect(404);
+    } finally {
+      delete process.env.ADMIN_API_ENABLED;
+    }
+  });
+
+  it("lets admin routes through the gate when enabled (401 without a session)", async () => {
+    process.env.ADMIN_API_ENABLED = "true";
+    try {
+      await request(app.getHttpServer()).get("/api/admin/dashboard/summary").expect(401);
+    } finally {
+      delete process.env.ADMIN_API_ENABLED;
+    }
+  });
+
   it("rejects invalid vocabulary filters", async () => {
     await request(app.getHttpServer()).get("/api/v1/vocab").query({ levels: "NOPE" }).expect(400);
   });

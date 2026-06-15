@@ -81,9 +81,9 @@ pnpm --filter @keylish/admin-web dev  # Admin Web (Next.js, port 3002)
 | Thành phần       | Nền tảng                                                | Free tier                   |
 | ---------------- | ------------------------------------------------------- | --------------------------- |
 | `apps/user-web`  | [Vercel](https://vercel.com)                            | ✅                          |
-| `apps/admin-web` | [Vercel](https://vercel.com)                            | ✅                          |
+| `apps/admin-web` | Local-only (công cụ nội bộ — không deploy)              | — (xem doc/v2.1.1)          |
 | `apps/api`       | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)       |
-| PostgreSQL       | [Neon](https://neon.tech)                               | ✅ (tự thức khi có kết nối) |
+| PostgreSQL       | [Supabase](https://supabase.com)                        | ✅ (pause sau 7 ngày idle)  |
 
 Hướng dẫn chi tiết từng bước: [doc/deploy.md](doc/deploy.md).
 

@@ -121,10 +121,6 @@ export default function AccountPage() {
       <div className="mb-6">
         <div className="k-badge k-badge--violet mb-4">Tài khoản</div>
         <h1 className="text-5xl tracking-normal">Hồ sơ học tập</h1>
-        <p className="mt-3 max-w-2xl font-bold leading-7 text-neo-ink/70">
-          User session được đọc qua API profile. Cookie session vẫn HttpOnly và không được JS truy
-          cập.
-        </p>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">

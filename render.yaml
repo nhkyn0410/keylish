@@ -12,6 +12,9 @@ services:
         value: 22.16.0
       - key: NODE_ENV
         value: production
+      # Admin is a local-only internal tool — keep its API surface closed in prod.
+      - key: ADMIN_API_ENABLED
+        value: "false"
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL
@@ -25,7 +28,8 @@ services:
       # cookies need SameSite=None; Secure.
       - key: AUTH_COOKIE_SAMESITE
         value: none
-      # Browser origins allowed to send credentialed requests (web + admin).
+      # Browser origins allowed to send credentialed requests. Admin is
+      # local-only, so in prod this is just the user-web origin.
       - key: AUTH_ALLOWED_ORIGINS
         sync: false
       # user-web origin used to build password-reset links.

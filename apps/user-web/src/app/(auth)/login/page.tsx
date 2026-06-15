@@ -31,11 +31,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthFrame
-      eyebrow="User auth"
-      title="Đăng nhập để giữ phiên luyện"
-      subtitle="Session được lưu bằng cookie HttpOnly từ API. KeyLish không lưu auth token trong localStorage hoặc sessionStorage."
-    >
+    <AuthFrame eyebrow="User auth" title="Đăng nhập để giữ phiên luyện" subtitle="">
       <form className="grid gap-4" onSubmit={handleSubmit}>
         <label className="grid gap-2 text-sm font-black uppercase tracking-normal">
           Email
