@@ -3,7 +3,7 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon, ProgressStrip, Star, StatPill } from "./primitives";
 import { useTypingSession, type SessionResult, type VocabWord } from "./useTypingSession";
-import { DEFAULT_PRACTICE_SETTINGS, type PracticeSettings } from "./practiceSettings";
+import { DEFAULT_PRACTICE_SETTINGS, type PracticeSettings, type RepeatMode } from "./practiceSettings";
 
 function firstMismatch(target: string, typed: string) {
   let i = 0;
@@ -103,7 +103,7 @@ function WrongMark({
   autoAdvanceMs,
 }: {
   onContinue: () => void;
-  willRepeat: boolean;
+  willRepeat?: RepeatMode;
   autoAdvanceMs?: number;
 }) {
   return (
@@ -125,9 +125,14 @@ function WrongMark({
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <Icon name="x" size={20} stroke={4} style={{ color: "var(--neo-red)" }} />
         <span style={{ fontWeight: 900, fontSize: 18 }}>Chưa đúng</span>
-        {willRepeat && (
+        {willRepeat === "once" && (
           <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>
             · từ này sẽ lặp lại ở cuối vòng
+          </span>
+        )}
+        {willRepeat === "until" && (
+          <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>
+            · gõ đúng để qua
           </span>
         )}
       </div>
@@ -182,13 +187,13 @@ function Correction({
   target,
   typed,
   onContinue,
-  willRepeat = true,
+  willRepeat,
   showAnswer = true,
 }: {
   target: string;
   typed: string;
   onContinue: () => void;
-  willRepeat?: boolean;
+  willRepeat?: RepeatMode;
   showAnswer?: boolean; // true = lộ cả từ (reveal); false = chỉ ký tự lỗi (char)
 }) {
   const mis = firstMismatch(target, typed);
@@ -269,7 +274,8 @@ function Correction({
         </span>
         <Icon name="arrow" size={14} />
         <span style={{ color: "#149040", fontWeight: 900 }}>{rightCh}</span>
-        {willRepeat && <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>}
+        {willRepeat === "once" && <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>}
+        {willRepeat === "until" && <span style={{ opacity: 0.55 }}>· gõ đúng để qua</span>}
       </div>
     </div>
   );
@@ -314,7 +320,7 @@ export function TypingScreen({
 
   if (!word) return null;
 
-  const willRepeat = settings.repeat !== "none";
+  const repeatMode = settings.repeat !== "none" ? settings.repeat : undefined;
   const strictCheck = isTestMode;
   const showLiveCorrection = live !== "off";
 
@@ -573,7 +579,7 @@ export function TypingScreen({
             feedback === "mark" ? (
               <WrongMark
                 onContinue={continueNext}
-                willRepeat={willRepeat}
+                willRepeat={repeatMode}
                 autoAdvanceMs={isTestMode ? 3000 : undefined}
               />
             ) : (
@@ -581,7 +587,7 @@ export function TypingScreen({
                 target={target}
                 typed={typed}
                 onContinue={continueNext}
-                willRepeat={willRepeat}
+                willRepeat={repeatMode}
                 showAnswer={feedback === "reveal"}
               />
             )
