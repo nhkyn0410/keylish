@@ -76,6 +76,22 @@ pnpm --filter @keylish/user-web dev   # User Web (Next.js, port 3001)
 pnpm --filter @keylish/admin-web dev  # Admin Web (Next.js, port 3002)
 ```
 
+## Cấu hình môi trường (env)
+
+Mỗi file env có **một nhiệm vụ**, không trùng lặp. Ai đọc file nào:
+
+| File | Đọc bởi | Chứa |
+| ---- | ------- | ---- |
+| `.env` (gốc) | `docker compose` | `POSTGRES_*`, `PGADMIN_*` |
+| `packages/db/.env` | API runtime (override) · Prisma CLI · seed | `DATABASE_URL`, `DIRECT_URL` |
+| `apps/api/.env` | API runtime · seed | `PORT`, `AUTH_*`, `ADMIN_INITIAL_*`, `WEB_APP_URL`, `RESEND_*` |
+| `apps/user-web/.env` | user-web | `NEXT_PUBLIC_API_URL` |
+| `apps/admin-web/.env` | admin-web | `NEXT_PUBLIC_API_URL` |
+
+- **Kết nối DB chỉ khai ở `packages/db/.env`** — API runtime load nó với `override` nên nó luôn thắng; đừng đặt `DATABASE_URL` ở `apps/api/.env`.
+- **Production** (Render/Vercel): đặt env trên dashboard, không dùng file `.env`.
+- Mỗi file có `*.env.example` đi kèm làm mẫu. Tất cả `.env` thật đều đã được `.gitignore`.
+
 ## Triển khai
 
 | Thành phần       | Nền tảng                                                | Free tier                   |
