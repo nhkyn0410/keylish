@@ -15,6 +15,16 @@ enum CefrLevel {
   C2
 }
 
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  DELETED
+}
+
+enum AuthProvider {
+  PASSWORD
+}
+
 model Topic {
   id    String @id @default(cuid())
   slug  String @unique
@@ -40,4 +50,121 @@ model Word {
   @@index([level])
   @@index([topicId])
   @@index([frequency])
+}
+
+model User {
+  id              String     @id @default(cuid())
+  email           String     @unique
+  emailNormalized String     @unique
+  displayName     String?
+  avatarUrl       String?
+  status          UserStatus @default(ACTIVE)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  identities UserIdentity[]
+  sessions   UserSession[]
+  tokens     UserAuthToken[]
+}
+
+model Admin {
+  id                 String    @id @default(cuid())
+  username           String    @unique
+  usernameNormalized String    @unique
+  passwordChangedAt  DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  identities AdminIdentity[]
+  sessions   AdminSession[]
+}
+
+model UserIdentity {
+  id           String       @id @default(cuid())
+  userId       String
+  provider     AuthProvider @default(PASSWORD)
+  providerId   String
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([userId])
+}
+
+model AdminIdentity {
+  id           String       @id @default(cuid())
+  adminId      String
+  provider     AuthProvider @default(PASSWORD)
+  providerId   String
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([adminId])
+}
+
+model UserSession {
+  id             String    @id @default(cuid())
+  userId         String
+  tokenHash      String    @unique
+  userAgent      String?
+  ipHash         String?
+  createdAt      DateTime  @default(now())
+  lastSeenAt     DateTime  @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+model AdminSession {
+  id             String    @id @default(cuid())
+  adminId        String
+  tokenHash      String    @unique
+  userAgent      String?
+  ipHash         String?
+  createdAt      DateTime  @default(now())
+  lastSeenAt     DateTime  @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+model UserAuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  purpose   String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+}
+
+/// Aggregate-on-write page-view counters: one row per UTC hour (no raw events,
+/// so the table stays tiny — 24 rows/day — regardless of traffic volume).
+model TrafficHourly {
+  hour      DateTime @id
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
 }

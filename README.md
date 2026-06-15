@@ -21,12 +21,13 @@ Monorepo quản lý bằng **pnpm workspaces + Turborepo**.
 
 | Workspace         | Vai trò                         | Công nghệ                                                |
 | ----------------- | ------------------------------- | -------------------------------------------------------- |
-| `apps/web`        | Ứng dụng web                    | Next.js (App Router) · React · TypeScript · Tailwind CSS |
+| `apps/user-web`   | Ứng dụng web học từ vựng        | Next.js (App Router) · React · TypeScript · Tailwind CSS |
+| `apps/admin-web`  | Admin panel V2                  | Next.js (App Router) · React · TypeScript · Ant Design   |
 | `apps/api`        | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod     |
 | `packages/db`     | Tầng database                   | Prisma 7 (driver adapter `pg`) · PostgreSQL (Neon)       |
 | `packages/shared` | Schema & type dùng chung        | Zod 4                                                    |
 
-Công cụ chung: TypeScript 5 · Vitest · tsup · tsx.
+Công cụ chung: TypeScript 6 · Vitest · tsup · tsx.
 
 ### API V1
 
@@ -70,17 +71,35 @@ pnpm --filter @keylish/db generate
 pnpm --filter @keylish/db migrate
 
 # 4. Chạy dev
-pnpm --filter @keylish/api dev   # API (NestJS)
-pnpm --filter @keylish/web dev   # Web (Next.js)
+pnpm --filter @keylish/api dev        # API (NestJS, port 3000)
+pnpm --filter @keylish/user-web dev   # User Web (Next.js, port 3001)
+pnpm --filter @keylish/admin-web dev  # Admin Web (Next.js, port 3002)
 ```
+
+## Cấu hình môi trường (env)
+
+Mỗi file env có **một nhiệm vụ**, không trùng lặp. Ai đọc file nào:
+
+| File | Đọc bởi | Chứa |
+| ---- | ------- | ---- |
+| `.env` (gốc) | `docker compose` | `POSTGRES_*`, `PGADMIN_*` |
+| `packages/db/.env` | API runtime (override) · Prisma CLI · seed | `DATABASE_URL`, `DIRECT_URL` |
+| `apps/api/.env` | API runtime · seed | `PORT`, `AUTH_*`, `ADMIN_INITIAL_*`, `WEB_APP_URL`, `RESEND_*` |
+| `apps/user-web/.env` | user-web | `NEXT_PUBLIC_API_URL` |
+| `apps/admin-web/.env` | admin-web | `NEXT_PUBLIC_API_URL` |
+
+- **Kết nối DB chỉ khai ở `packages/db/.env`** — API runtime load nó với `override` nên nó luôn thắng; đừng đặt `DATABASE_URL` ở `apps/api/.env`.
+- **Production** (Render/Vercel): đặt env trên dashboard, không dùng file `.env`.
+- Mỗi file có `*.env.example` đi kèm làm mẫu. Tất cả `.env` thật đều đã được `.gitignore`.
 
 ## Triển khai
 
-| Thành phần | Nền tảng                                                | Free tier                   |
-| ---------- | ------------------------------------------------------- | --------------------------- |
-| `apps/web` | [Vercel](https://vercel.com)                            | ✅                          |
-| `apps/api` | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)       |
-| PostgreSQL | [Neon](https://neon.tech)                               | ✅ (tự thức khi có kết nối) |
+| Thành phần       | Nền tảng                                                | Free tier                   |
+| ---------------- | ------------------------------------------------------- | --------------------------- |
+| `apps/user-web`  | [Vercel](https://vercel.com)                            | ✅                          |
+| `apps/admin-web` | Local-only (công cụ nội bộ — không deploy)              | — (xem doc/v2.1.1)          |
+| `apps/api`       | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)       |
+| PostgreSQL       | [Supabase](https://supabase.com)                        | ✅ (pause sau 7 ngày idle)  |
 
 Hướng dẫn chi tiết từng bước: [doc/deploy.md](doc/deploy.md).
 
@@ -89,8 +108,9 @@ Hướng dẫn chi tiết từng bước: [doc/deploy.md](doc/deploy.md).
 ```
 KeyLish/
 ├── apps/
-│   ├── web/        # Next.js — giao diện luyện gõ
-│   └── api/        # NestJS — vocab read API + scripts build dataset
+│   ├── api/        # NestJS — vocab read API + scripts build dataset
+│   ├── user-web/   # Next.js — giao diện luyện gõ
+│   └── admin-web/  # Next.js — admin panel V2
 ├── packages/
 │   ├── db/         # Prisma schema, client, migrations
 │   └── shared/     # Zod schemas & types dùng chung

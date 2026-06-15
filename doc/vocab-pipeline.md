@@ -63,14 +63,14 @@ pnpm --filter @keylish/api seed
 Kiểm tra sau khi seed:
 
 ```powershell
-curl.exe http://localhost:3001/api/v1/topics
-curl.exe "http://localhost:3001/api/v1/vocab?levels=A1&limit=5"
+curl.exe http://localhost:3000/api/v1/topics
+curl.exe "http://localhost:3000/api/v1/vocab?levels=A1&limit=5"
 ```
 
 ## Bước 4 — Cập nhật seed offline cho web (tùy chọn)
 
 ```powershell
-node scripts/build-vocab.mjs   # 112 từ → apps/web/src/data/seed/seed-vocabulary.json
+node scripts/build-vocab.mjs   # 112 từ → apps/user-web/src/data/seed/seed-vocabulary.json
 ```
 
 ## Cập nhật dữ liệu về sau

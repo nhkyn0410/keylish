@@ -1,0 +1,24 @@
+name: keepalive
+
+# Ping định kỳ một endpoint CÓ chạm DB để Supabase free không bị pause sau 7
+# ngày không hoạt động. /api/v1/vocab/count query Postgres nên đủ giữ "active".
+# (Render free vẫn spin-down 15' — cold start do prewarm phía web lo, không phải
+# workflow này.)
+
+on:
+  schedule:
+    - cron: "0 */12 * * *" # 2 lần/ngày (UTC) — dư sức chặn mốc pause 7 ngày
+  workflow_dispatch: {} # cho phép bấm chạy tay để test
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping API (chạm DB giữ Supabase active)
+        run: |
+          URL="${{ vars.API_BASE_URL || 'https://keylish-api.onrender.com' }}"
+          echo "Pinging $URL/api/v1/vocab/count"
+          # retry để "đánh thức" Render nếu đang ngủ (502/503/timeout lần đầu)
+          curl -fsS --retry 5 --retry-all-errors --retry-delay 20 --max-time 90 \
+            "$URL/api/v1/vocab/count" > /dev/null
+          echo "OK"

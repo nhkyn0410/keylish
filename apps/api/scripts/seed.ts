@@ -2,7 +2,7 @@
 //
 // Input (ưu tiên theo thứ tự):
 //   1. .data-tmp/dataset.json            — full dataset (scripts/build-dataset.mjs)
-//   2. apps/web/src/data/seed/seed-vocabulary.json — 112 từ curated (fallback)
+//   2. apps/user-web/src/data/seed/seed-vocabulary.json — 112 từ curated (fallback)
 //
 // XÓA SẠCH dữ liệu cũ (Word + Topic) trước khi nạp dữ liệu mới.
 //
