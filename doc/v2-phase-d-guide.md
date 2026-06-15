@@ -24,7 +24,7 @@ Phase D đặt nền bảo mật cho V2.0.1 auth trên API NestJS:
 ## Env cần có
 
 ```bash
-AUTH_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3002
+AUTH_ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3002
 AUTH_TOKEN_PEPPER=change-me-at-least-32-random-chars
 AUTH_ARGON2_MEMORY_KIB=19456
 AUTH_ARGON2_ITERATIONS=2
@@ -63,7 +63,7 @@ User flow:
 
 Admin flow tương tự qua `GET /api/admin/csrf`.
 
-API cũng kiểm tra `Origin`/`Referer` cho unsafe methods. Local dev mặc định chấp nhận `http://localhost:3000` và `http://localhost:3002`; production phải cấu hình allow-list rõ ràng.
+API cũng kiểm tra `Origin`/`Referer` cho unsafe methods. Local dev mặc định chấp nhận `http://localhost:3001` và `http://localhost:3002`; production phải cấu hình allow-list rõ ràng.
 
 ## Lệnh kiểm tra
 

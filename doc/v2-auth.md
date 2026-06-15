@@ -185,9 +185,9 @@ Thuộc tính cookie:
 
 Development local:
 
-- User web: `http://localhost:3000`.
+- User web: `http://localhost:3001`.
 - Admin web: `http://localhost:3002`.
-- API: `http://localhost:3001`.
+- API: `http://localhost:3000`.
 - Cookie dev có thể dùng name `user` và `admin`, `secure: false`, `sameSite: "lax"`.
 - API `enableCors` phải thêm `credentials: true` và allow origin cụ thể.
 
@@ -593,7 +593,7 @@ DATABASE_URL=postgresql://postgres.<ref>:<pw>@aws-0-<region>.pooler.supabase.com
 DIRECT_URL=postgresql://postgres.<ref>:<pw>@aws-0-<region>.pooler.supabase.com:5432/postgres
 
 # Auth common
-AUTH_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3002,https://app.keylish.com,https://admin.keylish.com
+AUTH_ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3002,https://app.keylish.com,https://admin.keylish.com
 AUTH_SESSION_SECRET=<openssl-rand-base64-32-or-longer>
 AUTH_CSRF_SECRET=<openssl-rand-base64-32-or-longer>
 

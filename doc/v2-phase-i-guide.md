@@ -23,7 +23,7 @@ Phase I nối `apps/admin-web` với admin API và biến admin panel thành cô
 ## Env cần có
 
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
 Admin web dev server chạy ở port 3002:
