@@ -3,7 +3,7 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon, ProgressStrip, Star, StatPill } from "./primitives";
 import { useTypingSession, type SessionResult, type VocabWord } from "./useTypingSession";
-import { DEFAULT_PRACTICE_SETTINGS, type PracticeSettings } from "./practiceSettings";
+import { DEFAULT_PRACTICE_SETTINGS, type PracticeSettings, type RepeatMode } from "./practiceSettings";
 
 function firstMismatch(target: string, typed: string) {
   let i = 0;
@@ -103,7 +103,7 @@ function WrongMark({
   autoAdvanceMs,
 }: {
   onContinue: () => void;
-  willRepeat: boolean;
+  willRepeat?: RepeatMode;
   autoAdvanceMs?: number;
 }) {
   return (
@@ -125,9 +125,14 @@ function WrongMark({
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <Icon name="x" size={20} stroke={4} style={{ color: "var(--neo-red)" }} />
         <span style={{ fontWeight: 900, fontSize: 18 }}>Chưa đúng</span>
-        {willRepeat && (
+        {willRepeat === "once" && (
           <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>
             · từ này sẽ lặp lại ở cuối vòng
+          </span>
+        )}
+        {willRepeat === "until" && (
+          <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>
+            · gõ đúng để qua
           </span>
         )}
       </div>
@@ -144,17 +149,51 @@ function WrongMark({
   );
 }
 
+function CorrectMark({
+  target,
+  onContinue,
+}: {
+  target: string;
+  onContinue: () => void;
+}) {
+  return (
+    <div
+      className="k-b"
+      style={{
+        background: "var(--neo-green-soft)",
+        boxShadow: "var(--sh-sm)",
+        padding: "16px 20px",
+        width: "100%",
+        maxWidth: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        flexWrap: "wrap",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Icon name="check" size={20} stroke={4} style={{ color: "var(--neo-green)" }} />
+        <span style={{ fontWeight: 900, fontSize: 18, color: "#149040" }}>Đúng</span>
+      </div>
+      <button type="button" className="k-btn k-btn--primary k-btn--sm" onClick={onContinue}>
+        Tiếp tục <Icon name="arrow" size={16} />
+      </button>
+    </div>
+  );
+}
+
 function Correction({
   target,
   typed,
   onContinue,
-  willRepeat = true,
+  willRepeat,
   showAnswer = true,
 }: {
   target: string;
   typed: string;
   onContinue: () => void;
-  willRepeat?: boolean;
+  willRepeat?: RepeatMode;
   showAnswer?: boolean; // true = lộ cả từ (reveal); false = chỉ ký tự lỗi (char)
 }) {
   const mis = firstMismatch(target, typed);
@@ -235,7 +274,8 @@ function Correction({
         </span>
         <Icon name="arrow" size={14} />
         <span style={{ color: "#149040", fontWeight: 900 }}>{rightCh}</span>
-        {willRepeat && <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>}
+        {willRepeat === "once" && <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>}
+        {willRepeat === "until" && <span style={{ opacity: 0.55 }}>· gõ đúng để qua</span>}
       </div>
     </div>
   );
@@ -257,11 +297,14 @@ export function TypingScreen({
   drill?: "practice" | "test";
 }) {
   const isTestMode = drill === "test";
+  const { hint, example: exampleMode, feedback, live } = settings;
+  const hideLength = hint === "off" || hint === "first";
   const {
     word,
     target,
     index,
     total,
+    originalTotal,
     typed,
     status,
     stats,
@@ -271,22 +314,25 @@ export function TypingScreen({
     continueNext,
   } = useTypingSession(
     words,
-    { reveal: false, repeat: settings.repeat, wrongAdvanceMs: isTestMode ? 3000 : undefined },
+    { reveal: false, repeat: settings.repeat, wrongAdvanceMs: isTestMode ? 3000 : undefined, trimToTarget: !hideLength },
     onComplete
   );
 
   if (!word) return null;
 
-  const { hint, example: exampleMode, feedback } = settings;
-  const willRepeat = settings.repeat !== "none";
+  const repeatMode = settings.repeat !== "none" ? settings.repeat : undefined;
   const strictCheck = isTestMode;
-  const showLiveCorrection = feedback !== "mark";
+  const showLiveCorrection = live !== "off";
 
   const practiceCardWidth = "min(100%, 720px)";
-  const answerBoxWidth = Math.min(620, Math.max(320, target.length * 34 + 120));
-  const answerFontSize = target.length > 16 ? 36 : target.length > 11 ? 44 : 58;
-  const answerBackground = status === "wrong" ? "var(--neo-red-soft)" : "var(--neo-white)";
-  const targetChars = Array.from(target);
+  const answerBoxWidth = hideLength
+    ? Math.min(620, Math.max(320, typed.length * 34 + 120))
+    : Math.min(620, Math.max(320, target.length * 34 + 120));
+  const answerFontSize = hideLength ? 58 : target.length > 16 ? 36 : target.length > 11 ? 44 : 58;
+  const answerBackground = status === "wrong" ? "var(--neo-red-soft)" : status === "correct" ? "var(--neo-green-soft)" : "var(--neo-white)";
+  const targetChars = hideLength && typed.length > target.length
+    ? Array.from({ length: typed.length }, (_, i) => target[i] ?? "")
+    : Array.from(target);
 
   return (
     <div className="k-screen">
@@ -307,7 +353,7 @@ export function TypingScreen({
           Thoát
         </button>
       </AppHeader>
-      <ProgressStrip idx={index + 1} total={total} ctx={contextLabel} />
+      <ProgressStrip idx={index + 1} total={originalTotal} ctx={contextLabel} />
 
       <div
         onClick={focusInput}
@@ -420,7 +466,10 @@ export function TypingScreen({
                 const typedCh = typed[i];
                 const isTyped = i < typed.length;
                 const isBad = showLiveCorrection && isTyped && typedCh !== ch;
-                const showCursor = status !== "wrong" && i === typed.length;
+                const showCursor = status === "typing" && i === typed.length;
+                const hidden = !isTyped && (hint === "off" || (hint === "first" && i > 0));
+
+                if (hidden && !showCursor) return null;
 
                 return (
                   <span key={`${ch}-${i}`} style={{ display: "inline-flex", alignItems: "center" }}>
@@ -436,28 +485,30 @@ export function TypingScreen({
                         }}
                       />
                     )}
-                    <span
-                      style={{
-                        color: isTyped
-                          ? isBad
-                            ? "var(--neo-red)"
-                            : "var(--neo-ink)"
-                          : hint === "full" || (hint === "first" && i === 0)
-                            ? "rgba(0,0,0,.28)"
-                            : "transparent",
-                        display: "inline-block",
-                        textDecorationLine: isBad ? "line-through" : "none",
-                        textDecorationThickness: 4,
-                        borderBottom:
-                          !isTyped && hint === "underline" ? "4px solid rgba(0,0,0,.4)" : undefined,
-                      }}
-                    >
-                      {isTyped ? typedCh : ch}
-                    </span>
+                    {!hidden && (
+                      <span
+                        style={{
+                          color: isTyped
+                            ? isBad
+                              ? "var(--neo-red)"
+                              : "var(--neo-ink)"
+                            : hint === "full" || (hint === "first" && i === 0)
+                              ? "rgba(0,0,0,.28)"
+                              : "transparent",
+                          display: "inline-block",
+                          textDecorationLine: isBad ? "line-through" : "none",
+                          textDecorationThickness: 4,
+                          borderBottom:
+                            !isTyped && hint === "underline" ? "4px solid rgba(0,0,0,.4)" : undefined,
+                        }}
+                      >
+                        {isTyped ? typedCh : ch}
+                      </span>
+                    )}
                   </span>
                 );
               })}
-              {status !== "wrong" && typed.length === targetChars.length && (
+              {status === "typing" && typed.length === targetChars.length && (
                 <span
                   style={{
                     alignSelf: "center",
@@ -473,14 +524,14 @@ export function TypingScreen({
             <input
               ref={inputRef}
               value={typed}
-              maxLength={target.length}
+              maxLength={hideLength ? 34 : target.length}
               autoFocus
               aria-label="Gõ từ tiếng Anh"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              readOnly={status === "wrong"}
+              readOnly={status !== "typing"}
               {...inputHandlers}
               style={{
                 background: "transparent",
@@ -522,11 +573,13 @@ export function TypingScreen({
             justifyContent: "center",
           }}
         >
-          {status === "wrong" ? (
+          {status === "correct" ? (
+            <CorrectMark target={target} onContinue={continueNext} />
+          ) : status === "wrong" ? (
             feedback === "mark" ? (
               <WrongMark
                 onContinue={continueNext}
-                willRepeat={willRepeat}
+                willRepeat={repeatMode}
                 autoAdvanceMs={isTestMode ? 3000 : undefined}
               />
             ) : (
@@ -534,7 +587,7 @@ export function TypingScreen({
                 target={target}
                 typed={typed}
                 onContinue={continueNext}
-                willRepeat={willRepeat}
+                willRepeat={repeatMode}
                 showAnswer={feedback === "reveal"}
               />
             )

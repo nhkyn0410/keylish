@@ -8,6 +8,7 @@ export interface SessionEngineConfig {
   reveal: boolean; // lộ ký tự đích trong cells (M1 = false)
   repeat: RepeatMode; // xử lý từ gõ sai trong phiên
   wrongAdvanceMs?: number; // tự chuyển sau khi báo sai (dùng cho Kiểm tra)
+  trimToTarget?: boolean; // cắt input theo target.length (mặc định true)
 }
 
 export interface VocabWord {
@@ -34,7 +35,7 @@ export interface SessionResult {
   wrongWords: VocabWord[];
 }
 
-export type SessionStatus = "typing" | "wrong";
+export type SessionStatus = "typing" | "wrong" | "correct";
 
 const clean = (s: string) => s.toLowerCase().replace(/[^a-z'-]/g, "");
 
@@ -61,7 +62,7 @@ export function useTypingSession(
   config: SessionEngineConfig,
   onComplete: (r: SessionResult) => void
 ) {
-  const { reveal, repeat, wrongAdvanceMs } = config;
+  const { reveal, repeat, wrongAdvanceMs, trimToTarget = true } = config;
   const [queue, setQueue] = useState<VocabWord[]>(words);
   const [index, setIndex] = useState(0);
   const [typed, setTyped] = useState("");
@@ -78,6 +79,7 @@ export function useTypingSession(
   const counters = useRef({ correct: 0, wrong: 0, streak: 0, correctChars: 0, totalChars: 0 });
   const requeued = useRef<Set<string>>(new Set());
   const wrongWords = useRef<VocabWord[]>([]);
+  const originalCount = useRef(words.length);
 
   const word = queue[index];
   const target = word ? clean(word.en) : "";
@@ -164,7 +166,8 @@ export function useTypingSession(
       c.correct++;
       c.streak++;
       syncView();
-      scheduleAdvance(360);
+      setStatus("correct");
+      scheduleAdvance(600);
     } else {
       c.wrong++;
       c.streak = 0;
@@ -184,8 +187,9 @@ export function useTypingSession(
   }
 
   function applyValue(raw: string) {
-    if (locked.current || status === "wrong" || !word) return;
-    const v = clean(raw).slice(0, target.length);
+    if (locked.current || status !== "typing" || !word) return;
+    let v = clean(raw);
+    if (trimToTarget) v = v.slice(0, target.length);
     setTyped(v);
   }
 
@@ -209,8 +213,13 @@ export function useTypingSession(
         continueNext();
         return;
       }
+      if (status === "correct") {
+        continueNext();
+        return;
+      }
       if (locked.current || !word) return;
-      finalize(clean(e.currentTarget.value).slice(0, target.length));
+      const raw = clean(e.currentTarget.value);
+      finalize(trimToTarget ? raw.slice(0, target.length) : raw);
     },
   };
 
@@ -223,6 +232,7 @@ export function useTypingSession(
     target,
     index,
     total,
+    originalTotal: originalCount.current,
     typed,
     status,
     cells: computeCells(target, typed, reveal),
