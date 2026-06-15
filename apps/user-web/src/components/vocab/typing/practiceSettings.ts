@@ -8,13 +8,15 @@ export type HintLevel = "off" | "underline" | "first" | "full";
 export type ExampleMode = "off" | "show" | "cloze";
 export type FeedbackMode = "mark" | "char" | "reveal";
 export type RepeatMode = "none" | "once" | "until";
+export type LiveMode = "on" | "off";
 
-/** 4 tuỳ chọn của chế độ Luyện tập M2. */
+/** 5 tuỳ chọn của chế độ Luyện tập M2. */
 export interface PracticeSettings {
   hint: HintLevel; // mức gợi ý hiển thị đáp án trước khi gõ
   example: ExampleMode; // câu ví dụ
   feedback: FeedbackMode; // cách báo lỗi khi gõ sai
   repeat: RepeatMode; // xử lý từ gõ sai trong phiên
+  live: LiveMode; // tô màu ký tự real-time khi gõ
 }
 
 /** Mặc định khi Luyện tập. */
@@ -23,6 +25,7 @@ export const DEFAULT_PRACTICE_SETTINGS: PracticeSettings = {
   example: "show",
   feedback: "char",
   repeat: "once",
+  live: "on",
 };
 
 /** Giá trị bị khoá khi Kiểm tra — ẩn mọi phao, chấm một lần. */
@@ -31,6 +34,7 @@ export const TEST_SETTINGS: PracticeSettings = {
   example: "off",
   feedback: "mark",
   repeat: "none",
+  live: "off",
 };
 
 export interface SettingOption {
@@ -90,6 +94,16 @@ export const PRACTICE_SETTING_DEFS: SettingDef[] = [
       { value: "none", label: "Không" },
       { value: "once", label: "1 lần cuối vòng" },
       { value: "until", label: "Đến khi đúng" },
+    ],
+  },
+  {
+    key: "live",
+    label: "Tô màu real-time",
+    desc: "",
+    icon: "keyboard",
+    options: [
+      { value: "on", label: "Bật" },
+      { value: "off", label: "Tắt" },
     ],
   },
 ];
