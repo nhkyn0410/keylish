@@ -9,7 +9,7 @@
 | Tên | Thiết kế UI/UX và Design System |
 | Mã tài liệu | `06-ui-ux` |
 | Dự án | KeyLish |
-| Phiên bản | 0.1.1 |
+| Phiên bản | 0.1.2 |
 | Trạng thái | Draft |
 | Người viết | AI Agent (soạn thảo SDLC) |
 | Người duyệt | Nguyễn Hồng Khanh |
@@ -21,6 +21,7 @@
 |---|---|---|---|
 | 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu — nhập từ `doc/design.md` (giữ file gốc). |
 | 0.1.1 | 2026-06-15 | AI Agent | G-7: gắn nhãn ⬜ cho component thiết kế chưa build (§2.5/§2.6). |
+| 0.1.2 | 2026-06-15 | AI Agent | Phase ③ V2.1: thêm §7 UI kho cá nhân (layout C·Split — đã build `VocabLibrarySplit`). |
 
 ### 1.3. Tham chiếu
 
@@ -198,3 +199,24 @@ Trang chủ → "Quên mật khẩu" → nhập email → submit
 
 - `design.md` chỉ đánh số `## 8.x`, thiếu mục 1–7. File gốc được giữ nguyên — tài liệu này đã sắp xếp lại.
 - Một số component neo (NeoCard, NeoButton, NeoBadge) còn ở dạng primitive — chưa có design token centralized trong CSS variables đầy đủ.
+
+## 7. (V2.1) Kho từ vựng cá nhân — UI
+
+> Layout **"C · Split — danh sách + chi tiết"**, nhập từ bundle Claude Design (`library.jsx · LibSplit`). Đã có **bản dựng** (✅ UI; nối API kho cá nhân ⬜).
+
+### 7.1. Layout Split (đã build)
+
+- File: [`VocabLibrarySplit.tsx`](../../apps/user-web/src/components/vocab/library/VocabLibrarySplit.tsx), route `/kho-tu-vung`.
+- 3 cột: **rail lọc** (search + cấp độ + chủ đề) · **danh sách** (chọn từ; từ chọn nền vàng + dịch lên 2px) · **panel chi tiết** (nền violet + halftone: từ + IPA + nút TTS, divider, nghĩa VI, badge cấp/chủ đề, card ví dụ vàng-nhạt, card "Kho cá nhân", nút "Luyện từ này").
+- Tái dùng design tokens `app/neo.css` (đã port sẵn từ chính bundle) + `Icon` (primitives). Dữ liệu thật từ `fetchVocab`; phát âm qua Web Speech (TTS).
+
+### 7.2. State (loading / empty / permission)
+
+- Loading: eyebrow "đang nạp…"; panel chi tiết "Đang nạp từ vựng…".
+- Empty: card "Không có từ nào khớp bộ lọc".
+- Pick (FR-PVOC-02): nút "Thêm vào kho của tôi" → xong đổi badge xanh "Đã trong kho". Gợi ý **biến thể** (FR-PVOC-05) sẽ là dialog chọn (⬜ chờ API).
+- Permission: thao tác "Thêm" yêu cầu đăng nhập (FR-PVOC-09) — nối khi có API.
+
+### 7.3. A11y
+
+Theo chuẩn neo §2.9: báo trạng thái bằng **màu + icon** (✓), nút chỉ-icon có `aria-label` (vd nút phát âm), tương phản AA, tôn trọng `prefers-reduced-motion` (đã trong `neo.css`).

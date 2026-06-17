@@ -9,7 +9,7 @@
 | Tên | Thiết kế Cơ sở Dữ liệu (Database Design) |
 | Mã tài liệu | `04-database` |
 | Dự án | KeyLish |
-| Phiên bản | 0.2.1 |
+| Phiên bản | 0.2.2 |
 | Trạng thái | Draft |
 | Người viết | AI Agent (soạn thảo SDLC) |
 | Người duyệt | Nguyễn Hồng Khanh |
@@ -23,6 +23,7 @@
 | 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu — từ Prisma schema + vocab-pipeline. |
 | 0.2.0 | 2026-06-15 | AI Agent | Bổ sung ERD chi tiết, phân tích index, migration history, seed pipeline, query pattern, cascade rules, data volume estimate, lifecycle. |
 | 0.2.1 | 2026-06-15 | AI Agent | Chuẩn hóa format metadata (§1.1/§1.2); sửa F-5: phân biệt seed offline (112 từ / 8 topic) vs full DB (~14 topic); sửa §6.4 (`doi-song` thay `hoc-thuat` bị trùng); sửa cross-ref §6.4. |
+| 0.2.2 | 2026-06-15 | AI Agent | Phase ③ V2.1: thêm §10 model `UserVocabEntry` (tham chiếu + custom, unique, migration, storage); Tham chiếu → §11. |
 
 ## 2. Công nghệ
 
@@ -488,7 +489,64 @@ Khi seed xong hoặc app shutdown: `await client.$disconnect(); await pool.end()
 | BR-02 | Email không trùng | `User.emailNormalized @unique` |
 | BR-02 | Username admin không trùng | `Admin.usernameNormalized @unique` |
 
-## 10. Tham chiếu
+## 10. (V2.1 ⬜ — đang thiết kế) Kho từ vựng cá nhân — `UserVocabEntry`
+
+> Planned (chưa code). Căn cứ ADR-019, D-08..D-11. Kho hệ thống `Word` giữ nguyên.
+
+### 10.1. Model (Prisma — dự kiến)
+
+```prisma
+enum VocabEntrySource {
+  system
+  custom
+  ai // ⬜ V2.2
+}
+
+model UserVocabEntry {
+  id           String           @id @default(cuid())
+  userId       String
+  wordId       String? // set khi tham chiếu từ hệ thống
+  source       VocabEntrySource @default(system)
+
+  // chỉ dùng khi custom / override:
+  customEn     String?
+  normalizedEn String? // khóa dedup custom (lowercase, trim)
+  customVi     String?
+  customExample String?
+  customLevel  CefrLevel?
+  note         String?
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word Word? @relation(fields: [wordId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, wordId])       // không thêm trùng 1 từ hệ thống (BR-09)
+  @@unique([userId, normalizedEn]) // không tạo trùng 1 custom
+  @@index([userId])
+}
+```
+
+(+ thêm quan hệ `vocabEntries UserVocabEntry[]` vào `User`; `userEntries UserVocabEntry[]` vào `Word`.)
+
+### 10.2. Ràng buộc & ngữ nghĩa
+
+- Entry **tham chiếu**: `wordId` set, `customEn`/`normalizedEn` null → `@@unique([userId, wordId])` chặn trùng.
+- Entry **custom**: `wordId` null, `customEn`/`normalizedEn` set → `@@unique([userId, normalizedEn])` chặn trùng. (Với `wordId` null, unique `(userId, wordId)` không ràng buộc — Postgres coi NULL khác nhau — nên dùng `normalizedEn` cho custom.)
+- `onDelete`: User xóa → cascade xóa entries; Word xóa → `SetNull` (giữ entry, mất tham chiếu).
+- Override: entry tham chiếu vẫn có thể điền `customVi/customExample/note` → UI hiển thị override khi có.
+
+### 10.3. Migration & storage
+
+- Migration mới `add_user_vocab_entry` (tạo enum + bảng + index). Không đụng bảng hiện có.
+- Ước lượng ~180–230 B/tham chiếu, ~350–450 B/custom (kèm index) → **~0.05–0.1 MB / 200 từ / user** (R-14, NFR-PER-03). Free tier 0.5 GB → ~3–4k user kịch trần.
+
+### 10.4. Lemmatization (D-11)
+
+Luật Mức 1 (đuôi + ~200 bất quy tắc) ở `@keylish/shared` — **không tốn DB**. Mức 2 (bảng `WordForm` từ kaikki, +~35 MB) — OQ-12, để sau.
+
+## 11. Tham chiếu
 
 - `doc/vocab-pipeline.md` — Pipeline dữ liệu từ vựng (file gốc, giữ nguyên)
 - `packages/db/prisma/schema.prisma` — Schema chính thức (Prisma)

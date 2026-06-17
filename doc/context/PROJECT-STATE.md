@@ -1,23 +1,23 @@
 # PROJECT-STATE — Trạng thái sống của bộ tài liệu KeyLish
 
 > File LIVE, giữ LEAN. Nguồn duy nhất cho: trạng thái tài liệu · OPEN QUESTION/RISK đang mở · cửa sổ lịch sử ~5 mục. Cập nhật mỗi khi viết/sửa tài liệu.
-> Cập nhật lần cuối: 2026-06-15 (v0.2.3).
+> Cập nhật lần cuối: 2026-06-15 (v0.2.7).
 
 ## 1. Trạng thái tài liệu SDLC
 
 | Mã | Tài liệu | Trạng thái | Phiên bản | Ghi chú |
 | --- | --- | --- | --- | --- |
 | 00 | Coding Standard | Draft | 0.2.1 | Chờ review · +§12 Quy trình, +§13 Quy định trạng thái tài liệu |
-| 01 | SRS | Draft | 0.1.0 | Chờ review |
+| 01 | SRS | Draft | 0.2.1 | Chờ review · V2.1 phân bổ vào mục sẵn có (§4.8 FR-PVOC, §7 UC-07/08, §5/§6/§3); gỡ §10 |
 | 02 | HLD | Draft | 0.2.1 | deep-review fix (G-4/G-5) |
 | 03 | LLD | Draft | 0.2.1 | deep-review fix (G-4) |
-| 04 | Database Design | Draft | 0.2.1 | F-5 (seed 8 topic vs full DB ~14) |
-| 05 | API Specification | Draft | 0.2.1 | F-1 (33 route); OQ-09→D-07 |
-| 06 | UI/UX + Design System | Draft | 0.1.1 | G-7 (nhãn ⬜ component chưa build) |
-| 07 | Security & Permission | Draft | 0.2.1 | format chuẩn hóa; threat model |
+| 04 | Database Design | Draft | 0.2.2 | +§10 model `UserVocabEntry` (V2.1) |
+| 05 | API Specification | Draft | 0.2.2 | +§13 API kho cá nhân (V2.1) |
+| 06 | UI/UX + Design System | Draft | 0.1.2 | +§7 UI kho cá nhân (Split — đã build) |
+| 07 | Security & Permission | Draft | 0.2.2 | +§21 bảo mật kho cá nhân (V2.1) |
 | 08 | Test Plan & Acceptance | Draft | 0.1.1 | G-2/G-3 (10 e2e test); G-4 RISK |
 | 09 | Deployment & Operation | Draft | 0.1.0 | thay doc/deploy.md |
-| 10 | ADR | Draft | 0.2.2 | G-1 (sửa code-evidence ADR-003/005); 18 ADR |
+| 10 | ADR | Draft | 0.2.3 | +ADR-019 (kho cá nhân — tham chiếu); 19 ADR |
 | 11 | Task Breakdown | Draft | 0.1.1 | fix F-3 (trace T-02/T-03) |
 | 12 | Release Notes | Draft | 0.1.1 | G-5 (số chủ đề) |
 | — | AGENT.md | ✅ Done | — | trỏ 00 §12 |
@@ -46,10 +46,14 @@ Quy ước status: Draft → (review) → Approved. **Chỉ APPROVER (Nguyễn H
 | R-11 | `admin-web` chưa nối `@keylish/shared` — nguy cơ lệch contract. | Trung bình | Task T-07. |
 | R-12 | `seed.ts` fallback trỏ `apps/web/...` (sai) thay vì `apps/user-web/...`. | Thấp | ✅ **Đã sửa** trong phiên (G-6, 2026-06-15). |
 | R-13 | Rate-limit in-memory (mất khi restart). | Thấp | Task T-08. |
+| R-14 | Free tier 0.5 GB: kho cá nhân **không** phải nút thắt (~0.1 MB/user; ~3–4k user ở 200 từ). Lever thật là kích thước kho hệ thống (Mức-2 WordForm +~35 MB). | Thấp | Theo dõi khi seed full catalog; trim catalog nếu chật (`09`/`04`). |
 
 ## 3. OPEN QUESTION đang mở
 
-> Không còn OPEN QUESTION mở (tính tới 2026-06-15). Mở lại bằng OQ mới khi có nhu cầu phát sinh.
+| Mã | Mô tả | Ảnh hưởng | Ai quyết |
+| --- | --- | --- | --- |
+| OQ-11 | (V2.1) Cơ chế "đề cử" từ custom phổ biến lên kho hệ thống (admin duyệt)? | Phạm vi admin/data | APPROVER |
+| OQ-12 | (V2.1) Nâng lemmatization lên Mức 2 (`WordForm` từ kaikki, +~35 MB) khi nào? | Độ chính xác / storage | APPROVER |
 
 ## 4. DECISION đã chốt
 
@@ -62,11 +66,19 @@ Quy ước status: Draft → (review) → Approved. **Chỉ APPROVER (Nguyễn H
 | D-05 | Giữ layering as-built; ghi task refactor "tách logic engine → `domain/vocab-typing`" (T-06). | 2026-06-15 |
 | D-06 | (OQ-10) admin-web **local-only, không deploy**; prod giữ `ADMIN_API_ENABLED=false`. | 2026-06-15 |
 | D-07 | (OQ-09) Auth/admin **giữ không version** ở V1; chuẩn hóa `/api/v1/` khi API public. | 2026-06-15 |
+| D-08 | (V2.1) Kho cá nhân = **mô hình tham chiếu + custom**: `UserVocabEntry` trỏ `Word` hệ thống (`wordId`) hoặc lưu custom (`customEn/Vi/...`); **không copy** nguyên từ. `Word` giữ là kho hệ thống ownerless. | 2026-06-15 |
+| D-09 | (V2.1) Dedup khi add: khớp chính xác `en` → **tự liên kết + báo**; khớp biến thể → **gợi ý** từ gốc (KHÔNG tự gộp); không khớp → custom. Unique `(userId, wordId)` + `(userId, normalizedEn)`. | 2026-06-15 |
+| D-10 | (V2.1) Phạm vi = kho hệ thống + cá nhân + pick + tự tạo. **AI custom hoãn V2.2** (vẫn thuộc D-04); schema chừa `source` ∈ `system`/`custom`/`ai`. | 2026-06-15 |
+| D-11 | (V2.1) Lemmatization **Mức 1** (luật đuôi + ~200 bất quy tắc) ở `@keylish/shared`, chỉ dùng cho *gợi ý*. Mức 2 (bảng `WordForm` từ kaikki) để dành — mở OQ khi cần độ chính xác cao. | 2026-06-15 |
 
 ## 5. Lịch sử (cửa sổ trượt ~5 mục)
 
 | Ngày | Việc |
 | --- | --- |
+| 2026-06-15 | **Phase ③ V2.1**: thiết kế 5 doc — ADR-019 (`10`), model `UserVocabEntry` (`04` §10), API kho cá nhân (`05` §13), UI Split (`06` §7), bảo mật cô lập (`07` §21). |
+| 2026-06-15 | Tạo `CLAUDE.md` + `AGENTS.md` (root); hoàn thiện `01` (gộp V2.1 vào mục sẵn có, gỡ §10); **build UI C·Split** kho từ vựng (`/kho-tu-vung`, `VocabLibrarySplit`) từ bundle Claude Design — typecheck pass. **Phase ③ docs (ADR-019/04/05/06/07) còn lại.** |
+| 2026-06-15 | **Phase ② V2.1**: viết yêu cầu vào `01-srs` §10 (FR-PVOC-01..10, BR-09..11, NFR-PER-03/SEC-05, UC-07/08); mở OQ-11/OQ-12; cập nhật §8 OQ đã chốt. |
+| 2026-06-15 | **Phase ① V2.1** (kho từ vựng hệ thống + cá nhân): chốt D-08 (mô hình tham chiếu), D-09 (dedup + gợi ý biến thể), D-10 (phạm vi, AI hoãn V2.2), D-11 (lemmatization Mức 1). |
 | 2026-06-15 | Deep-review 02/03/06/08/09/10/12 đối chiếu code: xác nhận độ trung thực cao (line counts, practiceSettings, TrafficBeacon, e2e, seed batch khớp). |
 | 2026-06-15 | Sửa G-1 (code-evidence 10-adr), G-2/G-3 (08 test count + typo), G-5 (~52% → ASSUMPTION ở 02/12), G-7 (nhãn ⬜ ở 06). |
 | 2026-06-15 | G-4: gom RISK ID về registry chuẩn (R-9..R-13); 02/03/08 dùng ID nhất quán. |

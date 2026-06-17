@@ -9,7 +9,7 @@
 | Tên | Biên bản Quyết định Kiến trúc (Architecture Decision Records) |
 | Mã tài liệu | `10-adr` |
 | Dự án | KeyLish |
-| Phiên bản | 0.2.2 |
+| Phiên bản | 0.2.3 |
 | Trạng thái | Draft |
 | Người viết | AI Agent (soạn thảo SDLC) |
 | Người duyệt | Nguyễn Hồng Khanh |
@@ -24,6 +24,7 @@
 | 0.2.0 | 2026-06-15 | AI Agent | Bổ sung 8 ADR mới (11–18), cập nhật consequences code reference, thêm sơ đồ quan hệ ADR, supersedes chain. |
 | 0.2.1 | 2026-06-15 | AI Agent | Chuẩn hóa format metadata (§1.1/§1.2). |
 | 0.2.2 | 2026-06-15 | AI Agent | Sửa G-1: code-evidence ADR-003 (route groups (site)/(auth)/(practice)) + ADR-005 (`vocabApi.ts` thay `useVocab.ts`). |
+| 0.2.3 | 2026-06-15 | AI Agent | Phase ③ V2.1: thêm ADR-019 (kho cá nhân — mô hình tham chiếu); RISK → §23. |
 
 ## 2. Quy ước
 
@@ -577,7 +578,41 @@ Governance Layer
 
 **Code Evidence**: `doc/context/PROJECT-STATE.md` (D-03, D-04); `00-coding-standard` (design principle §2 — deferred); không có code cho deferred features.
 
-## 22. RISK
+## 22. ADR-019: Kho từ vựng cá nhân — mô hình tham chiếu (không copy)
+
+| Trường | Giá trị |
+|---|---|
+| Mã | ADR-019 |
+| Status | Accepted |
+| Supersedes | — |
+
+**Context** (V2.1): Người học cần **kho từ vựng cá nhân** — pick từ kho hệ thống (`Word`) + tự tạo từ. Nếu mỗi user **copy** nguyên từ thì: (a) trùng lặp dữ liệu; (b) dedup mơ hồ khi user tạo từ đã có trong kho hệ thống; (c) tốn storage trên free tier 0.5 GB.
+
+**Decision**: Kho cá nhân = bảng mới **`UserVocabEntry`** theo **mô hình tham chiếu + custom**:
+
+- `wordId` (FK → `Word`, nullable): set khi entry **trỏ tới** từ hệ thống (pick / khớp chính xác).
+- `customEn/customVi/customExample/customLevel/note` (nullable): chỉ dùng khi **tự tạo** (wordId null) hoặc **override** từ tham chiếu.
+- `source` ∈ `system | custom | ai` (ai ⬜ V2.2).
+- `Word` giữ nguyên là kho **hệ thống ownerless** — không thêm cột owner.
+
+**Options Considered**:
+
+- **Bản sao đầy đủ** (mỗi entry copy en/vi/ipa/example): đơn giản nhất nhưng trùng lặp + dedup mơ hồ + ~2× storage.
+- **Cột `ownerId` trên `Word`**: phải nới `@@unique([en, level])` → rủi ro hỏng dedup kho hệ thống + trộn dữ liệu cá nhân vào bảng public.
+- **Tham chiếu + custom** (chọn): tách bạch, tiết kiệm (~0.1 MB/user), dedup rõ ràng.
+
+**Consequences**:
+
+- Pick / khớp chính xác → 1 dòng tham chiếu (~180–230 B), không copy từ.
+- Dedup-on-add: khớp `en` chính xác → tự liên kết (FR-PVOC-04); khớp **biến thể** (lemmatization Mức 1) → **gợi ý** từ gốc, không tự gộp (FR-PVOC-05, D-11).
+- `Word` (API `/vocab` public) không lộ dữ liệu cá nhân — giữ boundary.
+- Schema chừa `source='ai'` cho V2.2 — không phải migrate lại.
+
+**Code Evidence**: chưa code (⬜ V2.1). Schema `04-database` §10; API `05-api` §13; bảo mật `07-security` §21; UI `06-ui-ux` §7 (đã có demo `apps/user-web/src/components/vocab/library/VocabLibrarySplit.tsx`).
+
+---
+
+## 23. RISK
 
 | ID | Mô tả |
 |---|---|

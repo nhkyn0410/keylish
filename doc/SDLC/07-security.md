@@ -9,7 +9,7 @@
 | Tên | Bảo mật và Phân quyền (Security & Permission) |
 | Mã tài liệu | `07-security` |
 | Dự án | KeyLish |
-| Phiên bản | 0.2.1 |
+| Phiên bản | 0.2.2 |
 | Trạng thái | Draft |
 | Người viết | AI Agent (soạn thảo SDLC) |
 | Người duyệt | Nguyễn Hồng Khanh |
@@ -23,6 +23,7 @@
 | 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu — auth tự xây as-built. |
 | 0.2.0 | 2026-06-15 | AI Agent | Bổ sung threat model, guard implementation detail, CORS config, auth attack mitigation matrix, anti-enumeration, production safety checks, e2e test coverage, session purge lifecycle, code-level audit với file references. |
 | 0.2.1 | 2026-06-15 | AI Agent | Chuẩn hóa format metadata (§1.1/§1.2). |
+| 0.2.2 | 2026-06-15 | AI Agent | Phase ③ V2.1: thêm §21 bảo mật kho cá nhân (cô lập userId, ownership, cascade). |
 
 ## 2. Tham chiếu
 
@@ -618,3 +619,16 @@ Tất cả validation đều dùng `safeParse` → throw `BadRequestException` v
 | FR-ADM-04 | Users CRUD | AdminGuard + AdminGateGuard |
 | FR-ADM-05 | Vocab/Topics CRUD | AdminGuard + AdminGateGuard |
 | FR-ADM-06 | Analytics | AdminGuard + AdminGateGuard |
+
+## 21. (V2.1 ⬜ — đang thiết kế) Bảo mật kho từ vựng cá nhân
+
+> Planned. Căn cứ NFR-SEC-05, BR-11, ADR-019.
+
+| Biện pháp | Yêu cầu |
+|---|---|
+| Xác thực | Mọi endpoint `/api/user/vocab*` qua **`UserGuard`** (cookie session) + **CSRF** cho thao tác ghi. |
+| Cô lập theo user | Truy vấn **luôn** lọc `where: { userId: session.userId }`; **KHÔNG** nhận `userId` từ client (BR-11, NFR-SEC-05). |
+| Quyền sở hữu | PATCH/DELETE `:id` phải kiểm `entry.userId === session.userId`; nếu không → `404` (không tiết lộ tồn tại). |
+| Validation | Input qua Zod (`@keylish/shared`); giới hạn độ dài như Word admin (en ≤120, vi ≤240, example ≤500). |
+| Cascade | User xóa → entries theo `onDelete: Cascade`; Word xóa → `SetNull` (entry còn, mất tham chiếu). |
+| Không PII mới | Kho cá nhân chứa từ vựng, không thêm PII nhạy cảm; không log nội dung entry. |

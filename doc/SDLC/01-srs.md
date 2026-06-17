@@ -9,7 +9,7 @@
 | Tên           | Đặc tả Yêu cầu Phần mềm (Software Requirements Specification)  |
 | Mã tài liệu   | `01-srs`                                                       |
 | Dự án         | KeyLish                                                        |
-| Phiên bản     | 0.1.0                                                          |
+| Phiên bản     | 0.2.1                                                          |
 | Trạng thái    | Draft                                                          |
 | Người viết    | AI Agent (soạn thảo SDLC), Nguyễn Hồng Khanh                   |
 | Người duyệt   | Nguyễn Hồng Khanh                                              |
@@ -21,6 +21,8 @@
 | Phiên bản | Ngày       | Người cập nhật | Nội dung                                              |
 | --------- | ---------- | -------------- | ----------------------------------------------------- |
 | 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — SRS as-built suy ra từ code (MODE B). |
+| 0.2.0     | 2026-06-15 | AI Agent       | Phase ② V2.1: thêm §10 annex (FR-PVOC, UC-07/08, BR-09..11, NFR-PER-03/SEC-05); cập nhật §8 OQ đã chốt. |
+| 0.2.1     | 2026-06-15 | AI Agent       | Hoàn thiện 01: phân bổ V2.1 vào mục sẵn có (§3 enum, §4.8 FR-PVOC, §5 BR, §6 NFR, §7 UC-07/08, §9 trace); gỡ §10 annex. |
 
 ### 1.3. Mục đích
 
@@ -30,6 +32,7 @@
 
 - **Trong phạm vi (✅ as-built):** luyện gõ từ vựng char-by-char; chọn topic + cấp độ CEFR + mode; lặp từ sai; tổng kết phiên; lấy từ vựng local-first (API/cache/seed); auth người học (đăng ký/đăng nhập/phiên/đổi & quên & đặt lại mật khẩu); auth + API admin; traffic analytics; gửi mail reset.
 - **Khung (🚧):** `apps/admin-web` (giao diện admin V2 — pages có sẵn, chưa nối `@keylish/shared`).
+- **Đang thiết kế (V2.1, ⬜):** Kho từ vựng cá nhân (Personal Vocabulary) — xem §10 (annex). Mô hình tham chiếu + custom; dedup + gợi ý biến thể; AI custom hoãn V2.2.
 - **Ngoài phạm vi (⬜ — chỉ ghi OPEN QUESTION, không đặc tả chi tiết):** AI feedback + BYOK; flashcard/quiz mode; OAuth (enum `AuthProvider` mới có `PASSWORD`).
 
 ### 1.5. Định nghĩa & viết tắt
@@ -88,6 +91,8 @@ Lấy từ [schema.prisma](../../packages/db/prisma/schema.prisma) và code; tê
 | Phiên luyện gõ (client)      | `SessionStatus`                      | `typing · wrong · correct`                             | useTypingSession.ts |
 | Xử lý từ sai                 | `RepeatMode`                         | `none · once · until`                                  | useTypingSession.ts |
 | Nguồn dữ liệu vocab (client) | `VocabSource`                        | `api · cache · seed`                                   | vocabApi.ts         |
+| Nguồn entry kho cá nhân (V2.1 ⬜) | `VocabEntrySource` | `system · custom · ai` (ai ⬜ V2.2) | UserVocabEntry (planned) |
+| Loại entry kho cá nhân (V2.1 ⬜) | (suy ra) | `reference` (có wordId) · `custom` (có customEn) | UserVocabEntry (planned) |
 
 ## 4. Yêu cầu chức năng (FR)
 
@@ -168,6 +173,23 @@ Quy tắc validation từ [auth.dto.ts](../../apps/api/src/auth/auth.dto.ts): em
 | FR-SYS-01 | Hệ thống **BẮT BUỘC** dọn định kỳ phiên hết hạn/thu hồi (giữ 7 ngày để audit) và token đã dùng/hết hạn. | ✅         | `purgeExpired` — auth.service.ts           |
 | FR-SYS-02 | Pipeline dataset **BẮT BUỘC** build kho từ từ 2 nguồn mở rồi seed vào Postgres.                         | ✅         | scripts/build-dataset.mjs, scripts/seed.ts |
 
+### 4.8. Kho từ vựng cá nhân (Personal Vocabulary — V2.1 ⬜)
+
+> Yêu cầu **planned** cho V2.1 (chưa code). Căn cứ D-08..D-11. Kho **hệ thống** = `Word` (ownerless, dùng chung); kho **cá nhân** = bảng mới `UserVocabEntry` (tham chiếu `Word` qua `wordId`, hoặc lưu custom). AI custom hoãn V2.2.
+
+| Mã | Yêu cầu | Trạng thái | Trace |
+| --- | --- | --- | --- |
+| FR-PVOC-01 | Người học **BẮT BUỘC** xem được kho cá nhân của mình (từ hệ thống đã thêm + từ tự tạo). | ⬜ | D-08 |
+| FR-PVOC-02 | Người học **BẮT BUỘC** thêm ("pick") từ kho hệ thống vào kho cá nhân; lưu **tham chiếu** (`wordId`), **không nhân bản**. | ⬜ | D-08 |
+| FR-PVOC-03 | Người học **BẮT BUỘC** tạo từ mới vào kho cá nhân (`en` + `vi` + tùy chọn `example`/`level`). | ⬜ | D-08 |
+| FR-PVOC-04 | `en` **khớp chính xác** (chuẩn hóa) từ kho hệ thống → **BẮT BUỘC** tự liên kết tham chiếu + báo "đã có trong kho hệ thống", không tạo bản sao. | ⬜ | D-09 |
+| FR-PVOC-05 | `en` khớp một **biến thể** (lemmatization Mức 1) → **NÊN** gợi ý từ gốc cho người học chọn (dùng gốc / giữ biến thể riêng); **KHÔNG** tự gộp. | ⬜ | D-09, D-11 |
+| FR-PVOC-06 | Hệ thống **BẮT BUỘC** chặn trùng: không thêm 2 lần cùng từ hệ thống (`@@unique(userId, wordId)`); không tạo 2 custom cùng `normalizedEn`. | ⬜ | D-09 |
+| FR-PVOC-07 | Người học **BẮT BUỘC** sửa/xóa entry; với từ tham chiếu, lưu **override** (`customVi`/`customExample`/`note`) không đổi từ gốc. | ⬜ | D-08 |
+| FR-PVOC-08 | Người học **BẮT BUỘC** chọn luyện gõ theo **kho cá nhân**; engine gõ tái dùng FR-PRC-*. | ⬜ | D-08 |
+| FR-PVOC-09 | Kho cá nhân **BẮT BUỘC** chỉ truy cập bởi chủ sở hữu (yêu cầu phiên đăng nhập; lọc theo `userId`). | ⬜ | BR-11 |
+| FR-PVOC-10 | Lemmatization (luật đuôi + ~200 bất quy tắc) **BẮT BUỘC** đặt ở `@keylish/shared` để web (offline) + API dùng chung. | ⬜ | D-11 |
+
 ## 5. Yêu cầu nghiệp vụ (BR)
 
 | Mã    | Quy tắc                                                                                                                 | Nguồn                                 |
@@ -180,6 +202,9 @@ Quy tắc validation từ [auth.dto.ts](../../apps/api/src/auth/auth.dto.ts): em
 | BR-06 | Admin **đóng mặc định** ở production (an toàn khi quên cấu hình env).                                                   | admin-gate.guard.ts                   |
 | BR-07 | Traffic chỉ đếm khi **Origin hợp lệ**; giữ bảng nhỏ (≤24 dòng/ngày) bằng aggregate-on-write.                            | traffic.service.ts                    |
 | BR-08 | IP người dùng **không lưu thô** — chỉ lưu `ipHash`.                                                                     | auth.service.ts                       |
+| BR-09 | (V2.1 ⬜) Một từ hệ thống xuất hiện **tối đa 1 lần** trong kho cá nhân của một user. | `@@unique(userId, wordId)` |
+| BR-10 | (V2.1 ⬜) Dedup-on-add ưu tiên **tham chiếu** (không copy); custom chỉ tạo khi `en` không khớp kho hệ thống. | D-09, D-10 |
+| BR-11 | (V2.1 ⬜) Kho cá nhân **cô lập theo user** — không user nào đọc/ghi kho người khác. | D-08, FR-PVOC-09 |
 
 ## 6. Yêu cầu phi chức năng (NFR)
 
@@ -194,6 +219,8 @@ Quy tắc validation từ [auth.dto.ts](../../apps/api/src/auth/auth.dto.ts): em
 | NFR-ACC-01 | UI **BẮT BUỘC** đạt tương phản **WCAG AA**; báo đúng/sai bằng **màu + icon + nhãn** (an toàn cho người mù màu); tôn trọng `prefers-reduced-motion`; touch target ≥ h-12. | ✅                                 | design.md §8.9 → `06-ui-ux`                |
 | NFR-USA-01 | Giao diện & email **BẮT BUỘC** tiếng Việt; font **Be Vietnam Pro** hỗ trợ đầy đủ dấu.                                                                                    | ✅                                 | design.md §8.2                             |
 | NFR-MNT-01 | Validation + type **NÊN** dùng chung Zod (`@keylish/shared`) để tránh lệch hợp đồng giữa API và web.                                                                     | ✅ (api/user-web) / 🚧 (admin-web) | packages/shared, `00-coding-standard` §6.1 |
+| NFR-PER-03 | (V2.1 ⬜) Lưu kho cá nhân **BẮT BUỘC** dùng tham chiếu → ~0.1 MB/user (free tier 0.5 GB → ~3–4k user ở 200 từ). | ⬜ | D-08, R-14 |
+| NFR-SEC-05 | (V2.1 ⬜) Endpoint kho cá nhân **BẮT BUỘC** qua `UserGuard` + CSRF; lọc theo `userId` của phiên, **không** nhận `userId` từ client. | ⬜ | BR-11 |
 
 ## 7. Use Case (UC)
 
@@ -235,12 +262,22 @@ Quy tắc validation từ [auth.dto.ts](../../apps/api/src/auth/auth.dto.ts): em
 - **Actor:** Hệ thống (kích bởi web user). **Luồng chính:** lần đầu mỗi phiên trình duyệt → `sendBeacon` `/api/v1/track` → đếm vào dòng giờ UTC nếu Origin hợp lệ.
 - **Ngoại lệ:** Origin không hợp lệ → không đếm (vẫn trả 204). **Trace:** FR-TRF-01/02/03, BR-07.
 
+### UC-07 — Quản lý kho cá nhân (V2.1 ⬜)
+
+- **Actor:** Người học (đăng nhập). **Luồng chính:** mở kho cá nhân → (a) tìm/pick từ kho hệ thống → thêm (tham chiếu); hoặc (b) tạo từ mới → dedup: khớp chính xác → liên kết + báo; khớp biến thể → gợi ý từ gốc; không khớp → tạo custom → sửa/xóa/override khi cần.
+- **Ngoại lệ:** thêm trùng → chặn (BR-09); chưa đăng nhập → yêu cầu login (FR-PVOC-09).
+- **Hậu điều kiện:** kho cá nhân cập nhật. **Trace:** FR-PVOC-01..07/09.
+
+### UC-08 — Luyện gõ từ kho cá nhân (V2.1 ⬜)
+
+- **Actor:** Người học. **Tiền điều kiện:** kho cá nhân có ≥1 từ.
+- **Luồng chính:** chọn nguồn "kho cá nhân" → engine gõ char-by-char (tái dùng FR-PRC-*) → tổng kết. **Trace:** FR-PVOC-08, FR-PRC-01..09.
+
 ## 8. ASSUMPTION / OPEN QUESTION / TBD
 
-- **OQ-05 (ngoài phạm vi V1):** lịch sử/tiến độ phiên luyện gõ có cần **lưu lâu dài** (server hoặc IndexedDB) không? Hiện chỉ tính trong phiên, không persist. README mô tả "dữ liệu phiên lưu IndexedDB" → **lệch nhẹ** (IndexedDB chỉ cache response vocab). Ai quyết: APPROVER.
-- **OQ-06 (⬜):** AI feedback + BYOK — đã có khung UI (design.md §8.4-bis, route `app/api/ai/.gitkeep`) nhưng **chưa có logic**. Chỉ ghi nhận, không đặc tả.
-- **OQ-07 (⬜):** flashcard/quiz mode — có thư mục `domain/flashcard`, `domain/quiz` rỗng. Chưa đặc tả.
-- **OQ-08 (⬜):** OAuth — `AuthProvider` chỉ `PASSWORD`. Mở rộng provider chưa đặc tả.
+- **OQ-05 → ĐÃ CHỐT (D-03):** V1 **không** lưu lịch sử/tiến độ phiên luyện gõ — ngoài phạm vi V1, ứng viên V2. README "lưu IndexedDB" lệch (R-8 — sửa qua D-02).
+- **OQ-06/07/08 → ĐÃ CHỐT (D-04):** AI feedback+BYOK, flashcard/quiz, OAuth — deferred V2; chỉ ghi nhận, không đặc tả đợt này.
+- **V2.1 (đang thiết kế):** Kho từ vựng cá nhân — quyết định D-08..D-11; yêu cầu phân bổ ở §4.8 (FR-PVOC), §7 (UC-07/08), §5 (BR-09..11), §6 (NFR-PER-03/SEC-05), §3 (enum). OQ con còn mở: OQ-11, OQ-12 — xem PROJECT-STATE §3.
 - TBD: tiêu chí chấp nhận định lượng (vd ngưỡng WPM, thời gian phản hồi API mục tiêu) — đề xuất ở `08-test`.
 
 ## 9. Truy vết (tóm tắt)
@@ -254,5 +291,6 @@ Quy tắc validation từ [auth.dto.ts](../../apps/api/src/auth/auth.dto.ts): em
 | FR-TRF  | api `traffic` · user-web `TrafficBeacon`                   | UC-06               |
 | FR-MAL  | api `mail`                                                 | UC-04               |
 | FR-SYS  | api `auth.purgeExpired` · `scripts/*`                      | —                   |
+| FR-PVOC | (V2.1 ⬜) user-web kho cá nhân · api personal-vocab · `@keylish/shared` lemmatize | UC-07, UC-08 |
 
 Ma trận truy vết FR ↔ endpoint ↔ test sẽ hoàn thiện ở `05-api` và `08-test`.

@@ -9,7 +9,7 @@
 | Tên | Đặc tả API (API Specification) |
 | Mã tài liệu | `05-api` |
 | Dự án | KeyLish |
-| Phiên bản | 0.2.1 |
+| Phiên bản | 0.2.2 |
 | Trạng thái | Draft |
 | Người viết | AI Agent (soạn thảo SDLC) |
 | Người duyệt | Nguyễn Hồng Khanh |
@@ -23,6 +23,7 @@
 | 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu — as-built từ code + Swagger /api/docs. |
 | 0.2.0 | 2026-06-15 | AI Agent | Bổ sung endpoint chi tiết 33 route, full Zod schemas, guard chain, rate limit, response types, auth flow, module dependency, Swagger coverage, cookie spec, error mapping. |
 | 0.2.1 | 2026-06-15 | AI Agent | Chuẩn hóa format metadata (§1.1/§1.2); sửa F-1: tổng route 31→33, Auth User 11→10. |
+| 0.2.2 | 2026-06-15 | AI Agent | Phase ③ V2.1: thêm §13 API kho cá nhân (list/pick/create/update/delete + dedup-on-add). |
 
 ## 2. Tổng quan
 
@@ -829,3 +830,27 @@ Tất cả errors đều được NestJS `ExceptionFilter` mặc định handle:
 - `apps/api/src/**/*.ts` — Toàn bộ source files
 - `packages/shared/src/vocab.ts` — Shared Zod schemas
 - Swagger UI: `GET /api/docs` (khi API chạy)
+
+## 13. (V2.1 ⬜ — đang thiết kế) API kho từ vựng cá nhân
+
+> Planned (chưa code). Mọi endpoint qua `UserGuard` + CSRF; lọc theo `userId` của phiên (NFR-SEC-05). Versioning theo D-07 (giữ as-built — `/api/user/*`, không `/v1`).
+
+| Method | Path | Guard | Mô tả | Trace |
+|---|---|---|---|---|
+| GET | `/api/user/vocab` | UserGuard | Liệt kê kho cá nhân (lọc, phân trang) | FR-PVOC-01 |
+| POST | `/api/user/vocab/pick` | UserGuard, CsrfGuard | Thêm tham chiếu 1 từ hệ thống (`{ wordId }`) | FR-PVOC-02 |
+| POST | `/api/user/vocab` | UserGuard, CsrfGuard | Tạo từ (`{ en, vi, ... }`) → **dedup-on-add** | FR-PVOC-03/04/05 |
+| PATCH | `/api/user/vocab/:id` | UserGuard, CsrfGuard | Sửa / override entry | FR-PVOC-07 |
+| DELETE | `/api/user/vocab/:id` | UserGuard, CsrfGuard | Xóa entry | FR-PVOC-07 |
+
+### 13.1. Dedup-on-add (`POST /api/user/vocab`)
+
+1. `normalizedEn = lowercase(trim(en))`.
+2. Khớp `Word.en` **chính xác** → `{ status: "linked", entry }` (tham chiếu); không tạo bản sao (FR-PVOC-04).
+3. Khớp **biến thể** (lemmatize Mức 1 → lemma có trong `Word`) → `{ status: "suggest", lemma, candidates }` (KHÔNG tự tạo; client hỏi người dùng — FR-PVOC-05).
+4. Không khớp → tạo custom → `{ status: "created", entry }`.
+5. Trùng trong kho → `409` (BR-09).
+
+### 13.2. Response shape (dự kiến — Zod ở `@keylish/shared`)
+
+`UserVocabEntryDto = { id, source, word?: WordDTO, custom?: { en, vi, example?, level? }, note?, createdAt }`. Mã lỗi theo §8 (400/401/403/409).
