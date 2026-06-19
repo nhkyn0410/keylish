@@ -9,13 +9,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
-import type { WordDTO } from "@keylish/shared";
+import type { CefrLevel, TopicDTO, WordDTO } from "@keylish/shared";
 import { Icon } from "@/components/vocab/typing/primitives";
-import { fetchVocab } from "@/infra/vocab/vocabApi";
+import { fetchTopics, fetchVocab } from "@/infra/vocab/vocabApi";
 import { ApiError, getErrorMessage, pickSystemWord } from "@/infra/user/userApi";
 
-const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
+const LEVELS: CefrLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const HARD_SHADOW = "3px 3px 0 0 #000";
+const PAGE_SIZE = 100;
 
 function keyOf(w: WordDTO) {
   return w.id ?? `${w.en}:${w.level ?? ""}`;
@@ -82,6 +83,7 @@ export function speak(en: string) {
 export function VocabLibrarySplit() {
   const router = useRouter();
   const [words, setWords] = useState<WordDTO[]>([]);
+  const [topics, setTopics] = useState<TopicDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeLevels, setActiveLevels] = useState<Set<string>>(new Set());
@@ -89,37 +91,96 @@ export function VocabLibrarySplit() {
   const [selKey, setSelKey] = useState<string | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [notice, setNotice] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     let active = true;
-    fetchVocab({ limit: 60 })
-      .then((res) => {
-        if (active) setWords(res.words);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+    fetchTopics().then((res) => {
+      if (active) setTopics(res.topics);
+    });
     return () => {
       active = false;
     };
   }, []);
 
-  const topics = useMemo(
-    () => Array.from(new Set(words.map((w) => w.topic).filter(Boolean))) as string[],
-    [words]
+  const levelList = useMemo(
+    () => LEVELS.filter((level) => activeLevels.has(level)),
+    [activeLevels]
   );
+  const topicList = useMemo(() => Array.from(activeTopics).sort(), [activeTopics]);
+  const search = query.trim();
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return words.filter((w) => {
-      const okQ = !q || w.en.toLowerCase().includes(q) || w.vi.toLowerCase().includes(q);
-      const okLv = activeLevels.size === 0 || (w.level != null && activeLevels.has(w.level));
-      const okTp = activeTopics.size === 0 || (w.topic != null && activeTopics.has(w.topic));
-      return okQ && okLv && okTp;
-    });
-  }, [words, query, activeLevels, activeTopics]);
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setHasMore(false);
+    const timer = window.setTimeout(() => {
+      const filter = {
+        levels: levelList.length ? levelList : undefined,
+        topics: topicList.length ? topicList : undefined,
+        search: search || undefined,
+      };
+
+      fetchVocab({ ...filter, limit: PAGE_SIZE, offset: 0, random: false })
+        .then((res) => {
+          if (!active) return;
+          setWords(res.words);
+          setHasMore(res.words.length === PAGE_SIZE);
+          setSelKey((current) => {
+            if (!current) return null;
+            const nextKeys = new Set(res.words.map(keyOf));
+            return nextKeys.has(current) ? current : null;
+          });
+        })
+        .catch(() => {
+          if (!active) return;
+          setWords([]);
+          setHasMore(false);
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+    }, 250);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [levelList, search, topicList]);
+
+  const filtered = words;
 
   const sel = filtered.find((w) => keyOf(w) === selKey) ?? filtered[0] ?? null;
+
+  async function loadMore() {
+    if (loadingMore || !hasMore) return;
+    const filter = {
+      levels: levelList.length ? levelList : undefined,
+      topics: topicList.length ? topicList : undefined,
+      search: search || undefined,
+    };
+
+    setLoadingMore(true);
+    try {
+      const res = await fetchVocab({
+        ...filter,
+        limit: PAGE_SIZE,
+        offset: words.length,
+        random: false,
+      });
+      setWords((current) => {
+        const seen = new Set(current.map(keyOf));
+        const next = res.words.filter((word) => !seen.has(keyOf(word)));
+        return [...current, ...next];
+      });
+      setHasMore(res.words.length === PAGE_SIZE);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   function toggle(set: Set<string>, setter: (s: Set<string>) => void, value: string) {
     const next = new Set(set);
@@ -149,34 +210,12 @@ export function VocabLibrarySplit() {
   }
 
   return (
-    <div className="k-screen k-b" style={{ height: "min(80vh, 760px)", minHeight: 540 }}>
-      {/* Top bar */}
-      <div
-        style={{
-          flex: "0 0 auto",
-          height: 58,
-          borderBottom: "4px solid #000",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 20px",
-        }}
-      >
-        <div className="k-badge k-badge--violet">Kho từ vựng</div>
-        <button
-          className="k-btn k-btn--sm k-btn--primary"
-          onClick={() => router.push("/typing")}
-          disabled={!sel}
-        >
-          Luyện bộ này <Icon name="arrow" size={16} />
-        </button>
-      </div>
-
+    <div className="k-screen k-b" style={{ height: "100%", minHeight: 0 }}>
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
         {/* LEFT — rail lọc */}
         <div
           style={{
-            flex: "0 0 230px",
+            flex: "0 0 310px",
             borderRight: "4px solid #000",
             padding: "20px 18px",
             display: "flex",
@@ -241,13 +280,13 @@ export function VocabLibrarySplit() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {topics.map((t) => {
-                  const on = activeTopics.has(t);
+                  const on = activeTopics.has(t.slug);
                   return (
                     <button
-                      key={t}
+                      key={t.slug}
                       className="k-chip"
                       data-on={on ? "1" : "0"}
-                      onClick={() => toggle(activeTopics, setActiveTopics, t)}
+                      onClick={() => toggle(activeTopics, setActiveTopics, t.slug)}
                       style={{
                         padding: "6px 11px",
                         fontSize: 12.5,
@@ -255,7 +294,11 @@ export function VocabLibrarySplit() {
                         justifyContent: "space-between",
                       }}
                     >
-                      {t} {on ? <Icon name="check" size={13} stroke={4} /> : null}
+                      <span>{t.title}</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ opacity: 0.55 }}>{t.count}</span>
+                        {on ? <Icon name="check" size={13} stroke={4} /> : null}
+                      </span>
                     </button>
                   );
                 })}
@@ -263,18 +306,15 @@ export function VocabLibrarySplit() {
             </div>
           ) : null}
 
-          <div
-            style={{
-              marginTop: "auto",
-              fontSize: 12,
-              fontWeight: 700,
-              opacity: 0.55,
-              lineHeight: 1.4,
-            }}
-          >
-            {filtered.length} từ khớp bộ lọc
-            <br />
-            {picked.size} trong kho của bạn
+          <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
+            <button
+              className="k-btn k-btn--sm k-btn--primary"
+              onClick={() => router.push("/typing")}
+              disabled={!sel}
+              style={{ width: "100%" }}
+            >
+              Luyện bộ này <Icon name="arrow" size={16} />
+            </button>
           </div>
         </div>
 
@@ -290,9 +330,11 @@ export function VocabLibrarySplit() {
             overflow: "auto",
           }}
         >
-          <div className="k-h-eyebrow" style={{ color: "#7a6a00" }}>
-            Danh sách từ {loading ? "· đang nạp…" : `· ${filtered.length}`}
-          </div>
+          {loading && filtered.length === 0 ? (
+            <div className="k-card" style={{ padding: 18, fontWeight: 700, opacity: 0.7 }}>
+              Đang nạp từ vựng…
+            </div>
+          ) : null}
 
           {!loading && filtered.length === 0 ? (
             <div className="k-card" style={{ padding: 18, fontWeight: 700, opacity: 0.7 }}>
@@ -358,6 +400,17 @@ export function VocabLibrarySplit() {
               </button>
             );
           })}
+
+          {filtered.length > 0 && hasMore ? (
+            <button
+              className="k-btn k-btn--sm"
+              onClick={loadMore}
+              disabled={loadingMore}
+              style={{ alignSelf: "center", marginTop: 4 }}
+            >
+              {loadingMore ? "Đang tải…" : "Tải thêm"}
+            </button>
+          ) : null}
         </div>
 
         {/* RIGHT — panel chi tiết */}

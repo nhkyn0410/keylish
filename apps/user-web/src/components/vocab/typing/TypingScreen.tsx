@@ -363,8 +363,8 @@ export function TypingScreen({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "clamp(56px, 12vh, 104px) 24px 24px",
+          justifyContent: "safe center",
+          padding: "32px 24px",
           minHeight: 0,
           overflow: "auto",
         }}

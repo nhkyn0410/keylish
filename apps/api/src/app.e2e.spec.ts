@@ -118,6 +118,46 @@ describe("AppModule routes", () => {
     });
   });
 
+  it("serves searched v1 vocabulary", async () => {
+    database.client.word.findMany.mockResolvedValue([]);
+
+    await request(app.getHttpServer())
+      .get("/api/v1/vocab")
+      .query({ search: "xin", limit: "5" })
+      .expect(200)
+      .expect([]);
+
+    expect(database.client.word.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { en: { contains: "xin", mode: "insensitive" } },
+          { vi: { contains: "xin", mode: "insensitive" } },
+        ],
+      },
+      orderBy: [{ frequency: "desc" }, { en: "asc" }],
+      take: 5,
+      select: expect.any(Object),
+    });
+  });
+
+  it("serves paged v1 vocabulary", async () => {
+    database.client.word.findMany.mockResolvedValue([]);
+
+    await request(app.getHttpServer())
+      .get("/api/v1/vocab")
+      .query({ limit: "25", offset: "100" })
+      .expect(200)
+      .expect([]);
+
+    expect(database.client.word.findMany).toHaveBeenCalledWith({
+      where: {},
+      orderBy: [{ frequency: "desc" }, { en: "asc" }],
+      take: 25,
+      skip: 100,
+      select: expect.any(Object),
+    });
+  });
+
   it("serves v1 vocabulary counts", async () => {
     database.client.word.count.mockResolvedValue(7);
 

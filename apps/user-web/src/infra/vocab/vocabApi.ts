@@ -12,9 +12,10 @@ import { SEED_TOPICS, SEED_VOCABULARY } from "@/data/seed/vocabulary";
 export interface VocabFilter {
   levels?: CefrLevel[];
   topics?: string[];
+  search?: string;
 }
 
-const DB_NAME = "keylish-vocab-v1";
+const DB_NAME = "keylish-vocab-v2";
 const STORE_NAME = "responses";
 
 export type VocabSource = "api" | "local" | "cache" | "seed";
@@ -27,8 +28,8 @@ export interface FetchVocabResult {
 
 export async function fetchVocab(params: Partial<VocabQuery> = {}): Promise<FetchVocabResult> {
   const query = normalizeQuery(params);
-  const key = cacheKey(query);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  const key = cacheKey(query, apiUrl);
   let error: string | undefined;
 
   if (apiUrl) {
@@ -38,11 +39,8 @@ export async function fetchVocab(params: Partial<VocabQuery> = {}): Promise<Fetc
       });
       if (!res.ok) throw new Error(`API returned ${res.status}`);
       const parsed = VocabResponseSchema.parse(await res.json());
-      if (parsed.length) {
-        await writeCache(key, parsed);
-        return { words: parsed, source: sourceForApiUrl(apiUrl) };
-      }
-      error = "API returned an empty vocabulary set.";
+      await writeCache(key, parsed);
+      return { words: parsed, source: sourceForApiUrl(apiUrl) };
     } catch (err) {
       error = err instanceof Error ? err.message : "Unable to fetch vocabulary API.";
     }
@@ -144,6 +142,7 @@ export async function fetchVocabCount(filter: VocabFilter = {}): Promise<number>
       const params = new URLSearchParams();
       if (filter.levels?.length) params.set("levels", filter.levels.join(","));
       if (filter.topics?.length) params.set("topics", filter.topics.join(","));
+      if (filter.search?.trim()) params.set("search", filter.search.trim());
       const res = await fetch(`${apiUrl}/api/v1/vocab/count?${params.toString()}`, {
         headers: { Accept: "application/json" },
       });
@@ -156,6 +155,7 @@ export async function fetchVocabCount(filter: VocabFilter = {}): Promise<number>
 }
 
 function countSeed(filter: VocabFilter): number {
+  const search = filter.search?.trim().toLowerCase();
   return SEED_VOCABULARY.filter((word) => {
     const levelOk =
       !filter.levels?.length || (word.level != null && filter.levels.includes(word.level));
@@ -163,15 +163,20 @@ function countSeed(filter: VocabFilter): number {
       !filter.topics?.length ||
       (word.topic != null &&
         filter.topics.some((t) => t === word.topic || t === slugify(word.topic ?? "")));
-    return levelOk && topicOk;
+    const searchOk =
+      !search || word.en.toLowerCase().includes(search) || word.vi.toLowerCase().includes(search);
+    return levelOk && topicOk && searchOk;
   }).length;
 }
 
 function normalizeQuery(params: Partial<VocabQuery>): VocabQuery {
+  const search = params.search?.trim();
   return {
     levels: params.levels?.length ? params.levels : undefined,
     topics: params.topics?.length ? params.topics : undefined,
+    search: search ? search : undefined,
     limit: params.limit ?? 20,
+    offset: params.offset ?? 0,
     random: params.random ?? false,
   };
 }
@@ -180,18 +185,24 @@ function toSearchParams(query: VocabQuery) {
   const params = new URLSearchParams();
   if (query.levels?.length) params.set("levels", query.levels.join(","));
   if (query.topics?.length) params.set("topics", query.topics.join(","));
+  if (query.search) params.set("search", query.search);
   params.set("limit", String(query.limit));
+  if (query.offset) params.set("offset", String(query.offset));
   if (query.random) params.set("random", "1");
   return params.toString();
 }
 
-function cacheKey(query: VocabQuery) {
+function cacheKey(query: VocabQuery, apiUrl?: string) {
+  const apiScope = apiUrl?.toLowerCase() ?? "no-api";
   const levels = [...(query.levels ?? [])].sort().join(",");
   const topics = [...(query.topics ?? [])].sort().join(",");
-  return `vocab:${levels}:${topics}:${query.limit}:${query.random ? "1" : "0"}`;
+  return `vocab:${apiScope}:${levels}:${topics}:${query.search ?? ""}:${query.limit}:${
+    query.offset
+  }:${query.random ? "1" : "0"}`;
 }
 
 function filterSeed(query: VocabQuery): WordDTO[] {
+  const search = query.search?.toLowerCase();
   const rows = SEED_VOCABULARY.filter((word) => {
     const levelOk =
       !query.levels?.length || (word.level != null && query.levels.includes(word.level));
@@ -199,10 +210,12 @@ function filterSeed(query: VocabQuery): WordDTO[] {
       !query.topics?.length ||
       (word.topic != null &&
         query.topics.some((topic) => topic === word.topic || topic === slugify(word.topic ?? "")));
-    return levelOk && topicOk;
+    const searchOk =
+      !search || word.en.toLowerCase().includes(search) || word.vi.toLowerCase().includes(search);
+    return levelOk && topicOk && searchOk;
   });
   const source = query.random ? shuffle(rows) : rows;
-  return source.slice(0, query.limit);
+  return source.slice(query.offset, query.offset + query.limit);
 }
 
 async function openDb() {

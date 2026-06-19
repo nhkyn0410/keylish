@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { type CefrLevel } from "@keylish/db";
-import { VocabQuerySchema, type WordDTO } from "@keylish/shared";
+import { type CefrLevel, type Prisma } from "@keylish/db";
+import { VocabQuerySchema, type VocabQuery, type WordDTO } from "@keylish/shared";
 import { z } from "zod";
 import { DatabaseService } from "../database/database.service";
 
@@ -88,6 +88,22 @@ function shuffle<T>(items: T[]) {
   return copy;
 }
 
+function publicVocabWhere(query: Pick<VocabQuery, "levels" | "topics" | "search">) {
+  const where: Prisma.WordWhereInput = {
+    ...(query.levels?.length ? { level: { in: query.levels } } : {}),
+    ...(query.topics?.length ? { topic: { slug: { in: query.topics } } } : {}),
+  };
+
+  if (query.search) {
+    where.OR = [
+      { en: { contains: query.search, mode: "insensitive" } },
+      { vi: { contains: query.search, mode: "insensitive" } },
+    ];
+  }
+
+  return where;
+}
+
 @Injectable()
 export class VocabService {
   constructor(private readonly database: DatabaseService) {}
@@ -100,12 +116,10 @@ export class VocabService {
 
     const parsed = parsedResult.data;
     const rows = (await this.database.client.word.findMany({
-      where: {
-        ...(parsed.levels?.length ? { level: { in: parsed.levels } } : {}),
-        ...(parsed.topics?.length ? { topic: { slug: { in: parsed.topics } } } : {}),
-      },
+      where: publicVocabWhere(parsed),
       orderBy: parsed.random ? undefined : [{ frequency: "desc" }, { en: "asc" }],
       take: parsed.random ? undefined : parsed.limit,
+      ...(parsed.random || parsed.offset === 0 ? {} : { skip: parsed.offset }),
       select: {
         id: true,
         en: true,
@@ -136,12 +150,8 @@ export class VocabService {
       throw new BadRequestException(parsedResult.error.message);
     }
 
-    const { levels, topics } = parsedResult.data;
     return this.database.client.word.count({
-      where: {
-        ...(levels?.length ? { level: { in: levels } } : {}),
-        ...(topics?.length ? { topic: { slug: { in: topics } } } : {}),
-      },
+      where: publicVocabWhere(parsedResult.data),
     });
   }
 

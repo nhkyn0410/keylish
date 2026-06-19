@@ -1,20 +1,20 @@
 # PROJECT-STATE — Trạng thái sống của bộ tài liệu KeyLish
 
 > File LIVE, giữ LEAN. Nguồn duy nhất cho: trạng thái tài liệu · OPEN QUESTION/RISK đang mở · cửa sổ lịch sử ~5 mục. Cập nhật mỗi khi viết/sửa tài liệu.
-> Cập nhật lần cuối: 2026-06-19 (v0.2.10).
+> Cập nhật lần cuối: 2026-06-19 (v0.2.14).
 
 ## 1. Trạng thái tài liệu SDLC
 
 | Mã  | Tài liệu                 | Trạng thái | Phiên bản | Ghi chú                                                                                |
 | --- | ------------------------ | ---------- | --------- | -------------------------------------------------------------------------------------- |
 | 00  | Coding Standard          | Draft      | 0.2.1     | Chờ review · +§12 Quy trình, +§13 Quy định trạng thái tài liệu                         |
-| 01  | SRS                      | Draft      | 0.2.1     | Chờ review · V2.1 phân bổ vào mục sẵn có (§4.8 FR-PVOC, §7 UC-07/08, §5/§6/§3); gỡ §10 |
+| 01  | SRS                      | Draft      | 0.2.1     | V2.1 yêu cầu còn ghi planned; code hiện partial — cần sync trạng thái FR-PVOC           |
 | 02  | HLD                      | Draft      | 0.2.1     | deep-review fix (G-4/G-5)                                                              |
 | 03  | LLD                      | Draft      | 0.2.1     | deep-review fix (G-4)                                                                  |
-| 04  | Database Design          | Draft      | 0.2.2     | +§10 model `UserVocabEntry` (V2.1)                                                     |
-| 05  | API Specification        | Draft      | 0.2.2     | +§13 API kho cá nhân (V2.1)                                                            |
-| 06  | UI/UX + Design System    | Draft      | 0.1.2     | +§7 UI kho cá nhân (Split — đã build)                                                  |
-| 07  | Security & Permission    | Draft      | 0.2.2     | +§21 bảo mật kho cá nhân (V2.1)                                                        |
+| 04  | Database Design          | Draft      | 0.2.2     | `UserVocabEntry` đã có schema+migration; doc §10 vẫn ghi planned                       |
+| 05  | API Specification        | Draft      | 0.2.2     | `/api/user/vocab*` đã có code; doc §13 vẫn ghi planned                                 |
+| 06  | UI/UX + Design System    | Draft      | 0.1.2     | UI kho cá nhân đã nối API một phần; FR-PVOC-08 chưa nối typing                         |
+| 07  | Security & Permission    | Draft      | 0.2.2     | UserGuard/CSRF + userId isolation đã có code; doc §21 vẫn ghi planned                  |
 | 08  | Test Plan & Acceptance   | Draft      | 0.1.1     | G-2/G-3 (10 e2e test); G-4 RISK                                                        |
 | 09  | Deployment & Operation   | Draft      | 0.1.1     | tách local/dev Docker DB với production Supabase; thêm DB guard + live admin env riêng |
 | 10  | ADR                      | Draft      | 0.2.3     | +ADR-019 (kho cá nhân — tham chiếu); 19 ADR                                            |
@@ -39,7 +39,7 @@ Quy ước status: Draft → (review) → Approved. **Chỉ APPROVER (Nguyễn H
 | R-4  | README ghi DB "(Neon)" vs "(Supabase)".                                                                                                                    | Thấp             | SDLC dùng Supabase (prod); sửa README (D-02).                      |
 | R-5  | Layering user-web phần lớn scaffold rỗng; logic gõ ở `components/`.                                                                                        | Trung bình       | Task refactor T-06 (D-05).                                         |
 | R-6  | Versioning không đồng nhất (auth/admin không `/v1`).                                                                                                       | Thấp (chấp nhận) | D-07: giữ as-built, version khi public.                            |
-| R-7  | Coverage test thấp (`--passWithNoTests`) — gồm engine gõ (vùng dễ lỗi) + user-web/db/shared chưa test.                                                     | Cao              | Vùng MANDATORY `08`; task T-03/T-04/T-05.                          |
+| R-7  | Coverage test thấp (`--passWithNoTests`) — gồm engine gõ (vùng dễ lỗi), V2.1 uservocab, user-web/db/shared chưa test.                                      | Cao              | Vùng MANDATORY `08`; task T-03/T-04/T-05.                          |
 | R-8  | README ghi "dữ liệu phiên lưu IndexedDB" — thực tế chỉ cache vocab response.                                                                               | Thấp             | Làm rõ `01` (D-03); sửa README (D-02).                             |
 | R-9  | `auth.service.ts` ~963 dòng đảm nhiều trách nhiệm (SRP).                                                                                                   | Thấp             | Refactor tùy chọn (chưa có task bắt buộc).                         |
 | R-10 | Chưa có hook pre-commit lint/typecheck.                                                                                                                    | Thấp             | Task T-09.                                                         |
@@ -47,6 +47,8 @@ Quy ước status: Draft → (review) → Approved. **Chỉ APPROVER (Nguyễn H
 | R-12 | `seed.ts` fallback trỏ `apps/web/...` (sai) thay vì `apps/user-web/...`.                                                                                   | Thấp             | ✅ **Đã sửa** trong phiên (G-6, 2026-06-15).                       |
 | R-13 | Rate-limit in-memory (mất khi restart).                                                                                                                    | Thấp             | Task T-08.                                                         |
 | R-14 | Free tier 0.5 GB: kho cá nhân **không** phải nút thắt (~0.1 MB/user; ~3–4k user ở 200 từ). Lever thật là kích thước kho hệ thống (Mức-2 WordForm +~35 MB). | Thấp             | Theo dõi khi seed full catalog; trim catalog nếu chật (`09`/`04`). |
+| R-15 | Tài liệu V2.1 còn ghi `⬜ planned` trong `01/04/05/06/07`, trong khi code đã partial (schema/API/UI/security).                                               | Trung bình       | Sync tài liệu theo audit FR-PVOC; giữ FR-PVOC-08 là gap riêng.     |
+| R-16 | FR-PVOC-08 chưa triển khai: nút "Luyện..." từ kho cá nhân/kho hệ thống chỉ `router.push("/typing")`, không truyền nguồn/từ đã chọn.                         | Trung bình       | Thiết kế `PracticeSource` + API/typing integration cho personal.   |
 
 ## 3. OPEN QUESTION đang mở
 
@@ -57,24 +59,31 @@ Quy ước status: Draft → (review) → Approved. **Chỉ APPROVER (Nguyễn H
 
 ## 4. DECISION đã chốt
 
-| Mã   | Quyết định                                                                                                                                                                                                 | Ngày       |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| D-01 | Di chuyển nội dung design.md/vocab-pipeline.md vào SDLC (OQ-01); giữ file gốc trỏ tới.                                                                                                                     | 2026-06-15 |
-| D-02 | Được phép sửa README để khớp as-built (R-1/2/4/8); thực hiện **sau khi** có `05`/`09`.                                                                                                                     | 2026-06-15 |
-| D-03 | V1 **không** lưu lịch sử/tiến độ phiên luyện gõ → ngoài phạm vi V1; sửa README (R-8).                                                                                                                      | 2026-06-15 |
-| D-04 | AI feedback+BYOK, flashcard/quiz, OAuth ngoài PASSWORD → deferred V2.                                                                                                                                      | 2026-06-15 |
-| D-05 | Giữ layering as-built; ghi task refactor "tách logic engine → `domain/vocab-typing`" (T-06).                                                                                                               | 2026-06-15 |
-| D-06 | (OQ-10) admin-web **local-only, không deploy**; prod giữ `ADMIN_API_ENABLED=false`.                                                                                                                        | 2026-06-15 |
-| D-07 | (OQ-09) Auth/admin **giữ không version** ở V1; chuẩn hóa `/api/v1/` khi API public.                                                                                                                        | 2026-06-15 |
-| D-08 | (V2.1) Kho cá nhân = **mô hình tham chiếu + custom**: `UserVocabEntry` trỏ `Word` hệ thống (`wordId`) hoặc lưu custom (`customEn/Vi/...`); **không copy** nguyên từ. `Word` giữ là kho hệ thống ownerless. | 2026-06-15 |
-| D-09 | (V2.1) Dedup khi add: khớp chính xác `en` → **tự liên kết + báo**; khớp biến thể → **gợi ý** từ gốc (KHÔNG tự gộp); không khớp → custom. Unique `(userId, wordId)` + `(userId, normalizedEn)`.             | 2026-06-15 |
-| D-10 | (V2.1) Phạm vi = kho hệ thống + cá nhân + pick + tự tạo. **AI custom hoãn V2.2** (vẫn thuộc D-04); schema chừa `source` ∈ `system`/`custom`/`ai`.                                                          | 2026-06-15 |
-| D-11 | (V2.1) Lemmatization **Mức 1** (luật đuôi + ~200 bất quy tắc) ở `@keylish/shared`, chỉ dùng cho _gợi ý_. Mức 2 (bảng `WordForm` từ kaikki) để dành — mở OQ khi cần độ chính xác cao.                       | 2026-06-15 |
+| Mã   | Quyết định                                                                                                                                                                                                                                              | Ngày       |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| D-01 | Di chuyển nội dung design.md/vocab-pipeline.md vào SDLC (OQ-01); giữ file gốc trỏ tới.                                                                                                                                                                  | 2026-06-15 |
+| D-02 | Được phép sửa README để khớp as-built (R-1/2/4/8); thực hiện **sau khi** có `05`/`09`.                                                                                                                                                                  | 2026-06-15 |
+| D-03 | V1 **không** lưu lịch sử/tiến độ phiên luyện gõ → ngoài phạm vi V1; sửa README (R-8).                                                                                                                                                                   | 2026-06-15 |
+| D-04 | AI feedback+BYOK, flashcard/quiz, OAuth ngoài PASSWORD → deferred V2.                                                                                                                                                                                   | 2026-06-15 |
+| D-05 | Giữ layering as-built; ghi task refactor "tách logic engine → `domain/vocab-typing`" (T-06).                                                                                                                                                            | 2026-06-15 |
+| D-06 | (OQ-10) admin-web **local-only, không deploy**; prod giữ `ADMIN_API_ENABLED=false`.                                                                                                                                                                     | 2026-06-15 |
+| D-07 | (OQ-09) Auth/admin **giữ không version** ở V1; chuẩn hóa `/api/v1/` khi API public.                                                                                                                                                                     | 2026-06-15 |
+| D-08 | (V2.1) Kho cá nhân = **mô hình tham chiếu + custom**: `UserVocabEntry` trỏ `Word` hệ thống (`wordId`) hoặc lưu custom (`customEn/Vi/...`); **không copy** nguyên từ. `Word` giữ là kho hệ thống ownerless.                                              | 2026-06-15 |
+| D-09 | (V2.1) Dedup khi add: khớp chính xác `en` → **tự liên kết + báo**; khớp biến thể → **gợi ý** từ gốc (KHÔNG tự gộp); không khớp → custom. Unique `(userId, wordId)` + `(userId, normalizedEn)`.                                                          | 2026-06-15 |
+| D-10 | (V2.1) Phạm vi = kho hệ thống + cá nhân + pick + tự tạo. **AI custom hoãn V2.2** (vẫn thuộc D-04); schema chừa `source` ∈ `system`/`custom`/`ai`.                                                                                                       | 2026-06-15 |
+| D-11 | (V2.1) Lemmatization **Mức 1** (luật đuôi + ~200 bất quy tắc) ở `@keylish/shared`, chỉ dùng cho _gợi ý_. Mức 2 (bảng `WordForm` từ kaikki) để dành — mở OQ khi cần độ chính xác cao.                                                                    | 2026-06-15 |
+| D-12 | Local/dev DB mặc định là Docker Postgres; production DB chỉ trên dashboard. Admin-web vẫn local-only nhưng có **live admin mode** qua `KEYLISH_DB_ENV_FILE` + `ALLOW_REMOTE_DB_FOR_DEV=true`; typing setup hiển thị nguồn `local` khi API là localhost. | 2026-06-19 |
 
 ## 5. Lịch sử (cửa sổ trượt ~5 mục)
 
 | Ngày       | Việc                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-19 | Audit code so với V2.1: schema/migration/shared DTO + `/api/user/vocab*` + UI quản lý kho cá nhân đã partial; bảo mật UserGuard/CSRF/userId isolation có code; còn thiếu FR-PVOC-08 (luyện từ kho cá nhân), UI sửa/override chưa nối, phân trang/search kho cá nhân mới tải page đầu, test V2.1 còn thiếu. Verify: shared/api/user-web typecheck pass; api test 19/19 pass. |
+| 2026-06-19 | Tinh gọn UI Kho hệ thống: bỏ badge nguồn/header đếm và khối thống kê phụ; thêm public vocab `offset` + nút **Tải thêm** để append từng lô 100 từ thay vì chỉ xem 100 từ đầu. Verify: shared/api/user-web typecheck pass, api test 19/19 pass, eslint file liên quan sạch, local API `limit=3&offset=100` OK. |
+| 2026-06-19 | Sửa nguồn dữ liệu Vocabulary: thêm `search` cho public vocab API/count; màn Kho hệ thống gọi API theo search/cấp độ/chủ đề thay vì lọc 60 từ cục bộ; cache vocab tách theo API URL + badge nguồn `Local/API/Cache/Seed`. Verify: shared/api/user-web typecheck pass, api test 18/18 pass, eslint file liên quan sạch. |
+| 2026-06-19 | UI tiếp: route `/kho-tu-vung`→**`/vocabulary`**; đưa **Góp ý** lên sidebar (link Google Form, bỏ nút nổi + xóa `FeedbackButton.tsx`); **bỏ top-bar** trong khung kho (Luyện bộ này → rail; Tạo từ mới đã có ở rail); màn **typing co theo màn hình** (`.k-wrap` 1280→1600 cho setup/summary; TypingScreen căn giữa dọc `safe center`). typecheck pass. |
+| 2026-06-19 | Hiệu chỉnh UI Kho từ vựng (`/kho-tu-vung`): bỏ eyebrow "KeyLish · Kho từ vựng" + sửa nested `<main>`; đưa toggle Kho hệ thống/Kho của tôi + nút **"?"** (chỗ cho tour sau) lên ngang tiêu đề; khung Split **fill 100% chiều cao** shell-main + **full-width** (bỏ max-width 1280) để co theo màn hình; bỏ badge dư trong top-bar, thu gọn top-bar. typecheck pass. |
+| 2026-06-19 | Thêm `VocabSource="local"` cho user-web khi `NEXT_PUBLIC_API_URL` là localhost/127.x; badge nguồn dữ liệu ở màn thiết lập typing hiển thị `Local`; `loadTopicsAwait` coi `local` là nguồn API-backed đã sẵn sàng. Verify: `pnpm --filter @keylish/user-web typecheck` pass.                                                                                                                                                               |
 | 2026-06-19 | Tách quy trình local/dev khỏi production DB: local mặc định dùng Docker Postgres; production env trên dashboard; thêm guard chặn remote DB khi dev/migrate/seed; bổ sung live admin local-only qua env riêng.                                                                                                                                                                                                                             |
 | 2026-06-15 | Sửa Sidebar "Kho từ vựng" → `/kho-tu-vung` (route thật, bỏ dang-phat-trien); thêm `FeedbackButton` (nút góc phải-dưới → panel dock góc, không backdrop, kèm mascot; lưu localStorage + mailto nếu có `NEXT_PUBLIC_FEEDBACK_EMAIL`). Verify bằng preview (typecheck + screenshot).                                                                                                                                                         |
 | 2026-06-15 | **Phase ④ V2.1 (UI kho cá nhân)**: build `MyVocabSplit` (xem/tìm/xóa kho cá nhân) + form "Tạo từ mới" (dedup → linked/created + dialog gợi ý biến thể FR-PVOC-05) + tabs "Kho hệ thống / Kho của tôi"; API client `fetchUserVocab`/`createUserVocab`/`deleteUserVocab`. typecheck pass; lint sạch (file mới).                                                                                                                             |

@@ -76,7 +76,7 @@ export function MyVocabSplit() {
 
   if (authError) {
     return (
-      <div className="k-screen k-b" style={{ minHeight: 360, alignItems: "center", justifyContent: "center" }}>
+      <div className="k-screen k-b" style={{ height: "100%", minHeight: 360, alignItems: "center", justifyContent: "center" }}>
         <div className="k-card" style={{ padding: "28px 30px", textAlign: "center", maxWidth: 420 }}>
           <div className="k-badge k-badge--violet" style={{ marginBottom: 12 }}>
             Kho của tôi
@@ -96,25 +96,7 @@ export function MyVocabSplit() {
   }
 
   return (
-    <div className="k-screen k-b" style={{ height: "min(80vh, 760px)", minHeight: 540 }}>
-      {/* Top bar */}
-      <div
-        style={{
-          flex: "0 0 auto",
-          height: 58,
-          borderBottom: "4px solid #000",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 20px",
-        }}
-      >
-        <div className="k-badge k-badge--violet">Kho của tôi</div>
-        <button className="k-btn k-btn--sm k-btn--primary" onClick={() => setShowCreate(true)}>
-          + Tạo từ mới
-        </button>
-      </div>
-
+    <div className="k-screen k-b" style={{ height: "100%", minHeight: 0 }}>
       <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
         {/* LEFT — search + count */}
         <div

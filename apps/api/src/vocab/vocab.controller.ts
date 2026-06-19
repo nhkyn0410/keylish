@@ -23,7 +23,9 @@ export class VocabController {
   @ApiOperation({ summary: "List vocabulary items" })
   @ApiQuery({ name: "levels", required: false, isArray: true, enum: CefrLevelSchema.options })
   @ApiQuery({ name: "topics", required: false, isArray: true, type: String })
+  @ApiQuery({ name: "search", required: false, type: String })
   @ApiQuery({ name: "limit", required: false, type: Number, example: 20 })
+  @ApiQuery({ name: "offset", required: false, type: Number, example: 0 })
   @ApiQuery({ name: "random", required: false, type: Boolean, example: false })
   @ApiOkResponse({ description: "Vocabulary items." })
   findAll(@Query() query: Record<string, unknown>) {
@@ -34,6 +36,7 @@ export class VocabController {
   @ApiOperation({ summary: "Count vocabulary items matching the filters" })
   @ApiQuery({ name: "levels", required: false, isArray: true, enum: CefrLevelSchema.options })
   @ApiQuery({ name: "topics", required: false, isArray: true, type: String })
+  @ApiQuery({ name: "search", required: false, type: String })
   @ApiOkResponse({ description: "Number of matching vocabulary items." })
   async count(@Query() query: Record<string, unknown>) {
     return { count: await this.vocabService.count(query) };

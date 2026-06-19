@@ -63,7 +63,7 @@
    margin reset above (which has higher specificity than a lone `.k-wrap`). */
 .k-screen .k-wrap {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1600px;
   margin-inline: auto;
   padding-inline: 40px;
 }

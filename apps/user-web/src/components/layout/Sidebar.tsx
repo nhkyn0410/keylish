@@ -47,6 +47,12 @@ function NavIcon({
         <path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeWidth={stroke + 1} />
       </g>
     ),
+    chat: (
+      <g {...p}>
+        <path d="M4 5h16v11H9l-4 4v-4H4z" />
+        <path d="M8 9.5h8M8 12.5h5" />
+      </g>
+    ),
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
@@ -92,6 +98,10 @@ function SideLink({
 const DEV = "/dang-phat-trien";
 const soonHref = (feature: string) => `${DEV}/${feature}`;
 
+/* Link Google Form cho mục Góp ý (cấu hình qua env NEXT_PUBLIC_FEEDBACK_FORM_URL). */
+const FEEDBACK_FORM_URL =
+  process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL ?? "https://forms.gle/REPLACE_WITH_YOUR_FORM";
+
 /**
  * Sidebar dọc (variant D) — logo trên, danh sách tính năng giữa, đăng nhập/đăng
  * ký dưới. Port từ design `navbar.jsx` → NavSidebar.
@@ -102,7 +112,7 @@ export function Sidebar() {
 
   const exploreHref = soonHref("kham-pha");
   const sentenceHref = soonHref("luyen-cau");
-  const vocabularyHref = "/kho-tu-vung"; // route thật (V2.1) — không còn "đang phát triển"
+  const vocabularyHref = "/vocabulary"; // route tiếng Anh (V2.1)
   const lessonsHref = soonHref("quan-ly-bai");
 
   return (
@@ -146,6 +156,16 @@ export function Sidebar() {
           custom
           active={isActive(lessonsHref)}
         />
+        <div className="k-side-divider" />
+        <a
+          href={FEEDBACK_FORM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="k-side-item k-side-item--idle"
+        >
+          <ItemIcon name="chat" custom />
+          <span className="k-side-label">Góp ý</span>
+        </a>
       </nav>
 
       <UserSessionActions />
