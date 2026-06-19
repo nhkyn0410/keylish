@@ -17,10 +17,10 @@
 
 ### 1.2. Lịch sử thay đổi
 
-| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                  |
-| --------- | ---------- | -------------- | --------------------------------------------------------------------------------------------------------- |
-| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — as-built deployment từ render.yaml + README.                                              |
-| 0.1.1     | 2026-06-19 | AI Agent       | Tách rõ local/dev với production DB; thêm guard chống dùng remote DB khi dev; nhấn mạnh admin local-only. |
+| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                                |
+| --------- | ---------- | -------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — as-built deployment từ render.yaml + README.                                                            |
+| 0.1.1     | 2026-06-19 | AI Agent       | Tách rõ local/dev với production DB; thêm guard chống dùng remote DB khi dev; thêm live admin local-only qua env riêng. |
 
 ### 1.3. Tham chiếu
 
@@ -120,6 +120,27 @@ localhost:3002 (admin-web) ├── localhost:3000 (api) ── Docker Postgres
 - **Pepper bắt buộc** ở production — app từ chối boot nếu thiếu
 - Admin API mặc định OFF ở production; admin-web không deploy
 
+### 4.4. Live admin local-only
+
+`apps/admin-web` có thể chạy local để xem/chỉnh dữ liệu Supabase production khi cần vận hành.
+Đây là chế độ có chủ ý, tách khỏi dev thường ngày:
+
+1. Giữ `packages/db/.env` trỏ Docker local.
+2. Tạo file ignored riêng, ví dụ `packages/db/.env.admin-prod`, chứa Supabase production
+   `DATABASE_URL`/`DIRECT_URL`.
+3. Chạy API local với:
+
+```powershell
+$env:KEYLISH_DB_ENV_FILE="packages/db/.env.admin-prod"
+$env:ALLOW_REMOTE_DB_FOR_DEV="true"
+pnpm dev:api
+```
+
+4. Chạy admin-web local ở terminal khác: `pnpm dev:admin-web`.
+
+Không chạy `pnpm db:migrate`, `pnpm db:studio`, `seed`, hoặc `seed-admin` trong shell đang bật live
+admin. Schema change remote ngoài production deploy phải có thêm `ALLOW_REMOTE_SCHEMA_CHANGE=true`.
+
 ## 5. Build & Deploy
 
 ### 5.1. Render (render.yaml)
@@ -152,7 +173,8 @@ services:
 
 - Tạo project → lấy connection strings
 - Chạy migration: `pnpm db:deploy` (dùng DIRECT_URL)
-- Seed: `pnpm --filter @keylish/api seed` (dùng DIRECT_URL vì pooled không support cursor)
+- Seed production chỉ chạy thủ công khi có kế hoạch release/restore rõ ràng; script seed mặc định bị guard
+  chặn remote vì thao tác này xoá và nạp lại `Word`/`Topic`.
 
 ## 6. Cold start handling
 

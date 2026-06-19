@@ -92,6 +92,7 @@ Mỗi file env có **một nhiệm vụ**, không trùng lặp. Ai đọc file n
 - **Local/dev bắt buộc dùng Docker Postgres**. Script DB sẽ chặn remote DB khi `NODE_ENV` khác `production`, trừ thao tác staging có chủ ý với `ALLOW_REMOTE_DB_FOR_DEV=true`.
 - **Production** (Render/Vercel): đặt env trên dashboard, không dùng file `.env`; production DB là Supabase riêng.
 - **Admin** là local-only: `apps/admin-web` chạy ở `localhost:3002`, API admin bật ở local và tắt trên Render qua `ADMIN_API_ENABLED=false`.
+- **Live admin có chủ ý**: giữ `packages/db/.env` là Docker local; nếu cần admin đọc/chỉnh Supabase production từ máy cá nhân, tạo file ignored riêng như `packages/db/.env.admin-prod`, rồi chạy API với `KEYLISH_DB_ENV_FILE=packages/db/.env.admin-prod` và `ALLOW_REMOTE_DB_FOR_DEV=true`.
 - Mỗi file có `*.env.example` đi kèm làm mẫu. Tất cả `.env` thật đều đã được `.gitignore`.
 
 ## Triển khai

@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
 import cookieParser from "cookie-parser";
 import { VersioningType } from "@nestjs/common";
@@ -7,8 +7,18 @@ import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 
+const REPO_ROOT = resolve(__dirname, "../../..");
+
 loadEnv({ path: resolve(__dirname, "../.env") });
-loadEnv({ path: resolve(__dirname, "../../../packages/db/.env"), override: true });
+loadEnv({ path: resolve(REPO_ROOT, "packages/db/.env"), override: true });
+
+const dbEnvOverride = process.env.KEYLISH_DB_ENV_FILE?.trim();
+if (dbEnvOverride) {
+  loadEnv({
+    path: isAbsolute(dbEnvOverride) ? dbEnvOverride : resolve(REPO_ROOT, dbEnvOverride),
+    override: true,
+  });
+}
 
 function parseOrigins() {
   const configured = (process.env.AUTH_ALLOWED_ORIGINS ?? process.env.CORS_ORIGIN)

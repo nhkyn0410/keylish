@@ -1,14 +1,26 @@
 #!/usr/bin/env node
 import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dbEnvPath = resolve(here, "../.env");
+const repoRoot = resolve(here, "../../..");
 
 if (existsSync(dbEnvPath)) {
   dotenv.config({ path: dbEnvPath, override: true });
+}
+
+const overrideEnvFile = process.env.KEYLISH_DB_ENV_FILE?.trim();
+if (overrideEnvFile) {
+  const overridePath = isAbsolute(overrideEnvFile)
+    ? overrideEnvFile
+    : resolve(repoRoot, overrideEnvFile);
+  if (!existsSync(overridePath)) {
+    fail(`KEYLISH_DB_ENV_FILE does not exist: ${overridePath}`);
+  }
+  dotenv.config({ path: overridePath, override: true });
 }
 
 const mode = process.argv[2] ?? "dev-write";
@@ -68,7 +80,27 @@ if (local) {
   process.exit(0);
 }
 
-if (process.env.ALLOW_REMOTE_DB_FOR_DEV === "true") {
+const remoteRuntimeAllowed = mode === "runtime" && process.env.ALLOW_REMOTE_DB_FOR_DEV === "true";
+const remoteReadwriteAllowed =
+  mode === "dev-readwrite" && process.env.ALLOW_REMOTE_DB_FOR_DEV === "true";
+const remoteSchemaChangeAllowed =
+  (mode === "dev-write" || mode === "deploy") &&
+  process.env.ALLOW_REMOTE_DB_FOR_DEV === "true" &&
+  process.env.ALLOW_REMOTE_SCHEMA_CHANGE === "true";
+const remoteSeedAllowed =
+  mode === "dev-seed" &&
+  process.env.ALLOW_REMOTE_DB_FOR_DEV === "true" &&
+  process.env.ALLOW_DESTRUCTIVE_SEED === "true";
+const remoteAdminSeedAllowed =
+  mode === "dev-admin-seed" && process.env.ALLOW_REMOTE_DB_FOR_DEV === "true";
+
+if (
+  remoteRuntimeAllowed ||
+  remoteReadwriteAllowed ||
+  remoteSchemaChangeAllowed ||
+  remoteSeedAllowed ||
+  remoteAdminSeedAllowed
+) {
   console.warn(
     `[db-guard] ${mode}: ALLOW_REMOTE_DB_FOR_DEV=true, using remote DB ${maskConnectionString(
       connectionString
@@ -80,5 +112,5 @@ if (process.env.ALLOW_REMOTE_DB_FOR_DEV === "true") {
 fail(
   `Refusing to use remote DB ${maskConnectionString(
     connectionString
-  )} while NODE_ENV=${env}. Dev/admin workflows must use Docker Postgres. Set ALLOW_REMOTE_DB_FOR_DEV=true only for an explicit staging/one-off operation.`
+  )} while NODE_ENV=${env}. Dev/admin workflows default to Docker Postgres. For live admin runtime, set KEYLISH_DB_ENV_FILE plus ALLOW_REMOTE_DB_FOR_DEV=true; schema changes also require ALLOW_REMOTE_SCHEMA_CHANGE=true.`
 );

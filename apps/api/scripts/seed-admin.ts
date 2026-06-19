@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
 import { createPrismaClient } from "@keylish/db";
 import { AuthService } from "../src/auth/auth.service";
@@ -9,8 +9,18 @@ import { MailService } from "../src/mail/mail.service";
 // `override: true` so the real DATABASE_URL/DIRECT_URL win over any stale
 // localhost placeholder left in apps/api/.env — the seed must hit the same DB
 // the schema was migrated to.
+const REPO_ROOT = resolve(__dirname, "../../..");
+
 loadEnv({ path: resolve(__dirname, "../.env") });
-loadEnv({ path: resolve(__dirname, "../../../packages/db/.env"), override: true });
+loadEnv({ path: resolve(REPO_ROOT, "packages/db/.env"), override: true });
+
+const dbEnvOverride = process.env.KEYLISH_DB_ENV_FILE?.trim();
+if (dbEnvOverride) {
+  loadEnv({
+    path: isAbsolute(dbEnvOverride) ? dbEnvOverride : resolve(REPO_ROOT, dbEnvOverride),
+    override: true,
+  });
+}
 
 function dbHost(connectionString: string) {
   try {

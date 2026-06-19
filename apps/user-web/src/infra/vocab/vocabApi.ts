@@ -17,7 +17,7 @@ export interface VocabFilter {
 const DB_NAME = "keylish-vocab-v1";
 const STORE_NAME = "responses";
 
-export type VocabSource = "api" | "cache" | "seed";
+export type VocabSource = "api" | "local" | "cache" | "seed";
 
 export interface FetchVocabResult {
   words: WordDTO[];
@@ -40,7 +40,7 @@ export async function fetchVocab(params: Partial<VocabQuery> = {}): Promise<Fetc
       const parsed = VocabResponseSchema.parse(await res.json());
       if (parsed.length) {
         await writeCache(key, parsed);
-        return { words: parsed, source: "api" };
+        return { words: parsed, source: sourceForApiUrl(apiUrl) };
       }
       error = "API returned an empty vocabulary set.";
     } catch (err) {
@@ -85,7 +85,7 @@ export async function fetchTopics(): Promise<{
       });
       if (!res.ok) throw new Error(`API returned ${res.status}`);
       const parsed = TopicDTOSchema.array().parse(await res.json());
-      if (parsed.length) return { topics: parsed, source: "api" };
+      if (parsed.length) return { topics: parsed, source: sourceForApiUrl(apiUrl) };
       error = "API returned an empty topic list.";
     } catch (err) {
       error = err instanceof Error ? err.message : "Unable to fetch topics API.";
@@ -115,7 +115,7 @@ const sleep = (ms: number) =>
   });
 
 /**
- * Chờ API thức rồi mới trả chủ đề thật: thử fetchTopics tới khi nguồn = "api"
+ * Chờ API thức rồi mới trả chủ đề thật: thử fetchTopics tới khi nguồn = "api"/"local"
  * hoặc hết lượt. Dùng cho màn "Đang nạp từ vựng" để không rớt seed lúc Render
  * cold start (502/503). Nếu không cấu hình API → trả seed ngay.
  */
@@ -125,13 +125,13 @@ export async function loadTopicsAwait(
   delayMs = 3500
 ): Promise<{ topics: TopicDTO[]; source: VocabSource; error?: string }> {
   let last = await fetchTopics();
-  if (!apiConfigured() || last.source === "api") return last;
+  if (!apiConfigured() || isApiBackedSource(last.source)) return last;
   for (let i = 1; i < attempts; i += 1) {
     if (isAborted()) break;
     await sleep(delayMs);
     if (isAborted()) break;
     last = await fetchTopics();
-    if (last.source === "api") return last;
+    if (isApiBackedSource(last.source)) return last;
   }
   return last;
 }
@@ -269,4 +269,20 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function sourceForApiUrl(apiUrl: string): VocabSource {
+  try {
+    const host = new URL(apiUrl).hostname.toLowerCase();
+    if (host === "localhost" || host === "0.0.0.0" || host === "::1" || host.startsWith("127.")) {
+      return "local";
+    }
+  } catch {
+    // Fall back to API for non-URL values; fetch will decide whether it works.
+  }
+  return "api";
+}
+
+function isApiBackedSource(source: VocabSource) {
+  return source === "api" || source === "local";
 }

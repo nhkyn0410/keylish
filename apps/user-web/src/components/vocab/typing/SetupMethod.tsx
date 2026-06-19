@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { CefrLevel, TopicDTO } from "@keylish/shared";
-import { fetchVocabCount } from "@/infra/vocab/vocabApi";
+import { fetchVocabCount, type VocabSource } from "@/infra/vocab/vocabApi";
 import { isSetupTourDone, startSetupTour } from "@/lib/tour";
 import { Icon } from "./primitives";
 import {
@@ -22,7 +22,7 @@ export interface VocabSelection {
 
 export interface VocabLoadState {
   loading: boolean;
-  source: "api" | "cache" | "seed";
+  source: VocabSource;
   error?: string;
 }
 
@@ -560,9 +560,11 @@ export function SetupMethod({
                 ? "Đang nạp"
                 : loadState.source === "api"
                   ? "API"
-                  : loadState.source === "cache"
-                    ? "Cache"
-                    : "Seed"}
+                  : loadState.source === "local"
+                    ? "Local"
+                    : loadState.source === "cache"
+                      ? "Cache"
+                      : "Seed"}
             </div>
             <button
               type="button"

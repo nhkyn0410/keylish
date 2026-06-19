@@ -15,6 +15,13 @@ import { createPrismaClient } from "@keylish/db";
 const ROOT = path.resolve(__dirname, "../../..");
 dotenv.config({ path: path.join(ROOT, ".env") });
 dotenv.config({ path: path.join(ROOT, "packages", "db", ".env"), override: true });
+const dbEnvOverride = process.env.KEYLISH_DB_ENV_FILE?.trim();
+if (dbEnvOverride) {
+  dotenv.config({
+    path: path.isAbsolute(dbEnvOverride) ? dbEnvOverride : path.join(ROOT, dbEnvOverride),
+    override: true,
+  });
+}
 dotenv.config();
 
 const DEFAULT_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/keylish";

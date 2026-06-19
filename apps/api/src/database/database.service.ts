@@ -41,7 +41,7 @@ function resolveDatabaseUrl() {
     throw new Error(
       "Refusing to boot dev API against remote DB " +
         maskConnectionString(connectionString) +
-        ". Use Docker Postgres locally, or set ALLOW_REMOTE_DB_FOR_DEV=true for an explicit staging operation."
+        ". Use Docker Postgres locally, or set ALLOW_REMOTE_DB_FOR_DEV=true for an explicit live-admin/staging operation."
     );
   }
 
