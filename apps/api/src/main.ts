@@ -8,7 +8,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 
 loadEnv({ path: resolve(__dirname, "../.env") });
-loadEnv({ path: resolve(__dirname, "../../../packages/db/.env") });
+loadEnv({ path: resolve(__dirname, "../../../packages/db/.env"), override: true });
 
 function parseOrigins() {
   const configured = (process.env.AUTH_ALLOWED_ORIGINS ?? process.env.CORS_ORIGIN)

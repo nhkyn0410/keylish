@@ -54,3 +54,5 @@ temp/
 .data-tmp
 .design-tmp
 scripts
+!packages/db/scripts/
+!packages/db/scripts/**

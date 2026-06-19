@@ -7,9 +7,18 @@ import { AdminModule } from "./admin/admin.module";
 import { AdminGateGuard } from "./admin/admin-gate.guard";
 import { TrafficModule } from "./traffic/traffic.module";
 import { VocabModule } from "./vocab/vocab.module";
+import { UserVocabModule } from "./uservocab/uservocab.module";
 
 @Module({
-  imports: [HealthModule, AuthModule, AdminModule, TopicsModule, VocabModule, TrafficModule],
+  imports: [
+    HealthModule,
+    AuthModule,
+    AdminModule,
+    TopicsModule,
+    VocabModule,
+    TrafficModule,
+    UserVocabModule,
+  ],
   providers: [{ provide: APP_GUARD, useClass: AdminGateGuard }],
 })
 export class AppModule {}

@@ -12,6 +12,7 @@ import type { CSSProperties } from "react";
 import type { WordDTO } from "@keylish/shared";
 import { Icon } from "@/components/vocab/typing/primitives";
 import { fetchVocab } from "@/infra/vocab/vocabApi";
+import { ApiError, getErrorMessage, pickSystemWord } from "@/infra/user/userApi";
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 const HARD_SHADOW = "3px 3px 0 0 #000";
@@ -20,10 +21,24 @@ function keyOf(w: WordDTO) {
   return w.id ?? `${w.en}:${w.level ?? ""}`;
 }
 
-function SearchGlyph({ size = 20, stroke = 3, style }: { size?: number; stroke?: number; style?: CSSProperties }) {
+export function SearchGlyph({
+  size = 20,
+  stroke = 3,
+  style,
+}: {
+  size?: number;
+  stroke?: number;
+  style?: CSSProperties;
+}) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={style}>
-      <g fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <circle cx="10.5" cy="10.5" r="6.5" />
         <path d="M15.5 15.5L21 21" />
       </g>
@@ -31,7 +46,7 @@ function SearchGlyph({ size = 20, stroke = 3, style }: { size?: number; stroke?:
   );
 }
 
-function LvBadge({ lv }: { lv: WordDTO["level"] }) {
+export function LvBadge({ lv }: { lv: WordDTO["level"] }) {
   return (
     <span
       className="k-b2"
@@ -52,7 +67,7 @@ function LvBadge({ lv }: { lv: WordDTO["level"] }) {
   );
 }
 
-function speak(en: string) {
+export function speak(en: string) {
   try {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     const u = new SpeechSynthesisUtterance(en);
@@ -73,6 +88,7 @@ export function VocabLibrarySplit() {
   const [activeTopics, setActiveTopics] = useState<Set<string>>(new Set());
   const [selKey, setSelKey] = useState<string | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -112,11 +128,24 @@ export function VocabLibrarySplit() {
     setter(next);
   }
 
-  function addToPersonal(w: WordDTO) {
-    // Stub V2.1: hiện chỉ đánh dấu cục bộ. Khi có API kho cá nhân:
-    // - khớp chính xác → tự liên kết tham chiếu (FR-PVOC-04)
-    // - khớp biến thể → gợi ý từ gốc (FR-PVOC-05)
-    setPicked((prev) => new Set(prev).add(keyOf(w)));
+  async function addToPersonal(w: WordDTO) {
+    setNotice(null);
+    if (!w.id) {
+      setNotice("Từ này chưa thể thêm.");
+      return;
+    }
+    try {
+      await pickSystemWord(w.id); // FR-PVOC-02: lưu tham chiếu
+      setPicked((prev) => new Set(prev).add(keyOf(w)));
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setPicked((prev) => new Set(prev).add(keyOf(w))); // đã có trong kho
+      } else if (err instanceof ApiError && err.status === 401) {
+        setNotice("Đăng nhập để lưu từ vào kho của bạn.");
+      } else {
+        setNotice(getErrorMessage(err));
+      }
+    }
   }
 
   return (
@@ -234,7 +263,15 @@ export function VocabLibrarySplit() {
             </div>
           ) : null}
 
-          <div style={{ marginTop: "auto", fontSize: 12, fontWeight: 700, opacity: 0.55, lineHeight: 1.4 }}>
+          <div
+            style={{
+              marginTop: "auto",
+              fontSize: 12,
+              fontWeight: 700,
+              opacity: 0.55,
+              lineHeight: 1.4,
+            }}
+          >
             {filtered.length} từ khớp bộ lọc
             <br />
             {picked.size} trong kho của bạn
@@ -284,7 +321,9 @@ export function VocabLibrarySplit() {
                   transform: on ? "translate(-2px,-2px)" : undefined,
                 }}
               >
-                <span style={{ fontWeight: 900, fontSize: 16, width: 124, flex: "0 0 auto" }}>{w.en}</span>
+                <span style={{ fontWeight: 900, fontSize: 16, width: 124, flex: "0 0 auto" }}>
+                  {w.en}
+                </span>
                 <span
                   style={{
                     fontWeight: 700,
@@ -301,11 +340,21 @@ export function VocabLibrarySplit() {
                 </span>
                 <LvBadge lv={w.level} />
                 {picked.has(k) ? (
-                  <Icon name="check" size={16} stroke={4} style={{ color: "#16873f", flex: "0 0 auto" }} />
+                  <Icon
+                    name="check"
+                    size={16}
+                    stroke={4}
+                    style={{ color: "#16873f", flex: "0 0 auto" }}
+                  />
                 ) : (
                   <span style={{ width: 16, flex: "0 0 auto" }} />
                 )}
-                <Icon name="chevright" size={16} stroke={3} style={{ opacity: on ? 1 : 0.35, flex: "0 0 auto" }} />
+                <Icon
+                  name="chevright"
+                  size={16}
+                  stroke={3}
+                  style={{ opacity: on ? 1 : 0.35, flex: "0 0 auto" }}
+                />
               </button>
             );
           })}
@@ -325,12 +374,21 @@ export function VocabLibrarySplit() {
             overflow: "auto",
           }}
         >
-          <div className="k-halftone" style={{ position: "absolute", inset: 0, opacity: 0.12, pointerEvents: "none" }} />
+          <div
+            className="k-halftone"
+            style={{ position: "absolute", inset: 0, opacity: 0.12, pointerEvents: "none" }}
+          />
 
           {sel ? (
             <>
-              <div className="k-card" style={{ padding: "20px 20px 16px", position: "relative", zIndex: 1 }}>
-                <div className="k-badge k-badge--white rn-2" style={{ position: "absolute", top: -13, left: 14 }}>
+              <div
+                className="k-card"
+                style={{ padding: "20px 20px 16px", position: "relative", zIndex: 1 }}
+              >
+                <div
+                  className="k-badge k-badge--white rn-2"
+                  style={{ position: "absolute", top: -13, left: 14 }}
+                >
                   Chi tiết từ
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
@@ -354,14 +412,27 @@ export function VocabLibrarySplit() {
                   </button>
                 </div>
                 {sel.ipa ? (
-                  <div style={{ fontWeight: 500, fontSize: 15, opacity: 0.65, marginTop: 4 }}>{sel.ipa}</div>
+                  <div style={{ fontWeight: 500, fontSize: 15, opacity: 0.65, marginTop: 4 }}>
+                    {sel.ipa}
+                  </div>
                 ) : null}
                 <div style={{ height: 3, background: "#000", margin: "12px 0" }} />
                 <div style={{ fontWeight: 800, fontSize: 19 }}>{sel.vi}</div>
-                <div style={{ display: "flex", gap: 8, marginTop: 12, alignItems: "center", flexWrap: "wrap" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    marginTop: 12,
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                  }}
+                >
                   <LvBadge lv={sel.level} />
                   {sel.topic ? (
-                    <span className="k-badge k-badge--white" style={{ boxShadow: "none", fontSize: 10 }}>
+                    <span
+                      className="k-badge k-badge--white"
+                      style={{ boxShadow: "none", fontSize: 10 }}
+                    >
                       {sel.topic}
                     </span>
                   ) : null}
@@ -371,18 +442,34 @@ export function VocabLibrarySplit() {
               {sel.example ? (
                 <div
                   className="k-card"
-                  style={{ padding: "14px 16px", position: "relative", zIndex: 1, background: "var(--neo-yellow-soft)" }}
+                  style={{
+                    padding: "14px 16px",
+                    position: "relative",
+                    zIndex: 1,
+                    background: "var(--neo-yellow-soft)",
+                  }}
                 >
                   <div className="k-h-eyebrow" style={{ fontSize: 11, marginBottom: 6 }}>
                     Ví dụ
                   </div>
-                  <div className="k-focus" style={{ fontWeight: 600, fontSize: 15.5, lineHeight: 1.5, fontStyle: "italic" }}>
+                  <div
+                    className="k-focus"
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 15.5,
+                      lineHeight: 1.5,
+                      fontStyle: "italic",
+                    }}
+                  >
                     “{sel.example}”
                   </div>
                 </div>
               ) : null}
 
-              <div className="k-card" style={{ padding: "14px 16px", position: "relative", zIndex: 1 }}>
+              <div
+                className="k-card"
+                style={{ padding: "14px 16px", position: "relative", zIndex: 1 }}
+              >
                 <div className="k-h-eyebrow" style={{ fontSize: 11, marginBottom: 10 }}>
                   Kho cá nhân
                 </div>
@@ -399,9 +486,13 @@ export function VocabLibrarySplit() {
                     + Thêm vào kho của tôi
                   </button>
                 )}
-                <div style={{ fontSize: 11, fontWeight: 700, opacity: 0.55, marginTop: 8, lineHeight: 1.4 }}>
-                  Lưu tham chiếu — không nhân bản (V2.1). Đồng bộ khi đăng nhập.
-                </div>
+                {notice ? (
+                  <div
+                    style={{ fontSize: 11, fontWeight: 800, color: "var(--neo-red)", marginTop: 8 }}
+                  >
+                    {notice}
+                  </div>
+                ) : null}
               </div>
 
               <div style={{ flex: 1 }} />
@@ -414,7 +505,10 @@ export function VocabLibrarySplit() {
               </button>
             </>
           ) : (
-            <div className="k-card" style={{ padding: 18, position: "relative", zIndex: 1, fontWeight: 700 }}>
+            <div
+              className="k-card"
+              style={{ padding: 18, position: "relative", zIndex: 1, fontWeight: 700 }}
+            >
               {loading ? "Đang nạp từ vựng…" : "Chọn một từ ở danh sách để xem chi tiết."}
             </div>
           )}

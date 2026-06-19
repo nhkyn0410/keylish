@@ -9,17 +9,18 @@
 | Tên         | Triển khai và Vận hành (Deployment & Operation) |
 | Mã tài liệu | `09-deployment`                                 |
 | Dự án       | KeyLish                                         |
-| Phiên bản   | 0.1.0                                           |
-| Trạng thái  | Approved                                        |
+| Phiên bản   | 0.1.1                                           |
+| Trạng thái  | Draft                                           |
 | Người viết  | AI Agent (soạn thảo SDLC), Nguyễn Hồng Khanh    |
 | Người duyệt | Nguyễn Hồng Khanh                               |
 | Ngày tạo    | 2026-06-15                                      |
 
 ### 1.2. Lịch sử thay đổi
 
-| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                     |
-| --------- | ---------- | -------------- | ------------------------------------------------------------ |
-| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — as-built deployment từ render.yaml + README. |
+| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                  |
+| --------- | ---------- | -------------- | --------------------------------------------------------------------------------------------------------- |
+| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — as-built deployment từ render.yaml + README.                                              |
+| 0.1.1     | 2026-06-19 | AI Agent       | Tách rõ local/dev với production DB; thêm guard chống dùng remote DB khi dev; nhấn mạnh admin local-only. |
 
 ### 1.3. Tham chiếu
 
@@ -28,6 +29,21 @@
 - `01-srs` §2.3 — ràng buộc môi trường
 
 ## 2. Topology triển khai
+
+### 2.1. Local/dev
+
+```
+localhost:3001 (user-web) ─┐
+localhost:3002 (admin-web) ├── localhost:3000 (api) ── Docker Postgres :5432
+                           │
+                           └── pgAdmin :5050 (tuỳ chọn)
+```
+
+- Local/dev **BẮT BUỘC** dùng Docker Postgres qua `packages/db/.env`.
+- `apps/admin-web` chỉ chạy local và chỉ trỏ tới API local. Admin API bật ở local, tắt ở production.
+- Supabase production URL **KHÔNG** được đặt trong `.env` local.
+
+### 2.2. Production
 
 ```
                           Internet
@@ -58,7 +74,7 @@
 | File                  | Đọc bởi                             | Chứa                                                           |
 | --------------------- | ----------------------------------- | -------------------------------------------------------------- |
 | `.env` (gốc)          | `docker compose`                    | `POSTGRES_*`, `PGADMIN_*`                                      |
-| `packages/db/.env`    | API runtime (override) · Prisma CLI | `DATABASE_URL`, `DIRECT_URL`                                   |
+| `packages/db/.env`    | API runtime (override) · Prisma CLI | `DATABASE_URL`, `DIRECT_URL` local Docker                      |
 | `apps/api/.env`       | API runtime                         | `PORT`, `AUTH_*`, `ADMIN_INITIAL_*`, `WEB_APP_URL`, `RESEND_*` |
 | `apps/user-web/.env`  | user-web                            | `NEXT_PUBLIC_API_URL`                                          |
 | `apps/admin-web/.env` | admin-web                           | `NEXT_PUBLIC_API_URL`                                          |
@@ -96,10 +112,13 @@
 
 ### 4.3. Nguyên tắc
 
-- **DB connection chỉ khai ở `packages/db/.env`** — API runtime load nó với `override`
-- **Production**: đặt env trên dashboard, không dùng file `.env`
+- **DB connection local chỉ khai ở `packages/db/.env`** — API runtime load nó với `override`
+- **Local/dev dùng Docker Postgres**; script DB chặn remote DB khi `NODE_ENV` khác `production`
+- **Production**: đặt env trên Render/Vercel dashboard, không dùng file `.env`
+- **Supabase production URL không xuất hiện trong file local**; nếu đã lộ trên máy dev thì rotate credential
+- **Staging/one-off remote**: chỉ chạy khi có chủ ý bằng `ALLOW_REMOTE_DB_FOR_DEV=true`
 - **Pepper bắt buộc** ở production — app từ chối boot nếu thiếu
-- Admin API mặc định OFF ở production (an toàn nếu quên cấu hình)
+- Admin API mặc định OFF ở production; admin-web không deploy
 
 ## 5. Build & Deploy
 
@@ -149,12 +168,16 @@ Render free plan ngủ sau ~15 phút không request. Cơ chế prewarm:
 # Dev
 docker compose up -d
 pnpm db:generate
-pnpm db:migrate
+pnpm db:migrate     # guard: chỉ cho DB local, trừ staging override có chủ ý
 
 # Production (Supabase)
-pnpm db:deploy     # chạy migration chưa áp dụng
+pnpm db:deploy     # Render chạy với NODE_ENV=production + env dashboard
 pnpm db:generate   # tạo client (build-time)
 ```
+
+`pnpm --filter @keylish/api seed` xoá và nạp lại `Word`/`Topic`, nên chỉ dùng cho local.
+Muốn reset dữ liệu staging từ xa phải đặt cả `ALLOW_REMOTE_DB_FOR_DEV=true` và
+`ALLOW_DESTRUCTIVE_SEED=true`.
 
 ## 8. Observability
 
@@ -170,4 +193,4 @@ pnpm db:generate   # tạo client (build-time)
 - **Cold start**: Render free ngủ sau 15p → UX chậm lần đầu. Prewarm giảm thiểu.
 - **Supabase pause**: DB pause sau 7 ngày không hoạt động → cần manual wake.
 - **Admin-web local-only**: không deploy, admin phải chạy local.
-- README trỏ `doc/deploy.md` không tồn tại — file này thay thế.
+- **Env leak**: nếu production DB URL từng được dùng ở local, rotate credential và cập nhật dashboard.

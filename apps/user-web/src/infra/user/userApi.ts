@@ -1,3 +1,12 @@
+import type { AddVocabResult, CreateUserVocabDto, UserVocabEntryDto } from "@keylish/shared";
+
+export type UserVocabList = {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: UserVocabEntryDto[];
+};
+
 export type UserProfile = {
   id: string;
   email: string;
@@ -152,6 +161,35 @@ export async function resetPassword(token: string, password: string) {
   return requestWithCsrf<{ ok: true }>("/api/user/reset-password", {
     method: "POST",
     ...jsonBody({ token, password }),
+  });
+}
+
+/** Kho từ vựng cá nhân (V2.1 — FR-PVOC-02): thêm 1 từ hệ thống vào kho (tham chiếu). */
+export async function pickSystemWord(wordId: string): Promise<AddVocabResult> {
+  return requestWithCsrf<AddVocabResult>("/api/user/vocab/pick", {
+    method: "POST",
+    ...jsonBody({ wordId }),
+  });
+}
+
+/** FR-PVOC-01: liệt kê kho cá nhân của người dùng hiện tại. */
+export async function fetchUserVocab(search?: string): Promise<UserVocabList> {
+  const qs = search?.trim() ? "?search=" + encodeURIComponent(search.trim()) : "";
+  return requestJson<UserVocabList>("/api/user/vocab" + qs, { cache: "no-store" });
+}
+
+/** FR-PVOC-03/04/05: tạo từ vào kho cá nhân (dedup-on-add → linked | created | suggest). */
+export async function createUserVocab(input: CreateUserVocabDto): Promise<AddVocabResult> {
+  return requestWithCsrf<AddVocabResult>("/api/user/vocab", {
+    method: "POST",
+    ...jsonBody(input),
+  });
+}
+
+/** FR-PVOC-07: xóa một mục khỏi kho cá nhân. */
+export async function deleteUserVocab(id: string): Promise<{ ok: true }> {
+  return requestWithCsrf<{ ok: true }>("/api/user/vocab/" + encodeURIComponent(id), {
+    method: "DELETE",
   });
 }
 

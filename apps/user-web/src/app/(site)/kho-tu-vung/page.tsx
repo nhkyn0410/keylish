@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { VocabLibrarySplit } from "@/components/vocab/library/VocabLibrarySplit";
+import { VocabLibraryTabs } from "@/components/vocab/library/VocabLibraryTabs";
 
 export const metadata: Metadata = {
   title: "Kho từ vựng · KeyLish",
@@ -16,7 +16,7 @@ export default function VocabLibraryPage() {
           Kho từ vựng
         </h1>
       </div>
-      <VocabLibrarySplit />
+      <VocabLibraryTabs />
     </main>
   );
 }

@@ -102,7 +102,7 @@ export function Sidebar() {
 
   const exploreHref = soonHref("kham-pha");
   const sentenceHref = soonHref("luyen-cau");
-  const vocabularyHref = soonHref("kho-tu-vung");
+  const vocabularyHref = "/kho-tu-vung"; // route thật (V2.1) — không còn "đang phát triển"
   const lessonsHref = soonHref("quan-ly-bai");
 
   return (

@@ -46,6 +46,8 @@ model Word {
   source    String     @default("wiktionary+maximax67")
   updatedAt DateTime   @updatedAt
 
+  userEntries UserVocabEntry[]
+
   @@unique([en, level])
   @@index([level])
   @@index([topicId])
@@ -63,9 +65,10 @@ model User {
   updatedAt       DateTime   @updatedAt
   deletedAt       DateTime?
 
-  identities UserIdentity[]
-  sessions   UserSession[]
-  tokens     UserAuthToken[]
+  identities   UserIdentity[]
+  sessions     UserSession[]
+  tokens       UserAuthToken[]
+  vocabEntries UserVocabEntry[]
 }
 
 model Admin {
@@ -167,4 +170,37 @@ model TrafficHourly {
   hour      DateTime @id
   count     Int      @default(0)
   updatedAt DateTime @updatedAt
+}
+
+enum VocabEntrySource {
+  system
+  custom
+  ai // ⬜ V2.2
+}
+
+/// Kho từ vựng cá nhân (V2.1). Tham chiếu từ hệ thống (wordId) HOẶC tự tạo
+/// (customEn...). Không nhân bản từ hệ thống — xem ADR-019.
+model UserVocabEntry {
+  id     String           @id @default(cuid())
+  userId String
+  wordId String? // set khi tham chiếu từ hệ thống
+  source VocabEntrySource @default(system)
+
+  // chỉ dùng khi tự tạo (wordId null) hoặc override:
+  customEn      String?
+  normalizedEn  String? // khóa dedup custom (lowercase, trim)
+  customVi      String?
+  customExample String?
+  customLevel   CefrLevel?
+  note          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word Word? @relation(fields: [wordId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, wordId]) // không thêm trùng 1 từ hệ thống (BR-09)
+  @@unique([userId, normalizedEn]) // không tạo trùng 1 custom
+  @@index([userId])
 }

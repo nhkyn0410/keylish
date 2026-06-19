@@ -9,8 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "seed": "tsx scripts/seed.ts",
-    "seed-admin": "tsx scripts/seed-admin.ts",
+    "seed": "node ../../packages/db/scripts/guard-db-env.mjs dev-seed && tsx scripts/seed.ts",
+    "seed-admin": "node ../../packages/db/scripts/guard-db-env.mjs dev-admin-seed && tsx scripts/seed-admin.ts",
     "build-dataset": "node ../../scripts/build-dataset.mjs"
   },
   "dependencies": {

@@ -13,19 +13,19 @@ KeyLish là ứng dụng web luyện gõ tiếng Anh, trong đó việc học t�
 - 🎯 Nhiều **mode luyện tập**: nghĩa VI → gõ từ EN (mặc định), nghe phát âm (TTS trình duyệt) → gõ từ
 - 🔁 Tự động **lặp lại từ gõ sai** và cho phép sửa lỗi ngay trong phiên
 - 📊 Màn hình tổng kết sau mỗi phiên luyện
-- 📦 Hoạt động **local-first**: dữ liệu phiên lưu trên trình duyệt (IndexedDB), kèm seed offline dự phòng
+- 📦 Hoạt động **local-first**: cache từ vựng trên trình duyệt (IndexedDB), kèm seed offline dự phòng
 
 ## Tech stack
 
 Monorepo quản lý bằng **pnpm workspaces + Turborepo**.
 
-| Workspace         | Vai trò                         | Công nghệ                                                |
-| ----------------- | ------------------------------- | -------------------------------------------------------- |
-| `apps/user-web`   | Ứng dụng web học từ vựng        | Next.js (App Router) · React · TypeScript · Tailwind CSS |
-| `apps/admin-web`  | Admin panel V2                  | Next.js (App Router) · React · TypeScript · Ant Design   |
-| `apps/api`        | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod     |
-| `packages/db`     | Tầng database                   | Prisma 7 (driver adapter `pg`) · PostgreSQL (Neon)       |
-| `packages/shared` | Schema & type dùng chung        | Zod 4                                                    |
+| Workspace         | Vai trò                         | Công nghệ                                                                  |
+| ----------------- | ------------------------------- | -------------------------------------------------------------------------- |
+| `apps/user-web`   | Ứng dụng web học từ vựng        | Next.js (App Router) · React · TypeScript · Tailwind CSS                   |
+| `apps/admin-web`  | Admin panel V2                  | Next.js (App Router) · React · TypeScript · Ant Design                     |
+| `apps/api`        | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod                       |
+| `packages/db`     | Tầng database                   | Prisma 7 (driver adapter `pg`) · PostgreSQL (Docker local / Supabase prod) |
+| `packages/shared` | Schema & type dùng chung        | Zod 4                                                                      |
 
 Công cụ chung: TypeScript 6 · Vitest · tsup · tsx.
 
@@ -62,9 +62,9 @@ Yêu cầu: **Node.js 20+** và **pnpm 10**.
 # 1. Cài dependencies
 pnpm install
 
-# 2. Chạy Postgres local (Docker) — hoặc trỏ DATABASE_URL tới Neon
+# 2. Chạy Postgres local (Docker)
 docker compose up -d
-#    Tạo .env trong packages/db với DATABASE_URL=postgresql://... (xem .env.example)
+#    Copy packages/db/.env.example -> packages/db/.env (giữ DATABASE_URL local)
 
 # 3. Generate Prisma client & migrate
 pnpm --filter @keylish/db generate
@@ -80,28 +80,30 @@ pnpm --filter @keylish/admin-web dev  # Admin Web (Next.js, port 3002)
 
 Mỗi file env có **một nhiệm vụ**, không trùng lặp. Ai đọc file nào:
 
-| File | Đọc bởi | Chứa |
-| ---- | ------- | ---- |
-| `.env` (gốc) | `docker compose` | `POSTGRES_*`, `PGADMIN_*` |
-| `packages/db/.env` | API runtime (override) · Prisma CLI · seed | `DATABASE_URL`, `DIRECT_URL` |
-| `apps/api/.env` | API runtime · seed | `PORT`, `AUTH_*`, `ADMIN_INITIAL_*`, `WEB_APP_URL`, `RESEND_*` |
-| `apps/user-web/.env` | user-web | `NEXT_PUBLIC_API_URL` |
-| `apps/admin-web/.env` | admin-web | `NEXT_PUBLIC_API_URL` |
+| File                  | Đọc bởi                                    | Chứa                                                           |
+| --------------------- | ------------------------------------------ | -------------------------------------------------------------- |
+| `.env` (gốc)          | `docker compose`                           | `POSTGRES_*`, `PGADMIN_*`                                      |
+| `packages/db/.env`    | API runtime (override) · Prisma CLI · seed | `DATABASE_URL`, `DIRECT_URL`                                   |
+| `apps/api/.env`       | API runtime · seed                         | `PORT`, `AUTH_*`, `ADMIN_INITIAL_*`, `WEB_APP_URL`, `RESEND_*` |
+| `apps/user-web/.env`  | user-web                                   | `NEXT_PUBLIC_API_URL`                                          |
+| `apps/admin-web/.env` | admin-web                                  | `NEXT_PUBLIC_API_URL`                                          |
 
 - **Kết nối DB chỉ khai ở `packages/db/.env`** — API runtime load nó với `override` nên nó luôn thắng; đừng đặt `DATABASE_URL` ở `apps/api/.env`.
-- **Production** (Render/Vercel): đặt env trên dashboard, không dùng file `.env`.
+- **Local/dev bắt buộc dùng Docker Postgres**. Script DB sẽ chặn remote DB khi `NODE_ENV` khác `production`, trừ thao tác staging có chủ ý với `ALLOW_REMOTE_DB_FOR_DEV=true`.
+- **Production** (Render/Vercel): đặt env trên dashboard, không dùng file `.env`; production DB là Supabase riêng.
+- **Admin** là local-only: `apps/admin-web` chạy ở `localhost:3002`, API admin bật ở local và tắt trên Render qua `ADMIN_API_ENABLED=false`.
 - Mỗi file có `*.env.example` đi kèm làm mẫu. Tất cả `.env` thật đều đã được `.gitignore`.
 
 ## Triển khai
 
-| Thành phần       | Nền tảng                                                | Free tier                   |
-| ---------------- | ------------------------------------------------------- | --------------------------- |
-| `apps/user-web`  | [Vercel](https://vercel.com)                            | ✅                          |
-| `apps/admin-web` | Local-only (công cụ nội bộ — không deploy)              | — (xem doc/v2.1.1)          |
-| `apps/api`       | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)       |
-| PostgreSQL       | [Supabase](https://supabase.com)                        | ✅ (pause sau 7 ngày idle)  |
+| Thành phần       | Nền tảng                                                | Free tier                  |
+| ---------------- | ------------------------------------------------------- | -------------------------- |
+| `apps/user-web`  | [Vercel](https://vercel.com)                            | ✅                         |
+| `apps/admin-web` | Local-only (công cụ nội bộ — không deploy)              | — (xem doc/v2.1.1)         |
+| `apps/api`       | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)      |
+| PostgreSQL       | [Supabase](https://supabase.com)                        | ✅ (pause sau 7 ngày idle) |
 
-Hướng dẫn chi tiết từng bước: [doc/deploy.md](doc/deploy.md).
+Hướng dẫn chi tiết từng bước: [doc/SDLC/09-deployment.md](doc/SDLC/09-deployment.md).
 
 ## Cấu trúc thư mục
 

@@ -20,6 +20,39 @@ function dbHost(connectionString: string) {
   }
 }
 
+function isLocalDatabaseUrl(connectionString: string) {
+  try {
+    const host = new URL(connectionString).hostname.toLowerCase();
+    return (
+      host === "localhost" ||
+      host === "0.0.0.0" ||
+      host === "::1" ||
+      host === "host.docker.internal" ||
+      host === "postgres" ||
+      host.startsWith("127.")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function maskConnectionString(connectionString: string) {
+  return connectionString.replace(/:\/\/[^@]*@/, "://***@");
+}
+
+function assertAdminSeedTarget(connectionString: string) {
+  if (isLocalDatabaseUrl(connectionString)) return;
+  if (process.env.ALLOW_REMOTE_DB_FOR_DEV === "true") {
+    console.warn("Remote admin seed explicitly allowed: " + maskConnectionString(connectionString));
+    return;
+  }
+  throw new Error(
+    "Refusing to seed admin against remote DB " +
+      maskConnectionString(connectionString) +
+      ". Admin is local-only; use Docker Postgres locally, or set ALLOW_REMOTE_DB_FOR_DEV=true for an explicit staging operation."
+  );
+}
+
 function getCredentials(): { username: string; password: string } {
   const [, , argUsername, argPassword] = process.argv;
   const username = (
@@ -59,6 +92,7 @@ async function main() {
   if (!connectionString) {
     throw new Error("Thiếu DIRECT_URL/DATABASE_URL (đã thử apps/api/.env và packages/db/.env).");
   }
+  assertAdminSeedTarget(connectionString);
 
   console.log(`Kết nối DB: ${dbHost(connectionString)} — seed admin "${username}"...`);
 

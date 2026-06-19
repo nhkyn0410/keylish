@@ -14,11 +14,49 @@ import { createPrismaClient } from "@keylish/db";
 
 const ROOT = path.resolve(__dirname, "../../..");
 dotenv.config({ path: path.join(ROOT, ".env") });
-dotenv.config({ path: path.join(ROOT, "packages", "db", ".env") });
+dotenv.config({ path: path.join(ROOT, "packages", "db", ".env"), override: true });
 dotenv.config();
 
 const DEFAULT_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/keylish";
 const BATCH_SIZE = 1000;
+
+function isLocalDatabaseUrl(connectionString: string) {
+  try {
+    const host = new URL(connectionString).hostname.toLowerCase();
+    return (
+      host === "localhost" ||
+      host === "0.0.0.0" ||
+      host === "::1" ||
+      host === "host.docker.internal" ||
+      host === "postgres" ||
+      host.startsWith("127.")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function maskConnectionString(connectionString: string) {
+  return connectionString.replace(/:\/\/[^@]*@/, "://***@");
+}
+
+function assertSeedTarget(connectionString: string) {
+  if (isLocalDatabaseUrl(connectionString)) return;
+  if (
+    process.env.ALLOW_REMOTE_DB_FOR_DEV === "true" &&
+    process.env.ALLOW_DESTRUCTIVE_SEED === "true"
+  ) {
+    console.warn(
+      "Remote destructive seed explicitly allowed: " + maskConnectionString(connectionString)
+    );
+    return;
+  }
+  throw new Error(
+    "Refusing to run destructive vocab seed against remote DB " +
+      maskConnectionString(connectionString) +
+      ". Copy production data to local Docker instead. For a deliberate staging reset, set ALLOW_REMOTE_DB_FOR_DEV=true and ALLOW_DESTRUCTIVE_SEED=true."
+  );
+}
 
 interface DatasetWord {
   en: string;
@@ -92,7 +130,8 @@ async function main() {
   const { topics, words, from } = loadDataset();
   console.log(`Nguồn: ${from} — ${topics.length} chủ đề, ${words.length.toLocaleString()} từ`);
 
-  const url = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL;
+  const url = process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL;
+  assertSeedTarget(url);
   console.log(`Database: ${url.replace(/:\/\/[^@]*@/, "://***@")}`);
   const { client, pool } = createPrismaClient(url);
 

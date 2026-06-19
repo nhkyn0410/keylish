@@ -17,13 +17,13 @@
     "build": "pnpm generate && tsup src/index.ts --format esm,cjs --dts",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "generate": "prisma generate --schema prisma/schema.prisma",
-    "migrate": "prisma migrate dev --schema prisma/schema.prisma",
-    "deploy": "prisma migrate deploy --schema prisma/schema.prisma",
+    "migrate": "node scripts/guard-db-env.mjs dev-write && prisma migrate dev --schema prisma/schema.prisma",
+    "deploy": "node scripts/guard-db-env.mjs deploy && prisma migrate deploy --schema prisma/schema.prisma",
     "format": "prisma format --schema prisma/schema.prisma",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "studio": "prisma studio --schema prisma/schema.prisma"
+    "studio": "node scripts/guard-db-env.mjs dev-readwrite && prisma studio --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
