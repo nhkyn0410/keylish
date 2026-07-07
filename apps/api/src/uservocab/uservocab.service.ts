@@ -24,6 +24,7 @@ const ENTRY_SELECT = {
   customVi: true,
   customExample: true,
   customLevel: true,
+  customTopic: { select: { slug: true } },
   note: true,
   createdAt: true,
   word: {
@@ -80,6 +81,7 @@ export class UserVocabService {
               vi: e.customVi ?? "",
               example: e.customExample,
               level: e.customLevel,
+              topic: e.customTopic?.slug ?? null,
             }
           : null,
       note: e.note,
@@ -105,10 +107,26 @@ export class UserVocabService {
   async list(userId: string, input: unknown): Promise<UserVocabListDto> {
     const parsed = UserVocabQuerySchema.safeParse(input);
     if (!parsed.success) throw new BadRequestException(parsed.error.message);
-    const { search, page, pageSize } = parsed.data;
+    const { search, levels, topics, page, pageSize } = parsed.data;
+
+    const and: Prisma.UserVocabEntryWhereInput[] = [];
+    if (levels?.length) {
+      and.push({
+        OR: [{ customLevel: { in: levels } }, { word: { is: { level: { in: levels } } } }],
+      });
+    }
+    if (topics?.length) {
+      and.push({
+        OR: [
+          { customTopic: { is: { slug: { in: topics } } } },
+          { word: { is: { topic: { is: { slug: { in: topics } } } } } },
+        ],
+      });
+    }
 
     const where: Prisma.UserVocabEntryWhereInput = {
       userId,
+      ...(and.length ? { AND: and } : {}),
       ...(search
         ? {
             OR: [
@@ -167,7 +185,7 @@ export class UserVocabService {
 
     // 1. Khớp chính xác kho hệ thống → tự liên kết tham chiếu (FR-PVOC-04).
     const exact = await this.database.client.word.findFirst({
-      where: { en: { equals: body.en, mode: "insensitive" } },
+      where: { en: { equals: normalized, mode: "insensitive" } },
       select: { id: true },
     });
     if (exact) {
@@ -185,8 +203,13 @@ export class UserVocabService {
           take: 5,
         });
         if (matches.length) {
+          const matchedLemma =
+            candidates.find((candidate) =>
+              matches.some((match) => normalizeEn(match.en) === candidate)
+            ) ?? candidates[0];
           return {
             status: "suggest",
+            lemma: matchedLemma,
             candidates: matches.map((m) => ({
               id: m.id,
               en: m.en,
@@ -203,13 +226,14 @@ export class UserVocabService {
     try {
       const created = await this.database.client.userVocabEntry.create({
         data: {
-          userId,
+          user: { connect: { id: userId } },
           source: "custom",
           customEn: body.en,
           normalizedEn: normalized,
           customVi: body.vi,
           customExample: body.example ?? null,
           customLevel: body.level ?? null,
+          ...(body.topic ? { customTopic: { connect: { slug: body.topic } } } : {}),
           note: body.note ?? null,
         },
         select: ENTRY_SELECT,
@@ -218,6 +242,9 @@ export class UserVocabService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         throw new ConflictException("Từ này đã có trong kho của bạn.");
+      }
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        throw new BadRequestException("Chủ đề không tồn tại.");
       }
       throw error;
     }

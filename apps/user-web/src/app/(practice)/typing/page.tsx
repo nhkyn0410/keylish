@@ -1,14 +1,6 @@
-import type { Metadata } from "next";
-import { TypingFlow } from "@/components/vocab/typing/TypingFlow";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Luyện gõ từ vựng · KeyLish",
-};
-
-export default function TypingPage() {
-  return (
-    <div style={{ height: "100dvh" }}>
-      <TypingFlow />
-    </div>
-  );
+// /typing → màn thiết lập (ADR-020: tách route setup/play). Giữ link cũ sống.
+export default function TypingIndexPage() {
+  redirect("/typing/setup");
 }

@@ -1,10 +1,23 @@
-import type { AddVocabResult, CreateUserVocabDto, UserVocabEntryDto } from "@keylish/shared";
+import type {
+  AddVocabResult,
+  CefrLevel,
+  CreateUserVocabDto,
+  UserVocabEntryDto,
+} from "@keylish/shared";
 
 export type UserVocabList = {
   total: number;
   page: number;
   pageSize: number;
   items: UserVocabEntryDto[];
+};
+
+export type UserVocabFilter = {
+  search?: string;
+  levels?: CefrLevel[];
+  topics?: string[];
+  page?: number;
+  pageSize?: number;
 };
 
 export type UserProfile = {
@@ -173,9 +186,21 @@ export async function pickSystemWord(wordId: string): Promise<AddVocabResult> {
 }
 
 /** FR-PVOC-01: liệt kê kho cá nhân của người dùng hiện tại. */
-export async function fetchUserVocab(search?: string): Promise<UserVocabList> {
-  const qs = search?.trim() ? "?search=" + encodeURIComponent(search.trim()) : "";
-  return requestJson<UserVocabList>("/api/user/vocab" + qs, { cache: "no-store" });
+export async function fetchUserVocab(
+  filter: UserVocabFilter | string = {}
+): Promise<UserVocabList> {
+  const normalized: UserVocabFilter =
+    typeof filter === "string" ? { search: filter.trim() || undefined } : filter;
+  const params = new URLSearchParams();
+  if (normalized.search?.trim()) params.set("search", normalized.search.trim());
+  if (normalized.levels?.length) params.set("levels", normalized.levels.join(","));
+  if (normalized.topics?.length) params.set("topics", normalized.topics.join(","));
+  if (normalized.page != null) params.set("page", String(normalized.page));
+  if (normalized.pageSize != null) params.set("pageSize", String(normalized.pageSize));
+  const qs = params.toString();
+  return requestJson<UserVocabList>("/api/user/vocab" + (qs ? "?" + qs : ""), {
+    cache: "no-store",
+  });
 }
 
 /** FR-PVOC-03/04/05: tạo từ vào kho cá nhân (dedup-on-add → linked | created | suggest). */

@@ -9,8 +9,8 @@
 | Tên         | Quy chuẩn lập trình viên (Coding Standard)   |
 | Mã tài liệu | `00-coding-standard`                         |
 | Dự án       | KeyLish                                      |
-| Phiên bản   | 0.2.1                                        |
-| Trạng thái  | Approved                                     |
+| Phiên bản   | 0.2.2                                        |
+| Trạng thái  | In Review                                    |
 | Người viết  | AI Agent (soạn thảo SDLC), Nguyễn Hồng Khanh |
 | Người duyệt | Nguyễn Hồng Khanh                            |
 | Ngày tạo    | 2026-06-15                                   |
@@ -22,6 +22,7 @@
 | 0.1.0     | 2026-06-15 | AI Agent                    | Bản Draft đầu tiên — tài liệu hóa as-built từ code.                                                    |
 | 0.2.0     | 2026-06-15 | AI Agent                    | Thêm §12 Quy trình phát triển tính năng (Zero→Release).                                                |
 | 0.2.1     | 2026-06-15 | AI Agent, Nguyễn Hồng Khanh | Thêm §13 Quy định trạng thái tài liệu (vòng đời Draft → In Review → Approved → Superseded/Deprecated). |
+| 0.2.2     | 2026-06-22 | AI Agent                    | Thêm hard gate docs-first + approval-before-code: task phải APPROVED và Doc gate READY trước khi code. |
 
 ### 1.3. Mục đích & phạm vi
 
@@ -29,7 +30,7 @@ Tài liệu này mô tả **quy chuẩn kỹ thuật as-built** của monorepo K
 
 - Lý do **vì sao** chọn từng công nghệ → xem `10-adr` (sẽ viết). Tài liệu này chỉ mô tả **hiện trạng** và quy ước.
 - Thuật ngữ chuẩn hóa (entity, state, module) → xem `context/GLOSSARY.md` và `context/DOMAIN-MAP.md`.
-- Nhãn hiện trạng dùng trong toàn bộ SDLC: ✅ Đã có (as-built) · 🚧 Đang làm / khung · ⬜ Chưa làm.
+- Nhãn hiện trạng dùng trong toàn bộ SDLC: `DONE` = đã có (as-built); `PARTIAL` = đang làm / khung; `TODO` = chưa làm. Không dùng icon/emoji làm trạng thái.
 
 ## 2. Stack công nghệ (as-built)
 
@@ -37,24 +38,24 @@ Phiên bản đọc từ `package.json` các workspace (dấu `^` giữ nguyên 
 
 | Lớp                | Công nghệ                                 | Phiên bản (khai báo)                         | Nguồn                                                      | Trạng thái |
 | ------------------ | ----------------------------------------- | -------------------------------------------- | ---------------------------------------------------------- | ---------- |
-| Monorepo           | pnpm                                      | `10.27.0` (`packageManager`)                 | [package.json](../../package.json)                         | ✅         |
-| Build orchestrator | Turborepo                                 | `^2.9.17`                                    | [turbo.json](../../turbo.json)                             | ✅         |
-| Ngôn ngữ           | TypeScript                                | `^6.0.3`                                     | [package.json](../../package.json)                         | ✅         |
-| Runtime            | Node.js                                   | 20+ (dev), `22.16.0` (prod Render)           | README · [render.yaml](../../render.yaml)                  | ✅         |
-| Backend            | NestJS + Express                          | `^11.1.9`                                    | [apps/api/package.json](../../apps/api/package.json)       | ✅         |
-| Validation         | Zod                                       | `^4.1.13`                                    | [apps/api/package.json](../../apps/api/package.json)       | ✅         |
-| OpenAPI            | `@nestjs/swagger` + `nestjs-zod`          | `^11.2.3` / `^5.0.1`                         | [apps/api/package.json](../../apps/api/package.json)       | ✅         |
-| Mật khẩu           | `argon2`                                  | `^0.44.0`                                    | [apps/api/package.json](../../apps/api/package.json)       | ✅         |
-| Mail               | Resend (REST qua `fetch`, không SDK)      | —                                            | [mail.service.ts](../../apps/api/src/mail/mail.service.ts) | ✅         |
-| Web user           | Next.js (App Router) + React              | Next 16 / React 19                           | [apps/user-web](../../apps/user-web)                       | ✅         |
-| Web user — UI      | Tailwind CSS 4 · lucide-react · driver.js | —                                            | [apps/user-web](../../apps/user-web)                       | ✅         |
-| Web admin          | Next.js + React + Ant Design              | Next 16 / AntD 6                             | [apps/admin-web](../../apps/admin-web)                     | 🚧         |
-| ORM                | Prisma (driver adapter `pg`)              | Prisma 7                                     | [packages/db](../../packages/db)                           | ✅         |
-| CSDL               | PostgreSQL                                | Docker `postgres:16` (dev) · Supabase (prod) | README · [render.yaml](../../render.yaml)                  | ✅         |
-| Shared             | Zod schemas/types                         | `@keylish/shared`                            | [packages/shared/src](../../packages/shared/src)           | ✅         |
-| Test               | Vitest + Supertest                        | Vitest `^4.0.15`                             | [apps/api/package.json](../../apps/api/package.json)       | ✅         |
-| Lint/format        | ESLint + Prettier                         | ESLint `^10.4.1` / Prettier `^3.8.4`         | [package.json](../../package.json)                         | ✅         |
-| Tooling            | tsup · tsx · sharp                        | —                                            | [package.json](../../package.json)                         | ✅         |
+| Monorepo           | pnpm                                      | `10.27.0` (`packageManager`)                 | [package.json](../../package.json)                         | DONE       |
+| Build orchestrator | Turborepo                                 | `^2.9.17`                                    | [turbo.json](../../turbo.json)                             | DONE       |
+| Ngôn ngữ           | TypeScript                                | `^6.0.3`                                     | [package.json](../../package.json)                         | DONE       |
+| Runtime            | Node.js                                   | 20+ (dev), `22.16.0` (prod Render)           | README · [render.yaml](../../render.yaml)                  | DONE       |
+| Backend            | NestJS + Express                          | `^11.1.9`                                    | [apps/api/package.json](../../apps/api/package.json)       | DONE       |
+| Validation         | Zod                                       | `^4.1.13`                                    | [apps/api/package.json](../../apps/api/package.json)       | DONE       |
+| OpenAPI            | `@nestjs/swagger` + `nestjs-zod`          | `^11.2.3` / `^5.0.1`                         | [apps/api/package.json](../../apps/api/package.json)       | DONE       |
+| Mật khẩu           | `argon2`                                  | `^0.44.0`                                    | [apps/api/package.json](../../apps/api/package.json)       | DONE       |
+| Mail               | Resend (REST qua `fetch`, không SDK)      | —                                            | [mail.service.ts](../../apps/api/src/mail/mail.service.ts) | DONE       |
+| Web user           | Next.js (App Router) + React              | Next 16 / React 19                           | [apps/user-web](../../apps/user-web)                       | DONE       |
+| Web user — UI      | Tailwind CSS 4 · lucide-react · driver.js | —                                            | [apps/user-web](../../apps/user-web)                       | DONE       |
+| Web admin          | Next.js + React + Ant Design              | Next 16 / AntD 6                             | [apps/admin-web](../../apps/admin-web)                     | PARTIAL    |
+| ORM                | Prisma (driver adapter `pg`)              | Prisma 7                                     | [packages/db](../../packages/db)                           | DONE       |
+| CSDL               | PostgreSQL                                | Docker `postgres:16` (dev) · Supabase (prod) | README · [render.yaml](../../render.yaml)                  | DONE       |
+| Shared             | Zod schemas/types                         | `@keylish/shared`                            | [packages/shared/src](../../packages/shared/src)           | DONE       |
+| Test               | Vitest + Supertest                        | Vitest `^4.0.15`                             | [apps/api/package.json](../../apps/api/package.json)       | DONE       |
+| Lint/format        | ESLint + Prettier                         | ESLint `^10.4.1` / Prettier `^3.8.4`         | [package.json](../../package.json)                         | DONE       |
+| Tooling            | tsup · tsx · sharp                        | —                                            | [package.json](../../package.json)                         | DONE       |
 
 > RISK (R-4): README ghi CSDL "(Neon)" ở bảng stack nhưng "(Supabase)" ở bảng deploy; `render.yaml`/PHẦN 0 xác nhận **Supabase** cho prod. SDLC dùng **Supabase (prod) / postgres:16 Docker (dev)**. Ghi nhận tại `context/PROJECT-STATE.md`.
 
@@ -64,11 +65,11 @@ Phiên bản đọc từ `package.json` các workspace (dấu `^` giữ nguyên 
 
 | Workspace         | Package              | Vai trò                                                                    | Trạng thái |
 | ----------------- | -------------------- | -------------------------------------------------------------------------- | ---------- |
-| `apps/api`        | `@keylish/api`       | NestJS API (vocab read, auth, admin, traffic, mail, health) + scripts seed | ✅         |
-| `apps/user-web`   | `@keylish/user-web`  | Web học từ vựng (luyện gõ)                                                 | ✅         |
-| `apps/admin-web`  | `@keylish/admin-web` | Admin panel (V2)                                                           | 🚧         |
-| `packages/db`     | `@keylish/db`        | Prisma schema, client, migrations                                          | ✅         |
-| `packages/shared` | `@keylish/shared`    | Zod schema/type dùng chung                                                 | ✅         |
+| `apps/api`        | `@keylish/api`       | NestJS API (vocab read, auth, admin, traffic, mail, health) + scripts seed | DONE       |
+| `apps/user-web`   | `@keylish/user-web`  | Web học từ vựng (luyện gõ)                                                 | DONE       |
+| `apps/admin-web`  | `@keylish/admin-web` | Admin panel (V2)                                                           | PARTIAL    |
+| `packages/db`     | `@keylish/db`        | Prisma schema, client, migrations                                          | DONE       |
+| `packages/shared` | `@keylish/shared`    | Zod schema/type dùng chung                                                 | DONE       |
 
 - Pipeline dataset (`scripts/build-dataset.mjs`, `build-vocab.mjs`, `vocab-shared.mjs`) nằm ở **`scripts/` gốc repo**, gọi qua `pnpm --filter @keylish/api build-dataset` ([apps/api/package.json](../../apps/api/package.json)). Chi tiết → `04-database`.
 - Quy ước package: tên `@keylish/*`; phụ thuộc nội bộ qua `workspace:*`.
@@ -144,7 +145,7 @@ Cấu hình gốc: [tsconfig.base.json](../../tsconfig.base.json).
 ### 6.6. Tách bề mặt Admin
 
 - Admin là **công cụ nội bộ local-only**. Mọi route `/api/admin/*` bị **404** khi `ADMIN_API_ENABLED` không bật; mặc định **OFF ở production** ([admin-gate.guard.ts](../../apps/api/src/admin/admin-gate.guard.ts)).
-- `apps/admin-web` 🚧: chưa nối `@keylish/shared`, không deploy. Khi hoàn thiện **NÊN** dùng chung schema `@keylish/*`, không định nghĩa lại type.
+- `apps/admin-web` PARTIAL: chưa nối `@keylish/shared`, không deploy. Khi hoàn thiện **NÊN** dùng chung schema `@keylish/*`, không định nghĩa lại type.
 
 ## 7. Quy ước định tuyến & môi trường
 
@@ -175,25 +176,37 @@ Quy chuẩn này áp dụng cho mọi thiết kế ở `02-hld` → `09-deploy`.
 
 > Pipeline chuẩn cho **mọi tính năng mới** của KeyLish. Mỗi phase có **cổng (gate)** phải đạt trước khi sang phase kế — đây là phần giúp người mới không bỏ sót bước. Chi tiết từng loại nằm ở file SDLC tương ứng.
 
+### 12.0. Hard gate trước khi code
+
+Trước khi sửa source code, task **BẮT BUỘC** đạt đủ các điều kiện sau:
+
+1. Có task ID trong `11-tasks.md` hoặc có xác nhận rõ của APPROVER trong cuộc trao đổi hiện tại.
+2. Task có `Approval = APPROVED`.
+3. Tài liệu liên quan đã cập nhật theo impact matrix ở `11-tasks.md` §4.
+4. Task có `Doc gate = READY`, trừ cleanup nhỏ được ghi rõ `Doc gate = N/A`.
+5. Phạm vi code trace được về FR/UC/RISK/OQ/ADR hoặc lý do maintenance.
+
+Nếu thiếu bất kỳ điều kiện nào, agent **chỉ được** phân tích, mở OQ/RISK, hoặc cập nhật tài liệu; **không được sửa source code**. Nếu trong lúc code phát hiện implementation lệch tài liệu đã duyệt, phải dừng mở rộng code và cập nhật lại docs/task gate trước.
+
 ```
 ①Ý tưởng → ②Yêu cầu → ③Thiết kế → ④Code → ⑤Test → ⑥Review/Merge → ⑦Deploy → ⑧Release
    OQ        01-SRS     02–07+10    branch   08      PR+APPROVER      Vercel/Render  12+STATE
 ```
 
-| Phase          | Việc làm                                                                                                                                          | Doc/Artifact                  | Gate để qua                         |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| ① Ý tưởng      | 2–3 câu: tính năng gì, cho actor nào, vì sao. Phạm vi chưa rõ → mở `OQ-xx`.                                                                       | `PROJECT-STATE`               | APPROVER đồng ý → OQ thành DECISION |
-| ② Yêu cầu      | Thêm `FR-xxx` testable (actor + kết quả), UC nếu cần; gắn nhãn ⬜.                                                                                | `01-srs`                      | FR rõ, kiểm tra được                |
-| ③ Thiết kế     | Mỗi quyết định công nghệ mới → 1 ADR. DB đổi → `04` + Prisma migration; API → `05`; UI → `06`; bảo mật → `07`.                                    | `02/03/04/05/06/07/10`        | Thiết kế trace về FR; có ADR        |
-| ④ Code         | Nhánh `feature/...` (không commit thẳng `master`); theo boundary §6 (Zod, controller mỏng, không SDK trong domain, không log secret). Nhãn ⬜→🚧. | source + migration            | `pnpm build` chạy                   |
-| ⑤ Test         | Test vùng MANDATORY liên quan (engine/auth/traffic/toàn vẹn dữ liệu); `pnpm check && pnpm test`.                                                  | `08-test`                     | Xanh + tiêu chí UC đạt              |
-| ⑥ Review/Merge | Mở PR; tự review theo boundary §6; CI nếu có (task T-10).                                                                                         | PR                            | APPROVER duyệt → nhãn 🚧→✅         |
-| ⑦ Deploy       | Merge `master` → Vercel (user-web) + Render (api) tự deploy; migration chạy qua `db:deploy`.                                                      | `render.yaml`, `09`           | `GET /api/health` OK + smoke test   |
-| ⑧ Release      | Changelog ở `12`; cập nhật status doc + bump §1.2; thu gọn `PROJECT-STATE`.                                                                       | `12-release`, `PROJECT-STATE` | Trạng thái LIVE khớp thực tế        |
+| Phase          | Việc làm                                                                                                                                | Doc/Artifact                  | Gate để qua                         |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
+| ① Ý tưởng      | 2–3 câu: tính năng gì, cho actor nào, vì sao. Phạm vi chưa rõ → mở `OQ-xx`.                                                             | `PROJECT-STATE`               | APPROVER đồng ý → OQ thành DECISION |
+| ② Yêu cầu      | Thêm `FR-xxx` testable (actor + kết quả), UC nếu cần; gắn nhãn TODO.                                                                    | `01-srs`                      | FR rõ, kiểm tra được                |
+| ③ Thiết kế     | Mỗi quyết định công nghệ mới → 1 ADR. DB đổi → `04` + Prisma migration; API → `05`; UI → `06`; bảo mật → `07`.                          | `02/03/04/05/06/07/10`        | Thiết kế trace về FR; có ADR        |
+| ④ Code         | Chỉ bắt đầu khi `Approval = APPROVED` và `Doc gate = READY`; nhánh `feature/...`; theo boundary §6; không mở scope ngoài docs đã duyệt. | source + migration            | `pnpm build` chạy; không lệch scope |
+| ⑤ Test         | Test vùng MANDATORY liên quan (engine/auth/traffic/toàn vẹn dữ liệu); `pnpm check && pnpm test`.                                        | `08-test`                     | Xanh + tiêu chí UC đạt              |
+| ⑥ Review/Merge | Mở PR; tự review theo boundary §6; CI nếu có (task T-10).                                                                               | PR                            | APPROVER duyệt → nhãn PARTIAL→DONE  |
+| ⑦ Deploy       | Merge `master` → Vercel (user-web) + Render (api) tự deploy; migration chạy qua `db:deploy`.                                            | `render.yaml`, `09`           | `GET /api/health` OK + smoke test   |
+| ⑧ Release      | Changelog ở `12`; cập nhật status doc + bump §1.2; thu gọn `PROJECT-STATE`.                                                             | `12-release`, `PROJECT-STATE` | Trạng thái LIVE khớp thực tế        |
 
-**Checklist nhanh mỗi tính năng:** phạm vi chốt (OQ→DECISION) · FR vào `01` · ADR cho quyết định công nghệ mới · cập nhật DB/API/UI/security doc + migration · nhánh `feature/*` theo boundary · test MANDATORY + `pnpm check && pnpm test` xanh · PR + APPROVER + nhãn ✅ · `/api/health` OK sau deploy · ghi `12` + cập nhật `PROJECT-STATE`.
+**Checklist nhanh mỗi tính năng:** phạm vi chốt (OQ→DECISION) · task `APPROVED` + `Doc gate = READY` · FR vào `01` · ADR cho quyết định công nghệ mới · cập nhật DB/API/UI/security doc + migration trước code · nhánh `feature/*` theo boundary · test MANDATORY + `pnpm check && pnpm test` xanh · PR + APPROVER + nhãn DONE · `/api/health` OK sau deploy · ghi `12` + cập nhật `PROJECT-STATE`.
 
-**Điểm người mới hay quên:** (1) không commit thẳng `master`; (2) đổi schema **luôn** kèm migration + cập nhật `04`; (3) mọi input ngoài **phải** qua Zod (§6.1); (4) không log token/password/PII (§6.4); (5) tính năng V2 (AI/flashcard/quiz/OAuth) đang **deferred** (DECISION D-04) — muốn làm phải mở OQ + APPROVER duyệt mở rộng phạm vi **trước**.
+**Điểm người mới hay quên:** (1) không code task chưa `APPROVED`; (2) docs liên quan phải READY trước source code; (3) không commit thẳng `master`; (4) đổi schema **luôn** kèm migration + cập nhật `04`; (5) mọi input ngoài **phải** qua Zod (§6.1); (6) không log token/password/PII (§6.4); (7) tính năng V2 (AI/flashcard/quiz/OAuth) đang **deferred** (DECISION D-04) — muốn làm phải mở OQ + APPROVER duyệt mở rộng phạm vi **trước**.
 
 ## 13. Quy định trạng thái tài liệu (Document Status Lifecycle)
 

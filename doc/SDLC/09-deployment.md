@@ -60,12 +60,12 @@ localhost:3002 (admin-web) ├── localhost:3000 (api) ── Docker Postgres
 
 ## 3. Thành phần
 
-| Thành phần       | Nền tảng           | URL (mẫu)                          | Free tier             |
-| ---------------- | ------------------ | ---------------------------------- | --------------------- |
-| `apps/user-web`  | Vercel             | `https://keylish.vercel.app`       | ✅                    |
-| `apps/api`       | Render (blueprint) | `https://keylish-api.onrender.com` | ✅ (ngủ sau 15p)      |
-| `apps/admin-web` | Local-only         | `http://localhost:3002`            | —                     |
-| PostgreSQL       | Supabase           | Pooled/Direct connection string    | ✅ (pause sau 7 ngày) |
+| Thành phần       | Nền tảng           | URL (mẫu)                          | Free tier               |
+| ---------------- | ------------------ | ---------------------------------- | ----------------------- |
+| `apps/user-web`  | Vercel             | `https://keylish.vercel.app`       | DONE                    |
+| `apps/api`       | Render (blueprint) | `https://keylish-api.onrender.com` | DONE (ngủ sau 15p)      |
+| `apps/admin-web` | Local-only         | `http://localhost:3002`            | —                       |
+| PostgreSQL       | Supabase           | Pooled/Direct connection string    | DONE (pause sau 7 ngày) |
 
 ## 4. Env mapping
 

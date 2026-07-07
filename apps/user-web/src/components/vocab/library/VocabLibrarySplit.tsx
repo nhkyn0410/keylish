@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
 import type { CefrLevel, TopicDTO, WordDTO } from "@keylish/shared";
 import { Icon } from "@/components/vocab/typing/primitives";
+import { makeLibrarySpec, practiceHref } from "@/components/vocab/typing/practiceSpec";
 import { fetchTopics, fetchVocab } from "@/infra/vocab/vocabApi";
 import { ApiError, getErrorMessage, pickSystemWord } from "@/infra/user/userApi";
 
@@ -309,8 +310,19 @@ export function VocabLibrarySplit() {
           <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
             <button
               className="k-btn k-btn--sm k-btn--primary"
-              onClick={() => router.push("/typing")}
-              disabled={!sel}
+              onClick={() =>
+                router.push(
+                  practiceHref(
+                    makeLibrarySpec({
+                      source: "system",
+                      levels: levelList,
+                      topics: topicList,
+                      search: search || undefined,
+                    })
+                  )
+                )
+              }
+              disabled={filtered.length === 0}
               style={{ width: "100%" }}
             >
               Luyện bộ này <Icon name="arrow" size={16} />
@@ -551,7 +563,18 @@ export function VocabLibrarySplit() {
               <div style={{ flex: 1 }} />
               <button
                 className="k-btn k-btn--primary"
-                onClick={() => router.push("/typing")}
+                onClick={() =>
+                  router.push(
+                    practiceHref(
+                      makeLibrarySpec({
+                        source: "system",
+                        search: sel.en,
+                        levels: sel.level ? [sel.level] : undefined,
+                        size: 1,
+                      })
+                    )
+                  )
+                }
                 style={{ width: "100%", position: "relative", zIndex: 1 }}
               >
                 Luyện từ này <Icon name="arrow" size={20} />

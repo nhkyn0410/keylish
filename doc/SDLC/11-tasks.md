@@ -1,161 +1,124 @@
-# 11 — Phân chia Công việc Hoàn thiện (Task Breakdown)
+# 11 — Task Register
 
 ## 1. Thông tin tài liệu
 
 ### 1.1. Metadata
 
-| Trường | Giá trị |
-|---|---|
-| Tên | Phân chia Công việc Hoàn thiện |
-| Mã tài liệu | `11-tasks` |
-| Dự án | KeyLish |
-| Phiên bản | 0.1.1 |
-| Trạng thái | Draft |
-| Người viết | AI Agent (soạn thảo SDLC) |
-| Người duyệt | Nguyễn Hồng Khanh |
-| Ngày tạo | 2026-06-15 |
+| Trường      | Giá trị                                           |
+| ----------- | ------------------------------------------------- |
+| Tên         | Task Register                                     |
+| Mã tài liệu | `11-tasks`                                        |
+| Dự án       | KeyLish                                           |
+| Phiên bản   | 0.3.2                                             |
+| Trạng thái  | Draft                                             |
+| Người viết  | AI Agent (soạn thảo SDLC)                         |
+| Người duyệt | Nguyễn Hồng Khanh                                 |
+| Ngày tạo    | 2026-06-15                                        |
+| Phạm vi     | Task đã làm, task còn mở, gate trước khi sửa code |
 
 ### 1.2. Lịch sử thay đổi
 
-| Phiên bản | Ngày | Người cập nhật | Nội dung |
-|---|---|---|---|
-| 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu — các task sau bootstrap SDLC. |
-| 0.1.1 | 2026-06-15 | AI Agent | Sửa F-3: trace T-02 (R-6→R-1/Swagger), bỏ tham chiếu treo R-7b ở T-03. |
+| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                            |
+| --------- | ---------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — các task sau bootstrap SDLC.                                                                        |
+| 0.1.1     | 2026-06-15 | AI Agent       | Sửa F-3: trace T-02 (R-6→R-1/Swagger), bỏ tham chiếu treo R-7b ở T-03.                                              |
+| 0.1.2     | 2026-06-21 | AI Agent       | Dọn backlog sau docs refresh: T-01 done, thêm priority cho FR-PVOC-08, giữ task mở ngắn gọn.                        |
+| 0.2.0     | 2026-06-22 | AI Agent       | Viết lại toàn bộ file 11: thêm rule docs-first, approval-before-code, impact matrix, task gate và backlog có duyệt. |
+| 0.3.0     | 2026-06-22 | AI Agent       | Tinh gọn thành task register; bỏ phần governance dài; thêm chi tiết các task đã thực hiện.                          |
+| 0.3.1     | 2026-06-22 | AI Agent       | Chốt đợt 1 tách route (ADR-020): T-11 → APPROVED/READY (đợt 1 — tách route), tách T-13 (custom options, DEFERRED); thêm DONE-15. |
+| 0.3.2     | 2026-06-22 | AI Agent       | T-11 (FR-PVOC-08 đợt 1) → DONE (DONE-16): tách route /typing/setup + /typing/play đã code & verify. |
 
-## 2. Quy ước
+## 2. Rule tối thiểu trước khi code
 
-- Mỗi task có Definition of Done (DoD)
-- Priority: **Cao** (blocker) · **Trung** · **Thấp**
-- Trace về FR/UC/RISK/OQ
+Rule chi tiết nằm ở `00-coding-standard.md` §12.0. File này chỉ giữ checklist cần đọc ngay trước khi sửa source code.
 
-## 3. Task list
+| Gate         | Bắt buộc                                                                      |
+| ------------ | ----------------------------------------------------------------------------- |
+| Task         | Có task ID trong §4 hoặc xác nhận rõ của APPROVER.                            |
+| Approval     | Chỉ sửa source khi `Approval = APPROVED`.                                     |
+| Docs-first   | Docs liên quan phải cập nhật trước code và `Doc gate = READY`.                |
+| Scope        | Không mở feature/API/schema/UI/dependency ngoài task đã duyệt.                |
+| Verification | Muốn chuyển `Status = DONE` phải có verify hoặc ghi rõ vì sao chưa chạy được. |
+| Worktree     | Luôn đọc `git status`; không revert thay đổi không do mình tạo.               |
 
-### T-01: Sửa README khớp as-built
+### 2.1. Nhãn dùng trong file này
 
-| Trường | Giá trị |
-|---|---|
-| Priority | **Cao** |
-| Trace | R-1, R-2, R-4, R-8, D-02 |
-| DoD | README: API mô tả đúng (có auth/admin/traffic); DB ghi Supabase; bỏ trỏ file không tồn tại; sửa local-first mô tả |
-| Phụ thuộc | 05-api, 09-deployment đã viết |
+| Nhãn     | Nghĩa                                                         |
+| -------- | ------------------------------------------------------------- |
+| TODO     | Chưa làm hoặc chưa đủ điều kiện sửa code.                     |
+| PARTIAL  | Đã làm một phần, cần đọc diff/trạng thái trước khi tiếp tục.  |
+| DONE     | Hoàn tất trong phạm vi task, có ghi chú verify/evidence.      |
+| BLOCKED  | Không thể tiếp tục nếu chưa có quyết định/thay đổi bên ngoài. |
+| PENDING  | Chưa được duyệt để code.                                      |
+| APPROVED | Được phép code trong đúng phạm vi task.                       |
+| CLOSED   | Task đã DONE hoặc không còn cần code thêm.                    |
+| READY    | Docs liên quan đã đủ để code.                                 |
+| N/A      | Không cần doc gate thiết kế, phải có lý do rõ.                |
 
-### T-02: Cập nhật OpenAPI Description
+## 3. Task đã thực hiện
 
-| Trường | Giá trị |
-|---|---|
-| Priority | Trung |
-| Trace | R-1, Swagger description (mô tả "read-only" lỗi thời) |
-| DoD | `main.ts` `DocumentBuilder.setDescription` cập nhật mô tả không còn "read-only" |
-| Phụ thuộc | — |
+| ID      | Ngày       | Phạm vi                                     | Chi tiết đã làm                                                                                                                                                                                            | Evidence / verify                                                                                                     |
+| ------- | ---------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| DONE-01 | 2026-06-15 | Bootstrap tài liệu & agent rules            | Tạo `CLAUDE.md`, `AGENTS.md`, bộ SDLC `00`–`12`, `doc/AGENT.md`, `PROJECT-STATE`, `DOMAIN-MAP`, `GLOSSARY`. Thiết lập quy ước SSOT, status tài liệu, risk/OQ/decision registry.                            | Docs hiện có trong `doc/`; `PROJECT-STATE` ghi D-01..D-07 và lịch sử 2026-06-15.                                      |
+| DONE-02 | 2026-06-15 | Deep-review SDLC                            | Rà `02/03/06/08/09/10/12` đối chiếu code; sửa các điểm G-1..G-7; gom RISK về registry chuẩn; chốt D-06 admin local-only và D-07 versioning as-built.                                                       | `PROJECT-STATE` decision/risk; các file SDLC đã cập nhật.                                                             |
+| DONE-03 | 2026-06-15 | Thiết kế V2.1 kho cá nhân                   | Chốt D-08..D-11: `UserVocabEntry` dạng tham chiếu + custom, dedup exact/variant, AI custom hoãn, lemmatization Mức 1. Phân bổ vào SRS/ADR/DB/API/UI/Security.                                              | `01-srs` FR-PVOC, `10-adr` ADR-019, `04/05/06/07` phần V2.1.                                                          |
+| DONE-04 | 2026-06-15 | Backend user vocab V2.1                     | Thêm schema/migration `UserVocabEntry`, enum source, shared DTO, lemmatize Mức 1, API `uservocab` list/pick/create/update/delete, cô lập `userId`, wire module.                                            | Verify lúc thực hiện: `prisma generate`, shared build, api/user-web typecheck, 17 API tests pass.                     |
+| DONE-05 | 2026-06-15 | UI kho cá nhân V2.1                         | Build `MyVocabSplit`, form tạo từ mới, dedup dialog, tab Kho hệ thống/Kho của tôi, API client `fetchUserVocab`/`createUserVocab`/`deleteUserVocab`, nút thêm vào kho hệ thống.                             | Verify lúc thực hiện: user-web typecheck pass, lint file liên quan sạch.                                              |
+| DONE-06 | 2026-06-19 | Local/prod DB và admin local                | Tách local Docker DB khỏi production Supabase; thêm guard chặn remote DB khi dev/migrate/seed; mô tả live admin local-only qua env riêng.                                                                  | `09-deployment`, README env, `PROJECT-STATE` D-12.                                                                    |
+| DONE-07 | 2026-06-19 | Public vocab search/pagination/local source | Thêm `search` cho public vocab/count, `offset` cho vocab API, cache tách theo API URL, nguồn `local` khi API localhost, UI vocabulary dùng server-side filter.                                             | Verify lúc thực hiện: shared/api/user-web typecheck pass, API tests 18/19 pass qua các mốc ghi trong `PROJECT-STATE`. |
+| DONE-08 | 2026-06-19 | UI vocabulary cleanup                       | Đổi route sang `/vocabulary`, bỏ top-bar dư, đưa feedback lên sidebar, chỉnh split full-width/fill-height, typing co theo màn hình.                                                                        | Verify lúc thực hiện: typecheck pass, preview/screenshot ở phiên UI.                                                  |
+| DONE-09 | 2026-06-20 | Filter kho cá nhân theo cấp độ/chủ đề       | Thêm `customTopicId`, migration `20260620093000_add_user_vocab_custom_topic`, API `/api/user/vocab` nhận `levels/topics`, UI filter server-side, tạo custom có topic.                                      | Verify lúc thực hiện: `pnpm check` pass; `pnpm test` pass, API 23/23.                                                 |
+| DONE-10 | 2026-06-20 | Thiết kế mở FR-PVOC-08                      | Viết lại `06-ui-ux` §4: phân tầng as-built vs planned, đề xuất `/typing/setup` + `/typing/play`, lifecycle 4 pha, mở OQ-13/OQ-14.                                                                          | Docs-only; chờ ADR-020/APPROVER trước code.                                                                           |
+| DONE-11 | 2026-06-21 | Docs entrypoint & state refresh             | Thêm `doc/README.md`, viết lại README as-built, thu gọn `PROJECT-STATE`, chuyển `T-01` thành DONE, cập nhật release note.                                                                                  | Prettier check pass cho nhóm docs lúc thực hiện.                                                                      |
+| DONE-12 | 2026-06-22 | Chuẩn hoá trạng thái tài liệu               | Bỏ toàn bộ emoji/icon trạng thái trong Markdown; dùng nhãn chữ `DONE`/`PARTIAL`/`TODO`; cập nhật docs liên quan.                                                                                           | Scan icon Unicode trả `NO_ICON_CHARS`; Prettier check pass.                                                           |
+| DONE-13 | 2026-06-22 | Task gate docs-first                        | Thêm rule: docs liên quan trước code, chỉ code khi `Approval = APPROVED` và `Doc gate = READY`; cập nhật `00-coding-standard`, `AGENTS.md`, `CLAUDE.md`, `doc/README.md`, `doc/AGENT.md`, `PROJECT-STATE`. | Prettier check pass cho nhóm docs; `00-coding-standard` v0.2.2 đang In Review.                                        |
+| DONE-14 | 2026-06-22 | Gỡ trạng thái tạm dừng docs                 | `PROJECT-STATE` chuyển sang ACTIVE; README/doc entrypoint đổi từ resume checklist sang checklist bắt đầu làm việc; release note cập nhật.                                                                  | Prettier check pass; còn “tạm dừng đồng hồ” trong `06-ui-ux` là hành vi UI, không phải trạng thái dự án.              |
+| DONE-15 | 2026-06-22 | Chốt thiết kế tách route typing (đợt 1)     | APPROVER duyệt tách route `/typing/setup` + `/typing/play`; viết ADR-020 (Accepted), `06` §4.6 chia 2 đợt, đóng OQ-13 → D-13, mở T-11 sang APPROVED/READY (đợt 1) và tách T-13 (custom options, DEFERRED).                                            | Docs-only; `06` v0.1.7, `10` v0.2.6, `PROJECT-STATE` cập nhật.                                                         |
+| DONE-16 | 2026-06-22 | FR-PVOC-08 đợt 1: tách route luyện gõ        | Tách `/typing` → `/typing/setup` (`SetupFlow`) + `/typing/play` (`PlayFlow`) qua session-spec (`practiceSpec.ts`: build/parse query + `loadWordsForSpec`); play tự nạp kho hệ thống (`fetchVocab`) / cá nhân (`fetchUserVocab`), vòng đời resolving→ready→play→summary; nút "Luyện bộ này/từ này/kho này" ở `VocabLibrarySplit`/`MyVocabSplit` điều hướng `/typing/play?source=…`; xoá `TypingFlow.tsx`. Custom options = đợt 2 (T-13). | `pnpm check` 7/7 pass; preview verify: /typing redirect, /typing/setup 200, /typing/play?source=system&n=5 → ReadyCard → engine (TỪ 1/5 · LUYỆN TẬP · A1–A2), /vocabulary "Luyện bộ này" → /typing/play?source=system…, 0 console error. |
 
-### T-03: Bổ sung unit test cho engine gõ (vùng MANDATORY)
+## 4. Task còn mở
 
-| Trường | Giá trị |
-|---|---|
-| Priority | **Cao** |
-| Trace | T-IME-01..10, R-7 |
-| DoD | Tối thiểu 6/10 test case trong `useTypingSession` pass: `computeCells`, `clean()`, IME composition, RepeatMode "none/once/until" |
-| Ghi chú | Cần tách `computeCells` và `clean()` thành pure functions trước khi test |
+> Toàn bộ task dưới đây đang `Approval = PENDING`; không sửa source code cho tới khi APPROVER duyệt và docs gate đạt yêu cầu.
 
-### T-04: Bổ sung unit test cho auth (vùng MANDATORY)
+| ID   | Status  | Approval | Doc gate | Priority | Task                                             | Trace               | Docs cần sẵn sàng trước code                     | Definition of Done                                                                                                        |
+| ---- | ------- | -------- | -------- | -------- | ------------------------------------------------ | ------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| T-02 | TODO    | PENDING  | TODO     | Thấp     | Cập nhật OpenAPI description                     | R-18/T-01 follow-up | `05-api.md`, `11-tasks.md`                       | `main.ts` `DocumentBuilder.setDescription` không còn ghi "read-only"; Swagger description phản ánh auth/admin/user-vocab. |
+| T-03 | TODO    | PENDING  | TODO     | Cao      | Bổ sung unit test cho engine gõ                  | R-7, T-IME-\*       | `08-test.md`, `03-lld.md` nếu tách logic         | Test tối thiểu `computeCells`, `clean`, IME composition, RepeatMode `none/once/until`.                                    |
+| T-04 | TODO    | PENDING  | TODO     | Trung    | Bổ sung unit test auth                           | R-7, T-ATH-\*       | `08-test.md`, `07-security.md`                   | Reset token one-time/expired, rate-limit, timing equalizer có test.                                                       |
+| T-05 | TODO    | PENDING  | TODO     | Thấp     | Bổ sung test traffic idempotent                  | R-7, T-TRF-\*       | `08-test.md`                                     | Track/count/range analytics có test.                                                                                      |
+| T-06 | TODO    | PENDING  | TODO     | Trung    | Tách engine gõ sang domain                       | R-5, D-05           | `03-lld.md`, `08-test.md`                        | Pure functions nằm ở `domain/vocab-typing/`; UI không đổi hành vi.                                                        |
+| T-07 | TODO    | PENDING  | TODO     | Trung    | Kết nối admin-web với `@keylish/shared`          | R-11                | `03-lld.md`, `05-api.md`, `08-test.md`           | Admin-web không định nghĩa lại schema/type đã có ở shared.                                                                |
+| T-08 | TODO    | PENDING  | TODO     | Thấp     | Rate limit persistence                           | R-13                | `07-security.md`, `04-database.md` nếu thêm bảng | Rate limit không chỉ dựa vào in-memory `Map` khi public rộng.                                                             |
+| T-09 | TODO    | PENDING  | TODO     | Thấp     | Pre-commit hook                                  | R-10                | `00-coding-standard.md`, `08-test.md`            | Hook lint/typecheck hoặc cảnh báo rõ trước commit.                                                                        |
+| T-10 | TODO    | PENDING  | TODO     | Trung    | CI pipeline                                      | R-7                 | `08-test.md`, `09-deployment.md`                 | GitHub Actions chạy `pnpm install -> pnpm check -> pnpm test`.                                                            |
+| T-11 | DONE    | APPROVED | READY    | Cao      | FR-PVOC-08 đợt 1 — hoàn tất (xem DONE-16)            | R-16, ADR-020, D-13 | `01-srs.md`, `06-ui-ux.md`, ADR-020              | Chốt route/session spec; nút "Luyện..." truyền nguồn/từ; engine tái dùng FR-PRC-\*.                                       |
+| T-13 | TODO | PENDING | TODO | Trung | FR-PVOC-08 đợt 2: custom-options lifecycle khi vào play | OQ-14, 06 §4.6 (DEFERRED) | `06-ui-ux.md` §4.6 đợt 2 | Pre-commit sửa tự do; ma trận forward-only/cấu trúc khi LIVE; cờ chỉnh-giữa-phiên/seed theo OQ-14. |
+| T-12 | TODO    | PENDING  | N/A      | Thấp     | Dọn pointer tài liệu/code còn treo               | R-2                 | N/A                                              | Comment/link cũ trỏ file không tồn tại được sửa về `09-deployment.md` hoặc `doc/README.md`.                               |
 
-| Trường | Giá trị |
-|---|---|
-| Priority | Trung |
-| Trace | T-ATH-09..12 |
-| DoD | Test reset token one-time + expired + rate-limit + timing attack |
-| Phụ thuộc | — |
+## 5. Ưu tiên đề xuất
 
-### T-05: Bổ sung test cho traffic idempotent
+| Ưu tiên | Task        | Lý do                                                                      |
+| ------- | ----------- | -------------------------------------------------------------------------- |
+| —       | T-11        | FR-PVOC-08 đợt 1 đã xong & verify (DONE-16); đợt 2 = T-13 (chờ OQ-14).                          |
+| 2       | T-03 + T-06 | Engine gõ là vùng dễ lỗi nhất; tách domain giúp test được.                 |
+| 3       | T-10        | CI giúp giữ `pnpm check`/`pnpm test` ổn định khi project tiếp tục mở rộng. |
+| 4       | T-04        | Auth nhạy cảm bảo mật; nên bổ sung test trước refactor lớn.                |
+| 5       | T-02 + T-12 | Cleanup nhỏ, giảm lệch tài liệu/code nhưng không mở tính năng mới.         |
 
-| Trường | Giá trị |
-|---|---|
-| Priority | Thấp |
-| Trace | T-TRF-04..05 |
-| DoD | Test increment đúng, range analytics |
+## 6. Mẫu mở task mới
 
-### T-06: Tách engine gõ từ components/ → domain/ + unit-test
-
-| Trường | Giá trị |
-|---|---|
-| Priority | Trung |
-| Trace | OQ-04, D-05, R-5 |
-| DoD | `computeCells`, `clean()`, `finalize()` tách thành pure functions trong `domain/vocab-typing/`. `useTypingSession` gọi từ domain. Unit test viết cho domain |
-| Ghi chú | Không phá vỡ UI hiện tại |
-
-### T-07: Kết nối admin-web với @keylish/shared
-
-| Trường | Giá trị |
-|---|---|
-| Priority | Trung |
-| Trace | FR-ADM-07, R-7 admin-web |
-| DoD | admin-web dùng `VocabQuerySchema`, `WordDTOSchema` từ shared; không định nghĩa lại type |
-| Phụ thuộc | — |
-
-### T-08: Rate limit persistence
-
-| Trường | Giá trị |
-|---|---|
-| Priority | Thấp |
-| Trace | RISK rate-limit in-memory |
-| DoD | Rate limit dùng DB-backed (hoặc Redis nếu có) thay vì Map in-memory |
-| Ghi chú | V1 scale nhỏ chưa cần; nên làm trước khi public |
-
-### T-09: Pre-commit hook (lint + typecheck)
-
-| Trường | Giá trị |
-|---|---|
-| Priority | Thấp |
-| Trace | `00-coding-standard` §5.3 |
-| DoD | Husky/lint-staged chạy ESLint + Prettier trước commit |
-| Ghi chú | Không block, chỉ warning |
-
-### T-10: Thiết lập CI pipeline
-
-| Trường | Giá trị |
-|---|---|
-| Priority | Trung |
-| Trace | R-7 |
-| DoD | GitHub Actions: `pnpm install → pnpm check → pnpm test` trên push/PR |
-| Ghi chú | Render + Vercel deploy tự động đã có |
-
-## 4. Dependency graph
-
-```
-T-01 (sửa README)
-  └── phụ thuộc: 05-api, 09-deployment ✅
-
-T-03 (engine test)
-  └── phụ thuộc: T-06 (tách domain) — có thể làm song song nếu test pure functions trước
-
-T-06 (tách domain)
-  ├── hỗ trợ: T-03
-  └── phụ thuộc: không phá vỡ UI
-
-T-04 + T-05 (auth/traffic test)
-  └── độc lập
-
-T-07 (admin-web shared)
-  └── độc lập (cần shared schema)
-
-T-08 (rate limit)
-  └── độc lập
-
-T-09 + T-10 (CI)
-  └── độc lập (nên làm sớm)
+```text
+ID:
+Tên task:
+Lý do:
+Trace:
+Priority:
+Docs impact:
+Acceptance / DoD:
+Risk/OQ:
+Approval: PENDING
+Doc gate: TODO
+Code allowed: NO
 ```
 
-## 5. Priority tổng
-
-| Ưu tiên | Task | Lý do |
-|---|---|---|
-| **Cao** | T-01 (sửa README) | Sai lệch thông tin public |
-| **Cao** | T-03 (engine test) | Vùng dễ lỗi nhất, chưa có test |
-| Trung | T-06 (tách domain) | Hỗ trợ T-03, giảm tech-debt |
-| Trung | T-04 (auth test) | Bảo mật cần test |
-| Trung | T-07 (admin-web) | Hoàn thiện admin |
-| Trung | T-10 (CI) | Quality gate |
-| Thấp | T-05 (traffic test) | Ít rủi ro |
-| Thấp | T-02 (Swagger desc) | Mỹ phẩm |
-| Thấp | T-08 (rate limit) | Scale |
-| Thấp | T-09 (pre-commit) | Convenience |
+Task mới chỉ được code khi APPROVER đổi `Approval` thành `APPROVED` và docs impact đã đạt `Doc gate = READY`.

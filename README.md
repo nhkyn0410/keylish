@@ -2,125 +2,127 @@
 
 **Học từ vựng tiếng Anh bằng cách gõ phím.**
 
-KeyLish là ứng dụng web luyện gõ tiếng Anh, trong đó việc học từ vựng diễn ra thông qua chính hành động gõ: người học chọn **chủ đề (topic)**, **cấp độ (CEFR)** và **mode luyện tập**, sau đó gõ từng từ theo phương pháp đã chọn (ví dụ: nhìn nghĩa tiếng Việt → gõ từ tiếng Anh, nghe phát âm → gõ lại từ).
+KeyLish là monorepo web luyện từ vựng tiếng Anh. Người học chọn chủ đề, cấp độ CEFR và mode luyện tập, sau đó gõ từng từ char-by-char; engine hiện tại có xử lý IME tiếng Việt, lặp lại từ sai và màn tổng kết phiên.
 
-> Đây là phiên bản **V1** — tập trung duy nhất vào tính năng **gõ từ vựng**.
+> **Trạng thái dự án:** đang mở để tiếp tục phát triển. Trước khi làm việc, đọc [doc/README.md](doc/README.md), [doc/context/PROJECT-STATE.md](doc/context/PROJECT-STATE.md) và [doc/SDLC/11-tasks.md](doc/SDLC/11-tasks.md).
 
-## Tính năng V1
+## Hiện trạng tính năng
 
-- ⌨️ **Luyện gõ từ vựng** char-by-char, an toàn với IME/bộ gõ tiếng Việt
-- 🗂️ Chọn **chủ đề** và **cấp độ CEFR** (A1–C2) trước mỗi phiên luyện
-- 🎯 Nhiều **mode luyện tập**: nghĩa VI → gõ từ EN (mặc định), nghe phát âm (TTS trình duyệt) → gõ từ
-- 🔁 Tự động **lặp lại từ gõ sai** và cho phép sửa lỗi ngay trong phiên
-- 📊 Màn hình tổng kết sau mỗi phiên luyện
-- 📦 Hoạt động **local-first**: cache từ vựng trên trình duyệt (IndexedDB), kèm seed offline dự phòng
+| Mảng                     | Trạng thái | Ghi chú                                                                               |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------- |
+| Luyện gõ từ vựng         | DONE       | Setup theo topic/CEFR/mode, gõ char-by-char, an toàn IME, summary                     |
+| Vocab public             | DONE       | API + cache IndexedDB + seed offline; lọc topic/CEFR/search, phân trang               |
+| Auth người học           | DONE       | Register/login/logout/profile/change/forgot/reset password bằng cookie session + CSRF |
+| Traffic analytics        | DONE       | `POST /api/v1/track`, aggregate theo giờ UTC                                          |
+| Admin API                | DONE       | Local/internal; production mặc định 404 qua `ADMIN_API_ENABLED=false`                 |
+| Admin web                | PARTIAL    | Khung Next.js + Ant Design, local-only, chưa nối shared đầy đủ                        |
+| Kho từ vựng cá nhân V2.1 | PARTIAL    | API/UI quản lý cơ bản, pick/tạo/xóa/filter; chưa luyện gõ theo kho cá nhân            |
+| AI/flashcard/quiz/OAuth  | TODO       | Deferred V2, không tự mở scope nếu chưa có quyết định                                 |
 
-## Tech stack
+## Tech Stack
 
-Monorepo quản lý bằng **pnpm workspaces + Turborepo**.
+Monorepo dùng pnpm workspaces + Turborepo.
 
-| Workspace         | Vai trò                         | Công nghệ                                                                  |
-| ----------------- | ------------------------------- | -------------------------------------------------------------------------- |
-| `apps/user-web`   | Ứng dụng web học từ vựng        | Next.js (App Router) · React · TypeScript · Tailwind CSS                   |
-| `apps/admin-web`  | Admin panel V2                  | Next.js (App Router) · React · TypeScript · Ant Design                     |
-| `apps/api`        | API đọc kho từ vựng (read-only) | NestJS 11 · Express · OpenAPI (Swagger) · nestjs-zod                       |
-| `packages/db`     | Tầng database                   | Prisma 7 (driver adapter `pg`) · PostgreSQL (Docker local / Supabase prod) |
-| `packages/shared` | Schema & type dùng chung        | Zod 4                                                                      |
+| Workspace         | Vai trò                | Công nghệ                                |
+| ----------------- | ---------------------- | ---------------------------------------- |
+| `apps/api`        | Backend API            | NestJS 11, Express, OpenAPI, Prisma, Zod |
+| `apps/user-web`   | Web học từ vựng        | Next.js 16, React 19, Tailwind 4         |
+| `apps/admin-web`  | Admin panel local-only | Next.js, React, Ant Design 6             |
+| `packages/db`     | Database package       | Prisma 7, PostgreSQL 16                  |
+| `packages/shared` | Schema/type dùng chung | Zod 4                                    |
+| `scripts/`        | Pipeline dữ liệu       | Node scripts                             |
 
-Công cụ chung: TypeScript 6 · Vitest · tsup · tsx.
+Node production trên Render dùng 22.16; local cần Node 20+ và pnpm 10.
 
-### API V1
+## API Chính
 
-Backend V1 chỉ phục vụ **đọc kho từ vựng**:
+Versioning hiện không đồng nhất theo as-built: public/track dùng `/api/v1/*`, auth/admin/user-vocab không version. Đây là quyết định đã chốt trong `PROJECT-STATE` D-07.
 
-- `GET /api/v1/topics` — danh sách chủ đề
-- `GET /api/v1/vocab` — danh sách từ vựng (lọc theo topic / cấp độ)
-- `GET /api/health` - health check
-- `GET /api/docs` - OpenAPI UI
+| Nhóm         | Endpoint                                                                                                                                                                                                         |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Health/docs  | `GET /api/health`, `GET /api/docs`                                                                                                                                                                               |
+| Public vocab | `GET /api/v1/topics`, `GET /api/v1/vocab`, `GET /api/v1/vocab/count`                                                                                                                                             |
+| Traffic      | `POST /api/v1/track`                                                                                                                                                                                             |
+| User auth    | `/api/user/csrf`, `/api/user/register`, `/api/user/login`, `/api/user/logout`, `/api/user/logout-all`, `/api/user/profile`, `/api/user/change-password`, `/api/user/forgot-password`, `/api/user/reset-password` |
+| User vocab   | `GET/POST/PATCH/DELETE /api/user/vocab*`                                                                                                                                                                         |
+| Admin        | `/api/admin/*`                                                                                                                                                                                                   |
 
-## Nguồn dữ liệu từ vựng
+Chi tiết contract nằm ở [doc/SDLC/05-api.md](doc/SDLC/05-api.md).
+
+## Bắt Đầu Local
+
+```bash
+pnpm install
+
+pnpm docker:up
+pnpm db:generate
+pnpm db:migrate
+
+pnpm dev:api        # http://localhost:3000
+pnpm dev:user-web   # http://localhost:3001
+pnpm dev:admin-web  # http://localhost:3002
+```
+
+Quality gates:
+
+```bash
+pnpm check
+pnpm test
+```
+
+## Env
+
+Mỗi file env có một nhiệm vụ. DB URL chỉ khai ở `packages/db/.env`; API runtime load file này với `override`, nên không đặt `DATABASE_URL` trong `apps/api/.env`.
+
+| File                  | Đọc bởi                       | Chứa                                                           |
+| --------------------- | ----------------------------- | -------------------------------------------------------------- |
+| `.env`                | Docker Compose                | `POSTGRES_*`, `PGADMIN_*`                                      |
+| `packages/db/.env`    | Prisma CLI, API runtime, seed | `DATABASE_URL`, `DIRECT_URL`                                   |
+| `apps/api/.env`       | API runtime                   | `PORT`, `AUTH_*`, `ADMIN_INITIAL_*`, `WEB_APP_URL`, `RESEND_*` |
+| `apps/user-web/.env`  | user-web                      | `NEXT_PUBLIC_API_URL`                                          |
+| `apps/admin-web/.env` | admin-web                     | `NEXT_PUBLIC_API_URL`                                          |
+
+Production env đặt trên dashboard Render/Vercel/Supabase, không dùng file `.env` thật.
+
+## Nguồn Dữ Liệu Từ Vựng
 
 Kho từ vựng được build từ hai nguồn miễn phí:
 
-| Nguồn                                                                                   | Cung cấp                                        | License         |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------- |
-| [Maximax67/Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset)         | Từ EN + cấp độ CEFR + tần suất + POS (~172k từ) | MIT             |
-| [kaikki.org — English Wiktionary (Wiktextract)](https://kaikki.org/dictionary/English/) | Nghĩa EN→VI + IPA + ví dụ + POS (JSONL)         | CC BY-SA + GFDL |
+| Nguồn                                                                           | Cung cấp                      | License         |
+| ------------------------------------------------------------------------------- | ----------------------------- | --------------- |
+| [Maximax67/Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset) | Từ EN + CEFR + tần suất + POS | MIT             |
+| [kaikki.org — English Wiktionary](https://kaikki.org/dictionary/English/)       | Nghĩa, IPA, ví dụ, POS        | CC BY-SA + GFDL |
 
-Pipeline xử lý dữ liệu nằm trong `apps/api`:
-
-```bash
-pnpm --filter @keylish/api build-dataset   # tải & ghép dữ liệu từ 2 nguồn
-pnpm --filter @keylish/api seed            # nạp dữ liệu vào Postgres
-```
-
-## Bắt đầu
-
-Yêu cầu: **Node.js 20+** và **pnpm 10**.
+Pipeline:
 
 ```bash
-# 1. Cài dependencies
-pnpm install
-
-# 2. Chạy Postgres local (Docker)
-docker compose up -d
-#    Copy packages/db/.env.example -> packages/db/.env (giữ DATABASE_URL local)
-
-# 3. Generate Prisma client & migrate
-pnpm --filter @keylish/db generate
-pnpm --filter @keylish/db migrate
-
-# 4. Chạy dev
-pnpm --filter @keylish/api dev        # API (NestJS, port 3000)
-pnpm --filter @keylish/user-web dev   # User Web (Next.js, port 3001)
-pnpm --filter @keylish/admin-web dev  # Admin Web (Next.js, port 3002)
+pnpm --filter @keylish/api build-dataset
+pnpm --filter @keylish/api seed
 ```
 
-## Cấu hình môi trường (env)
+## Cấu Trúc
 
-Mỗi file env có **một nhiệm vụ**, không trùng lặp. Ai đọc file nào:
-
-| File                  | Đọc bởi                                    | Chứa                                                           |
-| --------------------- | ------------------------------------------ | -------------------------------------------------------------- |
-| `.env` (gốc)          | `docker compose`                           | `POSTGRES_*`, `PGADMIN_*`                                      |
-| `packages/db/.env`    | API runtime (override) · Prisma CLI · seed | `DATABASE_URL`, `DIRECT_URL`                                   |
-| `apps/api/.env`       | API runtime · seed                         | `PORT`, `AUTH_*`, `ADMIN_INITIAL_*`, `WEB_APP_URL`, `RESEND_*` |
-| `apps/user-web/.env`  | user-web                                   | `NEXT_PUBLIC_API_URL`                                          |
-| `apps/admin-web/.env` | admin-web                                  | `NEXT_PUBLIC_API_URL`                                          |
-
-- **Kết nối DB chỉ khai ở `packages/db/.env`** — API runtime load nó với `override` nên nó luôn thắng; đừng đặt `DATABASE_URL` ở `apps/api/.env`.
-- **Local/dev bắt buộc dùng Docker Postgres**. Script DB sẽ chặn remote DB khi `NODE_ENV` khác `production`, trừ thao tác staging có chủ ý với `ALLOW_REMOTE_DB_FOR_DEV=true`.
-- **Production** (Render/Vercel): đặt env trên dashboard, không dùng file `.env`; production DB là Supabase riêng.
-- **Admin** là local-only: `apps/admin-web` chạy ở `localhost:3002`, API admin bật ở local và tắt trên Render qua `ADMIN_API_ENABLED=false`.
-- **Live admin có chủ ý**: giữ `packages/db/.env` là Docker local; nếu cần admin đọc/chỉnh Supabase production từ máy cá nhân, tạo file ignored riêng như `packages/db/.env.admin-prod`, rồi chạy API với `KEYLISH_DB_ENV_FILE=packages/db/.env.admin-prod` và `ALLOW_REMOTE_DB_FOR_DEV=true`.
-- Mỗi file có `*.env.example` đi kèm làm mẫu. Tất cả `.env` thật đều đã được `.gitignore`.
-
-## Triển khai
-
-| Thành phần       | Nền tảng                                                | Free tier                  |
-| ---------------- | ------------------------------------------------------- | -------------------------- |
-| `apps/user-web`  | [Vercel](https://vercel.com)                            | ✅                         |
-| `apps/admin-web` | Local-only (công cụ nội bộ — không deploy)              | — (xem doc/v2.1.1)         |
-| `apps/api`       | [Render](https://render.com) (Blueprint: `render.yaml`) | ✅ (ngủ sau 15p idle)      |
-| PostgreSQL       | [Supabase](https://supabase.com)                        | ✅ (pause sau 7 ngày idle) |
-
-Hướng dẫn chi tiết từng bước: [doc/SDLC/09-deployment.md](doc/SDLC/09-deployment.md).
-
-## Cấu trúc thư mục
-
-```
+```text
 KeyLish/
 ├── apps/
-│   ├── api/        # NestJS — vocab read API + scripts build dataset
-│   ├── user-web/   # Next.js — giao diện luyện gõ
-│   └── admin-web/  # Next.js — admin panel V2
+│   ├── api/        # NestJS backend
+│   ├── user-web/   # Next.js learning app
+│   └── admin-web/  # Local-only admin UI
 ├── packages/
 │   ├── db/         # Prisma schema, client, migrations
-│   └── shared/     # Zod schemas & types dùng chung
-└── doc/            # Tài liệu thiết kế (tiếng Việt)
+│   └── shared/     # Zod schemas and shared types
+├── scripts/        # Dataset pipeline
+└── doc/            # SDLC docs in Vietnamese
 ```
 
-## Ghi công & License dữ liệu
+## Tài Liệu
+
+- [doc/README.md](doc/README.md) — bản đồ tài liệu và checklist bắt đầu làm việc.
+- [doc/context/PROJECT-STATE.md](doc/context/PROJECT-STATE.md) — trạng thái sống, risk, open question, decision.
+- [doc/SDLC/11-tasks.md](doc/SDLC/11-tasks.md) — backlog còn lại.
+- [doc/SDLC/09-deployment.md](doc/SDLC/09-deployment.md) — deploy/env chi tiết.
+
+## Ghi Công & License Dữ Liệu
 
 - Dữ liệu CEFR/tần suất/POS: [Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset) — MIT License.
-- Dữ liệu nghĩa EN→VI, IPA, ví dụ: trích xuất từ [English Wiktionary](https://en.wiktionary.org/) qua [kaikki.org](https://kaikki.org/) (Wiktextract) — phát hành theo **CC BY-SA** và **GFDL**; phần dữ liệu phái sinh từ nguồn này giữ nguyên license tương ứng.
+- Dữ liệu nghĩa EN→VI, IPA, ví dụ: trích xuất từ [English Wiktionary](https://en.wiktionary.org/) qua [kaikki.org](https://kaikki.org/) — CC BY-SA và GFDL.

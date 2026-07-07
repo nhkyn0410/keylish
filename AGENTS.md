@@ -4,7 +4,7 @@ Quy ước cho AI coding agents, áp dụng toàn monorepo. Chi tiết & lý do:
 
 ## Stack
 
-pnpm 10 + Turborepo 2.9 · TypeScript 6 (**strict**, ES2022, moduleResolution Bundler) · NestJS 11 + Express (api) · Next.js 16 + React 19 + Tailwind 4 (user-web) · Next.js + Ant Design 6 (admin-web 🚧) · Prisma 7 + PostgreSQL 16 · Zod 4 · Vitest 4 + Supertest. Node 20+ (prod Render 22.16).
+pnpm 10 + Turborepo 2.9 · TypeScript 6 (**strict**, ES2022, moduleResolution Bundler) · NestJS 11 + Express (api) · Next.js 16 + React 19 + Tailwind 4 (user-web) · Next.js + Ant Design 6 (admin-web PARTIAL) · Prisma 7 + PostgreSQL 16 · Zod 4 · Vitest 4 + Supertest. Node 20+ (prod Render 22.16).
 
 ## Setup & lệnh
 
@@ -22,7 +22,7 @@ pnpm format         # Prettier
 
 ## Cấu trúc
 
-`apps/api` (NestJS: auth, admin, vocab, topics, traffic, mail, health, database) · `apps/user-web` (engine gõ ở `components/vocab/typing/`, data ở `infra/`, seed ở `data/seed/`) · `apps/admin-web` (🚧 chưa nối shared) · `packages/db` (Prisma) · `packages/shared` (Zod) · `scripts/` (pipeline).
+`apps/api` (NestJS: auth, admin, vocab, topics, traffic, mail, health, database) · `apps/user-web` (engine gõ ở `components/vocab/typing/`, data ở `infra/`, seed ở `data/seed/`) · `apps/admin-web` (PARTIAL chưa nối shared) · `packages/db` (Prisma) · `packages/shared` (Zod) · `scripts/` (pipeline).
 
 ## Code style
 
@@ -39,6 +39,7 @@ pnpm format         # Prettier
 4. **Không log token/password/OTP/PII.** IP → `ipHash` (HMAC-SHA256 + pepper). Mailer chỉ log link reset khi thiếu cấu hình (dev-only).
 5. **OpenAPI** mô tả qua `@nestjs/swagger` decorators (tái dùng `CefrLevelSchema.options`).
 6. **user-web local-first**: lấy vocab 3 tầng API→IndexedDB→seed (`infra/vocab/vocabApi.ts`). Logic thuần nên đặt ở `domain/` (đang refactor — task T-06).
+7. **Task gate bắt buộc**: theo `doc/SDLC/11-tasks.md`, phải cập nhật tài liệu liên quan trước khi code; chỉ sửa source khi `Approval = APPROVED` và `Doc gate = READY` (hoặc `N/A` có lý do rõ).
 
 ## Test
 

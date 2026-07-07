@@ -3,7 +3,11 @@
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon, ProgressStrip, Star, StatPill } from "./primitives";
 import { useTypingSession, type SessionResult, type VocabWord } from "./useTypingSession";
-import { DEFAULT_PRACTICE_SETTINGS, type PracticeSettings, type RepeatMode } from "./practiceSettings";
+import {
+  DEFAULT_PRACTICE_SETTINGS,
+  type PracticeSettings,
+  type RepeatMode,
+} from "./practiceSettings";
 
 function firstMismatch(target: string, typed: string) {
   let i = 0;
@@ -131,9 +135,7 @@ function WrongMark({
           </span>
         )}
         {willRepeat === "until" && (
-          <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>
-            · gõ đúng để qua
-          </span>
+          <span style={{ opacity: 0.55, fontWeight: 700, fontSize: 13 }}>· gõ đúng để qua</span>
         )}
       </div>
       {autoAdvanceMs != null ? (
@@ -149,13 +151,7 @@ function WrongMark({
   );
 }
 
-function CorrectMark({
-  target,
-  onContinue,
-}: {
-  target: string;
-  onContinue: () => void;
-}) {
+function CorrectMark({ onContinue }: { onContinue: () => void }) {
   return (
     <div
       className="k-b"
@@ -274,7 +270,9 @@ function Correction({
         </span>
         <Icon name="arrow" size={14} />
         <span style={{ color: "#149040", fontWeight: 900 }}>{rightCh}</span>
-        {willRepeat === "once" && <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>}
+        {willRepeat === "once" && (
+          <span style={{ opacity: 0.55 }}>· từ này sẽ lặp lại ở cuối vòng</span>
+        )}
         {willRepeat === "until" && <span style={{ opacity: 0.55 }}>· gõ đúng để qua</span>}
       </div>
     </div>
@@ -303,7 +301,6 @@ export function TypingScreen({
     word,
     target,
     index,
-    total,
     originalTotal,
     typed,
     status,
@@ -314,7 +311,12 @@ export function TypingScreen({
     continueNext,
   } = useTypingSession(
     words,
-    { reveal: false, repeat: settings.repeat, wrongAdvanceMs: isTestMode ? 3000 : undefined, trimToTarget: !hideLength },
+    {
+      reveal: false,
+      repeat: settings.repeat,
+      wrongAdvanceMs: isTestMode ? 3000 : undefined,
+      trimToTarget: !hideLength,
+    },
     onComplete
   );
 
@@ -329,10 +331,16 @@ export function TypingScreen({
     ? Math.min(620, Math.max(320, typed.length * 34 + 120))
     : Math.min(620, Math.max(320, target.length * 34 + 120));
   const answerFontSize = hideLength ? 58 : target.length > 16 ? 36 : target.length > 11 ? 44 : 58;
-  const answerBackground = status === "wrong" ? "var(--neo-red-soft)" : status === "correct" ? "var(--neo-green-soft)" : "var(--neo-white)";
-  const targetChars = hideLength && typed.length > target.length
-    ? Array.from({ length: typed.length }, (_, i) => target[i] ?? "")
-    : Array.from(target);
+  const answerBackground =
+    status === "wrong"
+      ? "var(--neo-red-soft)"
+      : status === "correct"
+        ? "var(--neo-green-soft)"
+        : "var(--neo-white)";
+  const targetChars =
+    hideLength && typed.length > target.length
+      ? Array.from({ length: typed.length }, (_, i) => target[i] ?? "")
+      : Array.from(target);
 
   return (
     <div className="k-screen">
@@ -499,7 +507,9 @@ export function TypingScreen({
                           textDecorationLine: isBad ? "line-through" : "none",
                           textDecorationThickness: 4,
                           borderBottom:
-                            !isTyped && hint === "underline" ? "4px solid rgba(0,0,0,.4)" : undefined,
+                            !isTyped && hint === "underline"
+                              ? "4px solid rgba(0,0,0,.4)"
+                              : undefined,
                         }}
                       >
                         {isTyped ? typedCh : ch}
@@ -574,7 +584,7 @@ export function TypingScreen({
           }}
         >
           {status === "correct" ? (
-            <CorrectMark target={target} onContinue={continueNext} />
+            <CorrectMark onContinue={continueNext} />
           ) : status === "wrong" ? (
             feedback === "mark" ? (
               <WrongMark

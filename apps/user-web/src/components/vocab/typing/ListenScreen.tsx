@@ -30,7 +30,6 @@ export function ListenScreen({
   const {
     word,
     index,
-    total,
     originalTotal,
     cells,
     stats,
@@ -63,7 +62,12 @@ export function ListenScreen({
           Thoát
         </button>
       </AppHeader>
-      <ProgressStrip idx={index + 1} total={originalTotal} ctx={contextLabel} bg="var(--neo-yellow)" />
+      <ProgressStrip
+        idx={index + 1}
+        total={originalTotal}
+        ctx={contextLabel}
+        bg="var(--neo-yellow)"
+      />
 
       <div
         onClick={focusInput}

@@ -4,37 +4,37 @@
 
 ### 1.1. Metadata
 
-| Trường | Giá trị |
-|---|---|
-| Tên | Thiết kế Kiến trúc Mức cao (High-Level Design) |
-| Mã tài liệu | `02-hld` |
-| Dự án | KeyLish |
-| Phiên bản | 0.2.1 |
-| Trạng thái | Draft |
-| Người viết | AI Agent (soạn thảo SDLC) |
-| Người duyệt | Nguyễn Hồng Khanh |
-| Ngày tạo | 2026-06-15 |
-| Chuẩn áp dụng | ISO/IEC/IEEE 15289:2019 |
+| Trường        | Giá trị                                        |
+| ------------- | ---------------------------------------------- |
+| Tên           | Thiết kế Kiến trúc Mức cao (High-Level Design) |
+| Mã tài liệu   | `02-hld`                                       |
+| Dự án         | KeyLish                                        |
+| Phiên bản     | 0.2.1                                          |
+| Trạng thái    | Draft                                          |
+| Người viết    | AI Agent (soạn thảo SDLC)                      |
+| Người duyệt   | Nguyễn Hồng Khanh                              |
+| Ngày tạo      | 2026-06-15                                     |
+| Chuẩn áp dụng | ISO/IEC/IEEE 15289:2019                        |
 
 ### 1.2. Lịch sử thay đổi
 
-| Phiên bản | Ngày | Người cập nhật | Nội dung |
-|---|---|---|---|
-| 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu. |
-| 0.2.0 | 2026-06-15 | AI Agent | Nâng cấp: bổ sung sequence diagram, kiến trúc chi tiết, FR trace, quality attributes, cross-cutting concerns. |
-| 0.2.1 | 2026-06-15 | AI Agent | Sửa G-5 (~52% → ASSUMPTION); G-4 gom RISK (R-9→R-10) + phản ánh D-06/D-07. |
+| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                      |
+| --------- | ---------- | -------------- | ------------------------------------------------------------------------------------------------------------- |
+| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu.                                                                                                |
+| 0.2.0     | 2026-06-15 | AI Agent       | Nâng cấp: bổ sung sequence diagram, kiến trúc chi tiết, FR trace, quality attributes, cross-cutting concerns. |
+| 0.2.1     | 2026-06-15 | AI Agent       | Sửa G-5 (~52% → ASSUMPTION); G-4 gom RISK (R-9→R-10) + phản ánh D-06/D-07.                                    |
 
 ### 1.3. Tham chiếu
 
-| Tài liệu | Nội dung |
-|---|---|
+| Tài liệu             | Nội dung                                       |
+| -------------------- | ---------------------------------------------- |
 | `00-coding-standard` | Stack, workspace, ranh giới, coding convention |
-| `01-srs` | Yêu cầu chức năng (FR), use case (UC), NFR |
-| `03-lld` | Thiết kế chi tiết từng module API + engine gõ |
-| `04-database` | ERD, Prisma schema, data pipeline |
-| `07-security` | Auth, CSRF, session, cookie, rate-limit |
-| `09-deployment` | Vercel/Render/Supabase topology, env mapping |
-| `10-adr` | Quyết định kiến trúc (NestJS, Prisma, ...) |
+| `01-srs`             | Yêu cầu chức năng (FR), use case (UC), NFR     |
+| `03-lld`             | Thiết kế chi tiết từng module API + engine gõ  |
+| `04-database`        | ERD, Prisma schema, data pipeline              |
+| `07-security`        | Auth, CSRF, session, cookie, rate-limit        |
+| `09-deployment`      | Vercel/Render/Supabase topology, env mapping   |
+| `10-adr`             | Quyết định kiến trúc (NestJS, Prisma, ...)     |
 
 ## 2. Tổng quan kiến trúc
 
@@ -50,14 +50,14 @@ KeyLish theo kiến trúc **Monorepo phân tách trách nhiệm (Separation of C
 
 ### 2.2. Các nguyên lý kiến trúc (Architecture Principles)
 
-| # | Nguyên lý | Mô tả | Bằng chứng trong code |
-|---|---|---|---|
-| AP-01 | **Local-first** | Ứng dụng phải hoạt động được khi API không khả dụng | `vocabApi.ts`: 3 tầng API → cache → seed |
-| AP-02 | **Defense in depth** | Auth tự xây nhiều lớp: Argon2 + HMAC + CSRF + rate-limit + origin check | `auth.service.ts`, `admin-gate.guard.ts` |
-| AP-03 | **No vendor lock-in** | Không SDK vendor trong domain; REST `fetch` cho mail; Prisma adapter pattern | `mail.service.ts`, `@keylish/db` |
-| AP-04 | **Controller mỏng, service dày** | Controller chỉ routing/guard; logic + DB query ở service | `auth.controller.ts` vs `auth.service.ts` |
-| AP-05 | **Aggregate-on-write** | Gộp dữ liệu ngay khi ghi, không lưu raw events | `traffic.service.ts`: upsert hourly |
-| AP-06 | **Admin surface mặc định đóng** | Admin API 404 khi không bật; an toàn deploy public | `admin-gate.guard.ts` |
+| #     | Nguyên lý                        | Mô tả                                                                        | Bằng chứng trong code                     |
+| ----- | -------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------- |
+| AP-01 | **Local-first**                  | Ứng dụng phải hoạt động được khi API không khả dụng                          | `vocabApi.ts`: 3 tầng API → cache → seed  |
+| AP-02 | **Defense in depth**             | Auth tự xây nhiều lớp: Argon2 + HMAC + CSRF + rate-limit + origin check      | `auth.service.ts`, `admin-gate.guard.ts`  |
+| AP-03 | **No vendor lock-in**            | Không SDK vendor trong domain; REST `fetch` cho mail; Prisma adapter pattern | `mail.service.ts`, `@keylish/db`          |
+| AP-04 | **Controller mỏng, service dày** | Controller chỉ routing/guard; logic + DB query ở service                     | `auth.controller.ts` vs `auth.service.ts` |
+| AP-05 | **Aggregate-on-write**           | Gộp dữ liệu ngay khi ghi, không lưu raw events                               | `traffic.service.ts`: upsert hourly       |
+| AP-06 | **Admin surface mặc định đóng**  | Admin API 404 khi không bật; an toàn deploy public                           | `admin-gate.guard.ts`                     |
 
 ### 2.3. Sơ đồ kiến trúc tổng thể
 
@@ -78,7 +78,7 @@ KeyLish theo kiến trúc **Monorepo phân tách trách nhiệm (Separation of C
 │  │   │  typing/ (engine gõ)      │ │    │  └───────────────────────────┘ │      │
 │  │   │  layout/ (AppShell, ...)  │ │    └──────────┬──────────────────────┘      │
 │  │   │  auth/ (AuthFrame, ...)   │ │               │                              │
-│  │   │  ui/ (NeoCard, ...)      │ │               │ (local-only 🚧)               │
+│  │   │  ui/ (NeoCard, ...)      │ │               │ (local-only PARTIAL)               │
 │  │   └──────────────────────────┘ │               │                              │
 │  │   ┌──────────────────────────┐ │               │                              │
 │  │   │ Data layer               │ │               │                              │
@@ -148,13 +148,13 @@ KeyLish theo kiến trúc **Monorepo phân tách trách nhiệm (Separation of C
 
 ### 2.4. 5 Workspace
 
-| # | Workspace | Package | Vai trò | Runtime | Build tool | FR trace | Trạng thái |
-|---|---|---|---|---|---|---|---|
-| W-01 | `apps/api` | `@keylish/api` | Backend NestJS (auth, vocab, admin, traffic, mail, health) | Node 22.16 (prod) | `nest build` | FR-AUT/ADM/VOC/TRF/MAL | ✅ |
-| W-02 | `apps/user-web` | `@keylish/user-web` | Web học từ vựng (Next.js App Router + React 19) | Browser (Vercel) | `next build` | FR-PRC/VOC | ✅ |
-| W-03 | `apps/admin-web` | `@keylish/admin-web` | Admin panel V2 (Ant Design 6 Next.js) | Browser (local-only) | `next build` | FR-ADM-07 | 🚧 |
-| W-04 | `packages/db` | `@keylish/db` | Prisma schema, client generator, migrations | Node (build + runtime) | `tsup` | — | ✅ |
-| W-05 | `packages/shared` | `@keylish/shared` | Zod 4 schema/type dùng chung (vocab query, DTO) | Node (build-time) | `tsup` | FR-VOC-02/03 | ✅ |
+| #    | Workspace         | Package              | Vai trò                                                    | Runtime                | Build tool   | FR trace               | Trạng thái |
+| ---- | ----------------- | -------------------- | ---------------------------------------------------------- | ---------------------- | ------------ | ---------------------- | ---------- |
+| W-01 | `apps/api`        | `@keylish/api`       | Backend NestJS (auth, vocab, admin, traffic, mail, health) | Node 22.16 (prod)      | `nest build` | FR-AUT/ADM/VOC/TRF/MAL | DONE       |
+| W-02 | `apps/user-web`   | `@keylish/user-web`  | Web học từ vựng (Next.js App Router + React 19)            | Browser (Vercel)       | `next build` | FR-PRC/VOC             | DONE       |
+| W-03 | `apps/admin-web`  | `@keylish/admin-web` | Admin panel V2 (Ant Design 6 Next.js)                      | Browser (local-only)   | `next build` | FR-ADM-07              | PARTIAL    |
+| W-04 | `packages/db`     | `@keylish/db`        | Prisma schema, client generator, migrations                | Node (build + runtime) | `tsup`       | —                      | DONE       |
+| W-05 | `packages/shared` | `@keylish/shared`    | Zod 4 schema/type dùng chung (vocab query, DTO)            | Node (build-time)      | `tsup`       | FR-VOC-02/03           | DONE       |
 
 ### 2.5. Phân luồng request (Request Flow)
 
@@ -201,6 +201,7 @@ Browser                          NestJS                            PostgreSQL
 **File**: `apps/api/src/auth/` — `auth.module.ts`, `auth.controller.ts`, `auth.service.ts`, `auth.guard.ts`, `auth.dto.ts`
 
 **Trách nhiệm**:
+
 - Đăng ký/đăng nhập/đăng xuất user (email + password)
 - Đăng nhập/đăng xuất admin (username + password)
 - Quản lý session (cookie token hash), CSRF, rate-limit
@@ -210,6 +211,7 @@ Browser                          NestJS                            PostgreSQL
 **Phụ thuộc**: `DatabaseService`, `MailService`
 
 **Guard chain**:
+
 ```
 Request → AdminGateGuard (global, chặn admin nếu tắt)
         → CsrfGuard (POST/PUT/PATCH/DELETE: CSRF + Origin check)
@@ -217,6 +219,7 @@ Request → AdminGateGuard (global, chặn admin nếu tắt)
 ```
 
 **Sequence — Đăng ký (UC-02)**:
+
 ```
 Browser                     AuthController           AuthService                  DB
   │                              │                       │                         │
@@ -254,6 +257,7 @@ Browser                     AuthController           AuthService                
 | `AdminVocabController` | `/admin/vocab` (CRUD) | AdminGuard + CsrfGuard | Admin quản trị |
 
 **Public vocab flow**:
+
 ```
 Request → VocabController.findAll(query)
         → VocabService
@@ -278,6 +282,7 @@ Tương tự Vocab: public read + admin CRUD. Public endpoint trả `{slug, titl
 **File**: `apps/api/src/traffic/` — `traffic.module.ts`, `traffic.controller.ts`, `traffic.service.ts`
 
 **Aggregate-on-write pattern**:
+
 ```
 track(origin)
   → origin trong allowedOrigins?
@@ -300,11 +305,13 @@ Kết quả: luôn trả 204 No Content, không tiết lộ có đếm hay khôn
 **File**: `apps/api/src/admin/`
 
 **Ba tầng bảo vệ**:
+
 1. **AdminGateGuard** (global APP_GUARD): 404 khi ADMIN_API_ENABLED không bật
 2. **AdminGuard** (guard cục bộ): verify admin session cookie
 3. **CsrfGuard** (unsafe methods): CSRF double-submit
 
 **Admin controller structure**:
+
 ```
 AdminController:
   GET  /admin/dashboard/summary → AdminService.getAdminSummary()
@@ -497,10 +504,10 @@ main.ts:
 
 ### 8.2. Cookie domains
 
-| Môi trường | User session | Admin session | User CSRF | Admin CSRF |
-|---|---|---|---|---|
-| Production | `__Host-user` | `__Host-admin` | `__Host-u-csrf` | `__Host-a-csrf` |
-| Development | `user` | `admin` | `u-csrf` | `a-csrf` |
+| Môi trường  | User session  | Admin session  | User CSRF       | Admin CSRF      |
+| ----------- | ------------- | -------------- | --------------- | --------------- |
+| Production  | `__Host-user` | `__Host-admin` | `__Host-u-csrf` | `__Host-a-csrf` |
+| Development | `user`        | `admin`        | `u-csrf`        | `a-csrf`        |
 
 `__Host-` prefix yêu cầu: path=/ ; Secure; không có Domain attribute — bảo vệ khỏi subdomain attack.
 
@@ -579,13 +586,13 @@ Unsafe request (POST/PUT/PATCH/DELETE):
 
 ### 11.1. Error Handling Strategy
 
-| Layer | Cơ chế | Ví dụ |
-|---|---|---|
-| Controller | NestJS exception filter mặc định | `BadRequestException`, `UnauthorizedException` |
-| Service | `safeParse` Zod → ném `BadRequestException` | Validation lỗi |
-| Guard | Ném `ForbiddenException`, `UnauthorizedException`, `NotFoundException` | CSRF sai, session hết hạn, admin tắt |
-| DB | Prisma `P2002` → `ConflictException`; `P2025` → `NotFoundException` | Email trùng, not found |
-| Global | NestJS `ExceptionsHandler` — trả JSON `{ message, statusCode }` | Lỗi không bắt được |
+| Layer      | Cơ chế                                                                 | Ví dụ                                          |
+| ---------- | ---------------------------------------------------------------------- | ---------------------------------------------- |
+| Controller | NestJS exception filter mặc định                                       | `BadRequestException`, `UnauthorizedException` |
+| Service    | `safeParse` Zod → ném `BadRequestException`                            | Validation lỗi                                 |
+| Guard      | Ném `ForbiddenException`, `UnauthorizedException`, `NotFoundException` | CSRF sai, session hết hạn, admin tắt           |
+| DB         | Prisma `P2002` → `ConflictException`; `P2025` → `NotFoundException`    | Email trùng, not found                         |
+| Global     | NestJS `ExceptionsHandler` — trả JSON `{ message, statusCode }`        | Lỗi không bắt được                             |
 
 ### 11.2. Logging Strategy
 
@@ -596,29 +603,29 @@ Unsafe request (POST/PUT/PATCH/DELETE):
 
 ### 11.3. Background Jobs
 
-| Job | Trigger | Interval | Mô tả |
-|---|---|---|---|
-| Purge sessions/tokens | `AuthService.onModuleInit` + timer | 24h | Xóa session hết hạn, token đã dùng/hết hạn; giữ revoked 7 ngày audit |
-| Traffic cleanup | Không có (tự động) | — | TrafficHourly luôn ≤ 24 dòng/ngày — không cần cleanup |
+| Job                   | Trigger                            | Interval | Mô tả                                                                |
+| --------------------- | ---------------------------------- | -------- | -------------------------------------------------------------------- |
+| Purge sessions/tokens | `AuthService.onModuleInit` + timer | 24h      | Xóa session hết hạn, token đã dùng/hết hạn; giữ revoked 7 ngày audit |
+| Traffic cleanup       | Không có (tự động)                 | —        | TrafficHourly luôn ≤ 24 dòng/ngày — không cần cleanup                |
 
 ## 12. Quality Attributes (NFR mapping)
 
-| Attribute | Mục tiêu | Cơ chế as-built | NFR trace |
-|---|---|---|---|
-| **Performance** | Cold start < 5s (với prewarm) | `warmApi()`, `loadTopicsAwait()`, seed offline fallback | NFR-PER-01 |
-| **Scalability** | Traffic tracking O(1) storage | Aggregate-on-write: 1 row/hour, không raw events | NFR-PER-02 |
-| **Security** | Không lộ PII/token/password | Argon2id, HMAC+pepper, httpOnly, ipHash, no-log | NFR-SEC-01..04 |
-| **Accessibility** | WCAG AA, mù màu an toàn | Màu + icon + hình dạng; Focus Zone; reduced-motion | NFR-ACC-01 |
-| **Maintainability** | Single source of truth | `@keylish/shared` Zod schema; controller mỏng | NFR-MNT-01 |
-| **Usability** | Giao diện tiếng Việt | Be Vietnam Pro font; UI text tiếng Việt | NFR-USA-01 |
-| **Reliability** | Offline-capable | IndexedDB cache + 112 từ seed; không crash khi API lỗi | FR-VOC-05 |
+| Attribute           | Mục tiêu                      | Cơ chế as-built                                         | NFR trace      |
+| ------------------- | ----------------------------- | ------------------------------------------------------- | -------------- |
+| **Performance**     | Cold start < 5s (với prewarm) | `warmApi()`, `loadTopicsAwait()`, seed offline fallback | NFR-PER-01     |
+| **Scalability**     | Traffic tracking O(1) storage | Aggregate-on-write: 1 row/hour, không raw events        | NFR-PER-02     |
+| **Security**        | Không lộ PII/token/password   | Argon2id, HMAC+pepper, httpOnly, ipHash, no-log         | NFR-SEC-01..04 |
+| **Accessibility**   | WCAG AA, mù màu an toàn       | Màu + nhãn + hình dạng; Focus Zone; reduced-motion      | NFR-ACC-01     |
+| **Maintainability** | Single source of truth        | `@keylish/shared` Zod schema; controller mỏng           | NFR-MNT-01     |
+| **Usability**       | Giao diện tiếng Việt          | Be Vietnam Pro font; UI text tiếng Việt                 | NFR-USA-01     |
+| **Reliability**     | Offline-capable               | IndexedDB cache + 112 từ seed; không crash khi API lỗi  | FR-VOC-05      |
 
 ## 13. RISK / OPEN QUESTION
 
-| Mã | Mô tả | Mức | Ảnh hưởng |
-|---|---|---|---|
-| R-5 | Layering user-web (`domain/infra/server`) chưa hoàn chỉnh — logic gõ ở `components/vocab/typing/` | Trung bình | Khó unit-test engine gõ; khó tái sử dụng |
-| R-6 | Versioning không đồng nhất: `/api/v1/*` (vocab, topics, track) vs `/user/*`, `/admin/*` (auth) | Thấp (chấp nhận — D-07) | API surface không nhất quán |
-| R-10 | Không có hook pre-commit lint/typecheck — quality gate thủ công | Thấp | Dễ commit code lỗi |
+| Mã   | Mô tả                                                                                             | Mức                     | Ảnh hưởng                                |
+| ---- | ------------------------------------------------------------------------------------------------- | ----------------------- | ---------------------------------------- |
+| R-5  | Layering user-web (`domain/infra/server`) chưa hoàn chỉnh — logic gõ ở `components/vocab/typing/` | Trung bình              | Khó unit-test engine gõ; khó tái sử dụng |
+| R-6  | Versioning không đồng nhất: `/api/v1/*` (vocab, topics, track) vs `/user/*`, `/admin/*` (auth)    | Thấp (chấp nhận — D-07) | API surface không nhất quán              |
+| R-10 | Không có hook pre-commit lint/typecheck — quality gate thủ công                                   | Thấp                    | Dễ commit code lỗi                       |
 
 > RISK ID chuẩn ở `context/PROJECT-STATE.md` §2. OQ-09 (version hóa auth/admin) đã chốt **D-07**; OQ-10 (deploy admin-web) đã chốt **D-06** — xem PROJECT-STATE §4.

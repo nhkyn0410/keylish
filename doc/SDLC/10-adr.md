@@ -4,41 +4,44 @@
 
 ### 1.1. Metadata
 
-| Trường | Giá trị |
-|---|---|
-| Tên | Biên bản Quyết định Kiến trúc (Architecture Decision Records) |
-| Mã tài liệu | `10-adr` |
-| Dự án | KeyLish |
-| Phiên bản | 0.2.3 |
-| Trạng thái | Draft |
-| Người viết | AI Agent (soạn thảo SDLC) |
-| Người duyệt | Nguyễn Hồng Khanh |
-| Ngày tạo | 2026-06-15 |
-| Chuẩn áp dụng | ISO/IEC/IEEE 15289:2019 |
+| Trường        | Giá trị                                                       |
+| ------------- | ------------------------------------------------------------- |
+| Tên           | Biên bản Quyết định Kiến trúc (Architecture Decision Records) |
+| Mã tài liệu   | `10-adr`                                                      |
+| Dự án         | KeyLish                                                       |
+| Phiên bản     | 0.2.6                                                         |
+| Trạng thái    | Draft                                                         |
+| Người viết    | AI Agent (soạn thảo SDLC)                                     |
+| Người duyệt   | Nguyễn Hồng Khanh                                             |
+| Ngày tạo      | 2026-06-15                                                    |
+| Chuẩn áp dụng | ISO/IEC/IEEE 15289:2019                                       |
 
 ### 1.2. Lịch sử thay đổi
 
-| Phiên bản | Ngày | Người cập nhật | Nội dung |
-|---|---|---|---|
-| 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu — 10 ADR as-built (MODE B). |
-| 0.2.0 | 2026-06-15 | AI Agent | Bổ sung 8 ADR mới (11–18), cập nhật consequences code reference, thêm sơ đồ quan hệ ADR, supersedes chain. |
-| 0.2.1 | 2026-06-15 | AI Agent | Chuẩn hóa format metadata (§1.1/§1.2). |
-| 0.2.2 | 2026-06-15 | AI Agent | Sửa G-1: code-evidence ADR-003 (route groups (site)/(auth)/(practice)) + ADR-005 (`vocabApi.ts` thay `useVocab.ts`). |
-| 0.2.3 | 2026-06-15 | AI Agent | Phase ③ V2.1: thêm ADR-019 (kho cá nhân — mô hình tham chiếu); RISK → §23. |
+| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                             |
+| --------- | ---------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — 10 ADR as-built (MODE B).                                                                            |
+| 0.2.0     | 2026-06-15 | AI Agent       | Bổ sung 8 ADR mới (11–18), cập nhật consequences code reference, thêm sơ đồ quan hệ ADR, supersedes chain.           |
+| 0.2.1     | 2026-06-15 | AI Agent       | Chuẩn hóa format metadata (§1.1/§1.2).                                                                               |
+| 0.2.2     | 2026-06-15 | AI Agent       | Sửa G-1: code-evidence ADR-003 (route groups (site)/(auth)/(practice)) + ADR-005 (`vocabApi.ts` thay `useVocab.ts`). |
+| 0.2.3     | 2026-06-15 | AI Agent       | Phase ③ V2.1: thêm ADR-019 (kho cá nhân — mô hình tham chiếu); RISK → §23.                                           |
+| 0.2.4     | 2026-06-20 | AI Agent       | Sync ADR-019 với code hiện tại: schema/API/shared/UI kho cá nhân đã partial; FR-PVOC-08 còn mở.                      |
+| 0.2.5     | 2026-06-20 | AI Agent       | Bổ sung `customTopicId` vào ADR-019 để hỗ trợ filter chủ đề cho kho cá nhân.                                         |
+| 0.2.6     | 2026-06-22 | AI Agent       | Thêm ADR-020 (Accepted, forward): tách route `/typing/setup` + `/typing/play` qua session-spec để mở FR-PVOC-08; custom-options lifecycle hoãn (OQ-14). |
 
 ## 2. Quy ước
 
 Mỗi ADR = một quyết định kiến trúc as-built. Cấu trúc:
 
-| Mục | Mô tả |
-|---|---|
-| Context | Bối cảnh, vấn đề cần giải quyết |
-| Decision | Quyết định được chọn |
-| Options Considered | Các phương án đã cân nhắc |
-| Consequences | Hệ quả (tích cực + tiêu cực) |
-| Status | `Accepted` · `Proposed` · `Deprecated` |
-| Supersedes | ADR nào bị thay thế (nếu có) |
-| Code Evidence | File source minh họa quyết định |
+| Mục                | Mô tả                                  |
+| ------------------ | -------------------------------------- |
+| Context            | Bối cảnh, vấn đề cần giải quyết        |
+| Decision           | Quyết định được chọn                   |
+| Options Considered | Các phương án đã cân nhắc              |
+| Consequences       | Hệ quả (tích cực + tiêu cực)           |
+| Status             | `Accepted` · `Proposed` · `Deprecated` |
+| Supersedes         | ADR nào bị thay thế (nếu có)           |
+| Code Evidence      | File source minh họa quyết định        |
 
 Status: Chỉ APPROVER (Nguyễn Hồng Khanh) được chốt `Accepted`.
 
@@ -48,7 +51,7 @@ Status: Chỉ APPROVER (Nguyễn Hồng Khanh) được chốt `Accepted`.
 Tech Stack Layer
   ADR-001 (NestJS) ─── ADR-008 (pnpm + Turborepo)
   ADR-002 (Prisma + PG) ─── ADR-013 (vocab pipeline)
-  ADR-003 (Next.js App Router)
+  ADR-003 (Next.js App Router) ─── ADR-020 (tách route typing setup/play · V2.1)
   ADR-016 (Centralized Prisma package)
 
 Auth Layer
@@ -74,22 +77,24 @@ Governance Layer
 
 ## 4. ADR-001: NestJS làm backend framework
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-001 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-001  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần backend framework cho API vocabulary + auth + admin. Yêu cầu: TypeScript, dependency injection, modular, validation/OpenAPI tích hợp.
 
 **Decision**: Dùng **NestJS 11** + Express platform.
 
 **Options Considered**:
+
 - **Express thuần**: thiếu DI, modular structure, phải tự tổ chức project.
 - **Fastify**: nhanh hơn Express nhưng NestJS/Express ecosystem rộng hơn (Swagger, cookie-parser, testing).
 - **Hono**: mới, ít thư viện, cộng đồng nhỏ.
 
 **Consequences**:
+
 - Tích hợp sẵn `@nestjs/swagger`, DI mạnh cho testing.
 - Express platform quen thuộc, nhiều middleware.
 - `cookieParser` middleware hoạt động out-of-box.
@@ -102,22 +107,24 @@ Governance Layer
 
 ## 5. ADR-002: Prisma + PostgreSQL
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-002 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-002  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần ORM + database cho quan hệ User/Admin/Vocab/Traffic. Yêu cầu: type-safe, migration, connection pooling.
 
 **Decision**: **Prisma 7** + `@prisma/adapter-pg` + **PostgreSQL 16**.
 
 **Options Considered**:
+
 - **Drizzle ORM**: nhẹ hơn, SQL-like, nhưng migration còn non ở thời điểm chọn.
 - **TypeORM**: quen thuộc nhưng API phức tạp, type inference kém hơn Prisma.
 - **SQLite**: không phù hợp cho production (auth + admin cần server).
 
 **Consequences**:
+
 - Prisma schema là single source of truth — migration, type, client đều từ schema.
 - `@prisma/adapter-pg` dùng native `pg.Pool` — kiểm soát connection lifecycle.
 - Build toolchain nặng hơn (prisma generate, preinstall hook).
@@ -130,21 +137,23 @@ Governance Layer
 
 ## 6. ADR-003: Next.js App Router cho user-web
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-003 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-003  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần frontend cho ứng dụng học từ vựng. Yêu cầu: SSR optional, routing linh hoạt, React ecosystem.
 
 **Decision**: **Next.js 16 App Router** + **React 19**.
 
 **Options Considered**:
+
 - **Vite + React Router**: không có SSR, phải tự setup routing.
 - **Remix**: tốt nhưng cộng đồng nhỏ hơn, learning curve riêng.
 
 **Consequences**:
+
 - App Router cho phép nested layouts, server components, dynamic routes (`[slug]`).
 - Tailwind CSS 4 + lucide-react cho UI components.
 - `use client` / `use server` boundary rõ ràng.
@@ -157,26 +166,29 @@ Governance Layer
 
 ## 7. ADR-004: Auth tự xây
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-004 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-004  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần auth cho user (email/password) và admin (username/password). Yêu cầu: kiểm soát hoàn toàn session, CSRF, rate-limit. Không cần OAuth V1.
 
 **Decision**: Tự xây auth với:
+
 - **Argon2id** cho password hash
 - **HMAC-SHA256** cookie session + `AUTH_TOKEN_PEPPER`
 - **CSRF double-submit** (cookie + header X-CSRF-Token + Origin check)
 - Rate limit in-process `Map<string, { count, resetAt }>`
 
 **Options Considered**:
+
 - **NextAuth/Auth.js**: tốt cho OAuth, nhưng phức tạp cho cookie session tự xây.
 - **Lucia**: nhẹ, nhưng version chưa ổn định ở thời điểm chọn.
 - **Passport.js**: callback-based, khó tích hợp NestJS DI.
 
 **Consequences**:
+
 - Toàn quyền kiểm soát (cookie name, TTL, hash method, env config).
 - Timing equalizer: dummy Argon2 verify cho account ảo.
 - Technical debt: rate-limit in-memory (mất khi restart), CSRF chưa rotation.
@@ -188,22 +200,24 @@ Governance Layer
 
 ## 8. ADR-005: Local-first với IndexedDB + seed offline
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-005 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-005  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Ứng dụng cần hoạt động khi API không khả dụng (cold start, mạng chậm). Yêu cầu: vẫn luyện gõ được khi mất API.
 
 **Decision**: **IndexedDB cache** (opportunistic, write-through) + **seed offline 112 từ** bundled trong JS.
 
 **Options Considered**:
+
 - **Service Worker cache**: phức tạp hơn, không cần thiết cho V1.
 - **localStorage**: giới hạn dung lượng, synchronous, blocking main thread.
 - **Chỉ dùng API**: không local-first, không hoạt động offline.
 
 **Consequences**:
+
 - 3 tầng `fetchVocab`: API → IndexedDB cache → seed offline (112 từ curated).
 - Cache IndexedDB là cơ hội (opportunistic) — không đảm bảo dữ liệu tồn tại.
 - Seed 112 từ của 8 chủ đề đủ cho demo V1.
@@ -216,21 +230,23 @@ Governance Layer
 
 ## 9. ADR-006: Traffic aggregate-on-write
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-006 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-006  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần đếm lượt truy cập. Yêu cầu: chi phí lưu trữ thấp, không cần real-time chính xác.
 
 **Decision**: **Aggregate-on-write**: upsert `TrafficHourly` (1 dòng/giờ UTC), increment count.
 
 **Options Considered**:
+
 - **Raw event log**: lưu mỗi page-view → DB phình to theo traffic, không cần thiết cho V1.
 - **Analytics service (GA/Plausible)**: third-party dependency, privacy concerns, JavaScript blocking.
 
 **Consequences**:
+
 - Bảng traffic luôn ≤ 24 dòng/ngày → ~8.760 rows/năm — vĩnh viễn nhỏ.
 - Upsert idempotent ở mức transaction (`hour` PK).
 - Web dùng `sessionStorage` flag để chỉ gửi 1 request/phiên.
@@ -243,21 +259,23 @@ Governance Layer
 
 ## 10. ADR-007: Admin local-only (không deploy)
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-007 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-007  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần admin panel quản lý nội dung (vocab, topics, users). Yêu cầu: đơn giản, an toàn, không cần public.
 
 **Decision**: **Admin-web local-only** (không deploy). Admin API gated bằng `ADMIN_API_ENABLED` (mặc định OFF production).
 
 **Options Considered**:
+
 - **Admin API + dashboard public**: cần auth mạnh hơn, expose attack surface.
 - **Admin như phần của user-web**: trộn codebase, phức tạp, bundle lớn.
 
 **Consequences**:
+
 - Admin-web (Ant Design 6) chạy local `http://localhost:3002`.
 - Admin API 404 khi không bật — secure default khi quên env.
 - AdminGuard kiểm tra AdminSession — tách biệt hoàn toàn với UserGuard.
@@ -270,22 +288,24 @@ Governance Layer
 
 ## 11. ADR-008: Monorepo pnpm + Turborepo
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-008 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-008  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Dự án có 5 workspaces (api, user-web, admin-web, db, shared). Yêu cầu: chia sẻ code, build cache, quản lý dependency hiệu quả.
 
 **Decision**: **pnpm 10.27** workspace + **Turborepo 2.9**.
 
 **Options Considered**:
+
 - **npm workspaces**: chậm hơn pnpm (không content-addressable storage), không caching built-in.
 - **Yarn Berry**: PnP còn nhiều vấn đề tương thích (tooling, ESM).
 - **Nx**: mạnh nhưng nặng, overkill cho quy mô 5 workspaces.
 
 **Consequences**:
+
 - `pnpm-lock.yaml` deterministic — reproducible install.
 - Turbo cache build/test/lint — skip nếu không có thay đổi.
 - `@keylish/shared` dùng Zod schema cho API + web (single source of truth).
@@ -298,22 +318,24 @@ Governance Layer
 
 ## 12. ADR-009: Zod cho validation + OpenAPI
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-009 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-009  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần runtime validation cho API input + type inference cho frontend. API có cả public và admin endpoints.
 
 **Decision**: **Zod 4** cho validation runtime. `@nestjs/swagger` cho OpenAPI docs.
 
 **Options Considered**:
+
 - **Joi**: phổ biến nhưng thiếu type inference, không dùng được type.
 - **class-validator**: decorator-based, gắn chặt NestJS, không dùng được ở frontend.
 - **TypeBox**: nhanh, nhưng ecosystem nhỏ hơn Zod.
 
 **Consequences**:
+
 - Schema ở `@keylish/shared` dùng chung: `VocabQuerySchema`, `CefrLevelSchema`, `WordDTOSchema`, `TopicDTOSchema`.
 - Controller nhận `unknown` → service `safeParse` → throw `BadRequestException`.
 - CSV-list preprocessor cho multi-value query params (levels, topics).
@@ -325,22 +347,24 @@ Governance Layer
 
 ## 13. ADR-010: Mail qua Resend REST (không SDK)
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-010 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-010  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần gửi email reset password. Yêu cầu: tối thiểu dependency, đơn giản.
 
 **Decision**: **Resend REST API** (native `fetch`) — không SDK.
 
 **Options Considered**:
+
 - **Nodemailer + SMTP**: cần SMTP server, cấu hình phức tạp, thêm dependency.
 - **SendGrid SDK**: dependency nặng, API key management.
 - **Resend SDK**: dependency dù REST đủ dùng — tránh dependency không cần thiết.
 
 **Consequences**:
+
 - Zero dependency cho mail.
 - Khi thiếu `RESEND_API_KEY` → log reset link ra console (chấp nhận cho dev).
 - Production bắt buộc `RESEND_API_KEY` + `AUTH_RESET_EMAIL_FROM` — nếu thiếu, mail không gửi nhưng không throw.
@@ -353,22 +377,24 @@ Governance Layer
 
 ## 14. ADR-011: Cookie session > JWT/Bearer
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-011 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-011  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần session format cho auth. Yêu cầu: server-side revocable, không lưu sensitive data trong token.
 
 **Decision**: **Cookie session**: random token (32-byte base64url) → HMAC-SHA256 → lưu hash trong DB. Cookie httpOnly + SameSite + Secure.
 
 **Options Considered**:
+
 - **JWT access + refresh token**: stateless, nhưng không revoke được, cần blacklist, token lớn hơn.
 - **Bearer token (Authorization header)**: không auto-send, client phải tự quản lý storage, dễ bị XSS đánh cắp.
 - **Session ID (cookie) + Redis**: cần Redis instance, cache invalidation phức tạp.
 
 **Consequences**:
+
 - Server-side revoke: cập nhật `revokedAt` trong DB → session lập tức vô hiệu.
 - Cookie httpOnly: JS không đọc được → chống XSS theft.
 - Cookie SameSite=None (prod): hoạt động cross-origin (web ≠ API domain).
@@ -381,22 +407,24 @@ Governance Layer
 
 ## 15. ADR-012: Stateless CSRF (xoá csrfSecretHash)
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-012 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-012  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Schema V1 chứa cột `UserSession.csrfSecretHash` để verify CSRF. Phát hiện cột không bao giờ đọc — CSRF được enforce stateless.
 
 **Decision**: **Xoá `csrfSecretHash`** khỏi `UserSession` + `AdminSession`. CSRF hoàn toàn stateless: double-submit cookie + Origin check.
 
 **Options Considered**:
+
 - **Giữ cột**: dead code trong DB, misleading cho maintainer mới.
 - **Stateful CSRF (session-based)**: lưu secret trong session → cần DB lookup cho CSRF.
 - **Double-submit stateless**: server set cookie → client gửi lại trong header → so sánh cookie===header.
 
 **Consequences**:
+
 - Migration xoá column: `20260614010000_drop_session_csrf_secret`.
 - CSRF không cần DB lookup — nhanh hơn.
 - Origin check là security layer thứ hai (dù Origin header có thể spoof ở trình duyệt).
@@ -408,22 +436,24 @@ Governance Layer
 
 ## 16. ADR-013: Vocabulary dual-source pipeline (streaming join)
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-013 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-013  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Cần dataset từ vựng EN→VI lớn (~100k từ) với CEFR level, IPA, ví dụ. Dataset phải reproduce được, license rõ ràng.
 
 **Decision**: **Pipeline 2 nguồn**: [Maximax67/Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset) (CSV, MIT) + [kaikki.org English Wiktionary](https://kaikki.org/dictionary/English/) (JSONL.gz, CC BY-SA). Streaming join + voting topic assignment.
 
 **Options Considered**:
+
 - **Chỉ 1 nguồn**: không đủ (kaikki có nghĩa VI nhưng không CEFR; Maximax67 có CEFR nhưng không VI).
 - **Dataset tự build bằng LLM**: không reproduce được, license không rõ, tốn kém.
 - **Mua dataset thương mại**: chi phí, không minh bạch.
 
 **Consequences**:
+
 - `build-dataset.mjs` stream kaikki (multi-GB, không load full RAM) JOIN với Maximax67 lookup maps.
 - 112 từ curated làm core — override mọi source conflict.
 - Topic assignment dùng voting ≥ 2/3 majority (tránh gán nhầm từ đa nghĩa).
@@ -437,22 +467,24 @@ Governance Layer
 
 ## 17. ADR-014: Soft-delete cho user accounts
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-014 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-014  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: User có thể yêu cầu xoá tài khoản. Cần giữ audit trail, không mất dữ liệu tham chiếu.
 
 **Decision**: **Soft-delete**: `User.status = 'DELETED'` + `User.deletedAt = now()`. Không hard delete. Cascade delete chỉ cho identity/session/token (khi user bị xoá mềm, cascade không chạy).
 
 **Options Considered**:
+
 - **Hard delete**: mất audit trail, FK cascade mất dữ liệu liên quan.
 - **Soft-delete với isDeleted flag**: thiếu timestamp, không biết khi nào xoá.
 - **Status enum ACTIVE/DISABLED/DELETED**: cho phép 3 trạng thái rõ ràng.
 
 **Consequences**:
+
 - UserGuard kiểm tra `!user.deletedAt && user.status === 'ACTIVE'`.
 - Admin có thể xem user DELETED trong danh sách user.
 - Dashboard summary chỉ đếm `deletedAt: null AND status !== 'DELETED'`.
@@ -465,22 +497,24 @@ Governance Layer
 
 ## 18. ADR-015: Global AdminGateGuard pattern
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-015 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-015  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Admin API là local-only tool (ADR-007). Cần đảm bảo admin surface hoàn toàn ẩn trong production — kể cả login endpoint.
 
 **Decision**: **AdminGateGuard** global (`APP_GUARD`) — 404 toàn bộ `/api/admin/*` khi `ADMIN_API_ENABLED` không `"true"`.
 
 **Options Considered**:
+
 - **Middleware check**: NestJS middleware không có access đến NestJS DI context, khó test.
 - **Per-controller guard**: có thể quên guard ở controller mới, không đồng nhất.
 - **APP_GUARD global**: một điểm duy nhất, được e2e test coverage, dễ maintain.
 
 **Consequences**:
+
 - Mặc định OFF trong production — secure default.
 - Login endpoint cũng bị 404 — attacker không biết admin surface tồn tại.
 - E2E test xác nhận: `ADMIN_API_ENABLED=false` → 404; `ADMIN_API_ENABLED=true` → pass guard → 401 (chờ session).
@@ -492,22 +526,24 @@ Governance Layer
 
 ## 19. ADR-016: Centralized Prisma client package (`@keylish/db`)
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-016 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-016  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Prisma client cần dùng ở cả API app và seed scripts. Schema cần tách biệt khỏi business logic.
 
 **Decision**: Tạo **`packages/db`** — đóng gói Prisma schema + generated client + adapter setup.
 
 **Options Considered**:
+
 - **Prisma client trong apps/api**: không dùng được cho seed, scripts khác.
 - **Prisma trong mỗi workspace**: trùng schema, đồng bộ phức tạp.
 - **Package riêng @keylish/db**: single source of truth, reexport convenience.
 
 **Consequences**:
+
 - Schema nằm ở `packages/db/prisma/schema.prisma`.
 - `packages/db/src/index.ts` export `createPrismaClient(connectionString)` — khởi tạo pool + adapter + client.
 - `DatabaseService` (NestJS) wrapper gọi `createPrismaClient` → quản lý lifecycle (onApplicationShutdown).
@@ -520,22 +556,24 @@ Governance Layer
 
 ## 20. ADR-017: Owner-approver documentation governance
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-017 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-017  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Bộ SDLC 13 file cần quy trình review để đảm bảo chất lượng và as-built accuracy. Nhiều người có thể edit.
 
 **Decision**: **Chỉ APPROVER (Nguyễn Hồng Khanh)** được chốt trạng thái `Approved`. AI Agent viết, APPROVER duyệt. Gắn trạng thái Draft → Approved.
 
 **Options Considered**:
+
 - **Mọi người đều approve**: thiếu kiểm soát, dễ sai lệch so với code.
 - **Không quy trình**: ai cũng sửa, không ai chịu trách nhiệm.
 - **Code review tool (PR)**: nặng cho tài liệu, không cần thiết.
 
 **Consequences**:
+
 - Trạng thái hiện tại: tất cả `Draft`.
 - `PROJECT-STATE.md` là nguồn duy nhất cho trạng thái tài liệu.
 - RISK/OQ tracking trong PROJECT-STATE — APPROVER quyết định close.
@@ -547,30 +585,32 @@ Governance Layer
 
 ## 21. ADR-018: Deferred V2 features
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-018 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-018  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context**: Nhiều tính năng mong muốn nhưng ngoài scope V1. Cần document rõ deferred items để tránh scope creep.
 
 **Decision**: Deferred to V2 (không triển khai trong code hiện tại):
 
-| Tính năng | Lý do deferred | ADR liên quan |
-|---|---|---|
-| Lịch sử phiên luyện gõ | Yêu cầu DB schema mới, API, UI; V1 focus core typing engine | ADR-004, ADR-005 |
-| AI feedback (BYOK API key) | Cần API key management, prompt engineering, UI | — |
-| Flashcard / quiz mode | Yêu cầu spaced repetition algorithm, UI mới | — |
-| OAuth (Google, GitHub) | Auth tự xây đủ cho V1; cần UserIdentity mở rộng | ADR-004, ADR-011 |
-| Redis-backed rate limit | In-memory đủ cho V1 traffic | ADR-004 |
-| Auto OpenAPI from Zod | Manual Swagger decorator đủ cho V1 | ADR-009 |
+| Tính năng                  | Lý do deferred                                              | ADR liên quan    |
+| -------------------------- | ----------------------------------------------------------- | ---------------- |
+| Lịch sử phiên luyện gõ     | Yêu cầu DB schema mới, API, UI; V1 focus core typing engine | ADR-004, ADR-005 |
+| AI feedback (BYOK API key) | Cần API key management, prompt engineering, UI              | —                |
+| Flashcard / quiz mode      | Yêu cầu spaced repetition algorithm, UI mới                 | —                |
+| OAuth (Google, GitHub)     | Auth tự xây đủ cho V1; cần UserIdentity mở rộng             | ADR-004, ADR-011 |
+| Redis-backed rate limit    | In-memory đủ cho V1 traffic                                 | ADR-004          |
+| Auto OpenAPI from Zod      | Manual Swagger decorator đủ cho V1                          | ADR-009          |
 
 **Options Considered**:
+
 - **Làm hết V1**: scope quá lớn, delay release.
 - **Không document**: mất traceability, dễ quên.
 
 **Consequences**:
+
 - V1 codebase giữ lean — không có dead schema/UI cho deferred features.
 - `PROJECT-STATE.md` D-03/04 ghi rõ deferred.
 - Khi V2, cần ADR mới cho từng feature (không modify ADR-018).
@@ -580,19 +620,19 @@ Governance Layer
 
 ## 22. ADR-019: Kho từ vựng cá nhân — mô hình tham chiếu (không copy)
 
-| Trường | Giá trị |
-|---|---|
-| Mã | ADR-019 |
-| Status | Accepted |
-| Supersedes | — |
+| Trường     | Giá trị  |
+| ---------- | -------- |
+| Mã         | ADR-019  |
+| Status     | Accepted |
+| Supersedes | —        |
 
 **Context** (V2.1): Người học cần **kho từ vựng cá nhân** — pick từ kho hệ thống (`Word`) + tự tạo từ. Nếu mỗi user **copy** nguyên từ thì: (a) trùng lặp dữ liệu; (b) dedup mơ hồ khi user tạo từ đã có trong kho hệ thống; (c) tốn storage trên free tier 0.5 GB.
 
 **Decision**: Kho cá nhân = bảng mới **`UserVocabEntry`** theo **mô hình tham chiếu + custom**:
 
 - `wordId` (FK → `Word`, nullable): set khi entry **trỏ tới** từ hệ thống (pick / khớp chính xác).
-- `customEn/customVi/customExample/customLevel/note` (nullable): chỉ dùng khi **tự tạo** (wordId null) hoặc **override** từ tham chiếu.
-- `source` ∈ `system | custom | ai` (ai ⬜ V2.2).
+- `customEn/customVi/customExample/customLevel/customTopicId/note` (nullable): chỉ dùng khi **tự tạo** (wordId null) hoặc **override** từ tham chiếu; `customTopicId` trỏ `Topic` để lọc custom theo chủ đề mà không copy `Word`.
+- `source` ∈ `system | custom | ai` (ai TODO V2.2).
 - `Word` giữ nguyên là kho **hệ thống ownerless** — không thêm cột owner.
 
 **Options Considered**:
@@ -608,14 +648,57 @@ Governance Layer
 - `Word` (API `/vocab` public) không lộ dữ liệu cá nhân — giữ boundary.
 - Schema chừa `source='ai'` cho V2.2 — không phải migrate lại.
 
-**Code Evidence**: chưa code (⬜ V2.1). Schema `04-database` §10; API `05-api` §13; bảo mật `07-security` §21; UI `06-ui-ux` §7 (đã có demo `apps/user-web/src/components/vocab/library/VocabLibrarySplit.tsx`).
+**Code Evidence**: `packages/db/prisma/schema.prisma` (`UserVocabEntry`, `VocabEntrySource`, `customTopicId`), migrations `20260616090000_add_user_vocab_entry` + `20260620093000_add_user_vocab_custom_topic`, `packages/shared/src/personal-vocab.ts`, `packages/shared/src/lemmatize.ts`, `apps/api/src/uservocab/*`, `apps/user-web/src/components/vocab/library/MyVocabSplit.tsx`, `apps/user-web/src/components/vocab/library/VocabLibrarySplit.tsx`.
+
+**Residual Gap**: FR-PVOC-08 chưa nối typing theo kho cá nhân; UI sửa/override mới có API nhưng chưa có đầy đủ màn thao tác.
 
 ---
 
-## 23. RISK
+## 23. ADR-020: Tách route luyện gõ (`/typing/setup` + `/typing/play`) qua session-spec
 
-| ID | Mô tả |
-|---|---|
-| — | ADR-017 phụ thuộc vào APPROVER availability — nếu APPROVER bận, review chậm. |
-| — | ADR-018 deferred list cần review định kỳ để tránh lạc hậu. |
-| — | Một số ADR (010, 012) là implementation decision, không phải architectural — có thể merge với ADR khác. |
+| Trường     | Giá trị                                                  |
+| ---------- | -------------------------------------------------------- |
+| Mã         | ADR-020                                                  |
+| Status     | Accepted (forward — chưa code; định hướng cho T-11 đợt 1) |
+| Supersedes | — (tinh chỉnh luồng UC-01 ở `06-ui-ux` §4.1 → §4.6)      |
+
+**Context** (V2.1, FR-PVOC-08): Luyện gõ hiện nằm trong **một route `/typing`**, state máy `TypingFlow` (`warming→setup→loading→play→summary`) giữ toàn bộ ngữ cảnh trong bộ nhớ. Vì `play` chỉ tới được qua `setup` và route không mang tham số, nút "Luyện bộ này / Luyện từ này" ở kho từ vựng **không truyền được nguồn từ** vào `play` (R-16) — nút thắt của FR-PVOC-08.
+
+**Decision**: Tách `setup` và `play` thành **route riêng**, hạ ngữ cảnh phiên xuống URL theo nguyên tắc **`path = hoạt động · query = nguồn + spec phiên`**:
+
+- `/typing` → redirect `/typing/setup`.
+- `/typing/setup` (có sidebar) — dựng spec rồi điều hướng sang play.
+- `/typing/play?source=…` (immersive) — **tự nạp từ** theo spec, chạy engine, hiện summary nội bộ.
+- `source ∈ system | personal | word`; URL chỉ chở **run-defining** (`method/drill/size/source-filter`). Kho từ vựng điều hướng `/typing/play?source=…`, **không** tạo route riêng.
+- Vòng đời `play` tối giản: `RESOLVING → READY (nhấn để bắt đầu) → LIVE → DONE`; `retry`/review-wrong giữ nội bộ.
+
+**Phạm vi đợt này (Accepted)**: chỉ **tách route + session-spec + tự nạp + redirect**, đủ mở FR-PVOC-08.
+**Ngoài phạm vi (DEFERRED — OQ-14)**: lifecycle custom-options đầy đủ (pre-commit sửa tự do, ma trận forward-only/cấu trúc khi LIVE, "Áp dụng & luyện lại", cờ chỉnh-giữa-phiên, `seed` tái lập). Giữ ở `06` §4.6 nhãn DEFERRED.
+
+**Options Considered**:
+
+- **Giữ một route + state bộ nhớ** (hiện tại): đơn giản nhưng không deep-link, không truyền nguồn → kẹt FR-PVOC-08.
+- **Nguồn vào path** (`/vocabulary/play`): cùng một state có 2 URL → tách đôi analytics, nhân đôi logic — anti-pattern, loại.
+- **Spec trên query + tách route** (chọn): deep-link/back/refresh đúng; một engine, nhiều cửa vào.
+- **Bề mặt phổ quát `/practice/play`** (`method` vào spec): hữu ích khi có phương pháp non-typing thứ hai; **hoãn** (over-engineer — "Luyện câu" là feature riêng).
+
+**Consequences**:
+
+- Mở FR-PVOC-08: kho từ vựng nhảy thẳng vào `play` không qua `setup`.
+- Deep-link / bookmark / back-button hoạt động; F5 trên `/typing/play` chạy lại đúng spec.
+- Refactor `TypingFlow`: tách `loadSessionFromSpec` khỏi `start()`; chia thành 2 page + redirect; `warmApi` đặt ở layout `(practice)` (idempotent).
+- `random:true` ⇒ deep-link cho mẫu từ khác nhau mỗi lần (chấp nhận; `seed` để ngỏ ở OQ-14).
+- `source=word` cần nạp 1 từ theo id — đợt 1 tái dùng vocab fetch hiện có; quyết định endpoint chi tiết khi code (chưa thêm API ở giai đoạn doc).
+- Liên quan R-5 (layering): cơ hội đưa loader/engine ra khỏi component.
+
+**Code Evidence**: _(planned — chưa có; tạo ở T-11 đợt 1)_ dự kiến `apps/user-web/src/app/(practice)/typing/{setup,play}/page.tsx`, refactor `components/vocab/typing/TypingFlow.tsx`, build spec ở `VocabLibrarySplit`/`MyVocabSplit`. Luồng chi tiết: `06-ui-ux` §4.6.
+
+---
+
+## 24. RISK
+
+| ID  | Mô tả                                                                                                   |
+| --- | ------------------------------------------------------------------------------------------------------- |
+| —   | ADR-017 phụ thuộc vào APPROVER availability — nếu APPROVER bận, review chậm.                            |
+| —   | ADR-018 deferred list cần review định kỳ để tránh lạc hậu.                                              |
+| —   | Một số ADR (010, 012) là implementation decision, không phải architectural — có thể merge với ADR khác. |

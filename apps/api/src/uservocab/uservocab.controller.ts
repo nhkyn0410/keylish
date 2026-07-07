@@ -11,7 +11,8 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
-import { ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiCookieAuth, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { CefrLevelSchema } from "@keylish/shared";
 import { CsrfGuard, UserGuard, type Request } from "../auth/auth.guard";
 import type { UserSessionPayload } from "../auth/auth.dto";
 import { UserVocabService } from "./uservocab.service";
@@ -27,6 +28,11 @@ export class UserVocabController {
 
   @Get()
   @ApiOperation({ summary: "Liệt kê kho từ vựng cá nhân" })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "levels", required: false, isArray: true, enum: CefrLevelSchema.options })
+  @ApiQuery({ name: "topics", required: false, isArray: true, type: String })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "pageSize", required: false, type: Number })
   list(@Req() request: RequestWithUser, @Query() query: Record<string, unknown>) {
     return this.userVocab.list(request.userSession!.userId, query);
   }

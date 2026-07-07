@@ -26,10 +26,11 @@ enum AuthProvider {
 }
 
 model Topic {
-  id    String @id @default(cuid())
-  slug  String @unique
-  title String
-  words Word[]
+  id               String           @id @default(cuid())
+  slug             String           @unique
+  title            String
+  words            Word[]
+  userVocabEntries UserVocabEntry[] @relation("UserVocabCustomTopic")
 }
 
 model Word {
@@ -114,15 +115,15 @@ model AdminIdentity {
 }
 
 model UserSession {
-  id             String    @id @default(cuid())
-  userId         String
-  tokenHash      String    @unique
-  userAgent      String?
-  ipHash         String?
-  createdAt      DateTime  @default(now())
-  lastSeenAt     DateTime  @default(now())
-  expiresAt      DateTime
-  revokedAt      DateTime?
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  userAgent  String?
+  ipHash     String?
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -132,15 +133,15 @@ model UserSession {
 }
 
 model AdminSession {
-  id             String    @id @default(cuid())
-  adminId        String
-  tokenHash      String    @unique
-  userAgent      String?
-  ipHash         String?
-  createdAt      DateTime  @default(now())
-  lastSeenAt     DateTime  @default(now())
-  expiresAt      DateTime
-  revokedAt      DateTime?
+  id         String    @id @default(cuid())
+  adminId    String
+  tokenHash  String    @unique
+  userAgent  String?
+  ipHash     String?
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
 
   admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
@@ -192,15 +193,19 @@ model UserVocabEntry {
   customVi      String?
   customExample String?
   customLevel   CefrLevel?
+  customTopicId String?
   note          String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  word Word? @relation(fields: [wordId], references: [id], onDelete: SetNull)
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word        Word?  @relation(fields: [wordId], references: [id], onDelete: SetNull)
+  customTopic Topic? @relation("UserVocabCustomTopic", fields: [customTopicId], references: [id], onDelete: SetNull)
 
   @@unique([userId, wordId]) // không thêm trùng 1 từ hệ thống (BR-09)
   @@unique([userId, normalizedEn]) // không tạo trùng 1 custom
   @@index([userId])
+  @@index([customTopicId])
+  @@index([userId, customLevel])
 }

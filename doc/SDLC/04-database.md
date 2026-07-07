@@ -4,47 +4,49 @@
 
 ### 1.1. Metadata
 
-| Trường | Giá trị |
-|---|---|
-| Tên | Thiết kế Cơ sở Dữ liệu (Database Design) |
-| Mã tài liệu | `04-database` |
-| Dự án | KeyLish |
-| Phiên bản | 0.2.2 |
-| Trạng thái | Draft |
-| Người viết | AI Agent (soạn thảo SDLC) |
-| Người duyệt | Nguyễn Hồng Khanh |
-| Ngày tạo | 2026-06-15 |
-| Chuẩn áp dụng | ISO/IEC/IEEE 15289:2019 |
+| Trường        | Giá trị                                  |
+| ------------- | ---------------------------------------- |
+| Tên           | Thiết kế Cơ sở Dữ liệu (Database Design) |
+| Mã tài liệu   | `04-database`                            |
+| Dự án         | KeyLish                                  |
+| Phiên bản     | 0.2.4                                    |
+| Trạng thái    | Draft                                    |
+| Người viết    | AI Agent (soạn thảo SDLC)                |
+| Người duyệt   | Nguyễn Hồng Khanh                        |
+| Ngày tạo      | 2026-06-15                               |
+| Chuẩn áp dụng | ISO/IEC/IEEE 15289:2019                  |
 
 ### 1.2. Lịch sử thay đổi
 
-| Phiên bản | Ngày | Người cập nhật | Nội dung |
-|---|---|---|---|
-| 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu — từ Prisma schema + vocab-pipeline. |
-| 0.2.0 | 2026-06-15 | AI Agent | Bổ sung ERD chi tiết, phân tích index, migration history, seed pipeline, query pattern, cascade rules, data volume estimate, lifecycle. |
-| 0.2.1 | 2026-06-15 | AI Agent | Chuẩn hóa format metadata (§1.1/§1.2); sửa F-5: phân biệt seed offline (112 từ / 8 topic) vs full DB (~14 topic); sửa §6.4 (`doi-song` thay `hoc-thuat` bị trùng); sửa cross-ref §6.4. |
-| 0.2.2 | 2026-06-15 | AI Agent | Phase ③ V2.1: thêm §10 model `UserVocabEntry` (tham chiếu + custom, unique, migration, storage); Tham chiếu → §11. |
+| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                                                                                               |
+| --------- | ---------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu — từ Prisma schema + vocab-pipeline.                                                                                                                                     |
+| 0.2.0     | 2026-06-15 | AI Agent       | Bổ sung ERD chi tiết, phân tích index, migration history, seed pipeline, query pattern, cascade rules, data volume estimate, lifecycle.                                                |
+| 0.2.1     | 2026-06-15 | AI Agent       | Chuẩn hóa format metadata (§1.1/§1.2); sửa F-5: phân biệt seed offline (112 từ / 8 topic) vs full DB (~14 topic); sửa §6.4 (`doi-song` thay `hoc-thuat` bị trùng); sửa cross-ref §6.4. |
+| 0.2.2     | 2026-06-15 | AI Agent       | Phase ③ V2.1: thêm §10 model `UserVocabEntry` (tham chiếu + custom, unique, migration, storage); Tham chiếu → §11.                                                                     |
+| 0.2.3     | 2026-06-20 | AI Agent       | Sync `UserVocabEntry` từ planned sang as-built: schema + migration đã có trong code.                                                                                                   |
+| 0.2.4     | 2026-06-20 | AI Agent       | Thêm `customTopicId` cho custom user vocab để lọc kho cá nhân theo chủ đề.                                                                                                             |
 
 ## 2. Công nghệ
 
-| Thành phần | Giá trị | Ghi chú |
-|---|---|---|
-| ORM | Prisma 7 (`@prisma/client` + `@prisma/adapter-pg`) | Tầng truy vấn chính thức |
-| Database | PostgreSQL 16 (`postgres:16-alpine` Docker dev / Supabase prod) | Chỉ Postgres |
-| Driver | `pg` (native pool) | Pool size mặc định |
-| Migration | Prisma Migrate (`prisma migrate dev` / `prisma migrate deploy`) | Dùng `prisma generate` sau migrate |
-| Connection pool | `pg.Pool` do `packages/db/src/index.ts` khởi tạo | Pool size = `pg` default (10) |
-| String PK | `cuid()` — 25 ký tự, chữ thường + số | Không UUID v4 vì cuid ngắn hơn, không sequential |
+| Thành phần      | Giá trị                                                         | Ghi chú                                          |
+| --------------- | --------------------------------------------------------------- | ------------------------------------------------ |
+| ORM             | Prisma 7 (`@prisma/client` + `@prisma/adapter-pg`)              | Tầng truy vấn chính thức                         |
+| Database        | PostgreSQL 16 (`postgres:16-alpine` Docker dev / Supabase prod) | Chỉ Postgres                                     |
+| Driver          | `pg` (native pool)                                              | Pool size mặc định                               |
+| Migration       | Prisma Migrate (`prisma migrate dev` / `prisma migrate deploy`) | Dùng `prisma generate` sau migrate               |
+| Connection pool | `pg.Pool` do `packages/db/src/index.ts` khởi tạo                | Pool size = `pg` default (10)                    |
+| String PK       | `cuid()` — 25 ký tự, chữ thường + số                            | Không UUID v4 vì cuid ngắn hơn, không sequential |
 
 ## 3. Tổng quan — 10 Model + 3 Enum
 
 ### 3.1. Enum
 
-| Enum | Giá trị | Dùng bởi | Ghi chú |
-|---|---|---|---|
-| `CefrLevel` | `A1` `A2` `B1` `B2` `C1` `C2` | `Word.level` | Khung tham chiếu châu Âu 6 bậc |
-| `UserStatus` | `ACTIVE` `DISABLED` `DELETED` | `User.status` | `DELETED` = soft-delete |
-| `AuthProvider` | `PASSWORD` | `UserIdentity.provider`, `AdminIdentity.provider` | Chỉ 1 provider — mở rộng cho OAuth V2 |
+| Enum           | Giá trị                       | Dùng bởi                                          | Ghi chú                               |
+| -------------- | ----------------------------- | ------------------------------------------------- | ------------------------------------- |
+| `CefrLevel`    | `A1` `A2` `B1` `B2` `C1` `C2` | `Word.level`                                      | Khung tham chiếu châu Âu 6 bậc        |
+| `UserStatus`   | `ACTIVE` `DISABLED` `DELETED` | `User.status`                                     | `DELETED` = soft-delete               |
+| `AuthProvider` | `PASSWORD`                    | `UserIdentity.provider`, `AdminIdentity.provider` | Chỉ 1 provider — mở rộng cho OAuth V2 |
 
 ### 3.2. ERD chi tiết
 
@@ -147,43 +149,43 @@
 
 ### 3.3. Cardinality & Cascade
 
-| Source | Target | Loại | FK column | ON DELETE | ON UPDATE | Ý nghĩa |
-|---|---|---|---|---|---|---|
-| `Word` | `Topic` | N:1 (optional) | `topicId` | `SET NULL` | `CASCADE` | Xoá topic → từ mất topic, không mất từ |
-| `UserIdentity` | `User` | N:1 | `userId` | `CASCADE` | `CASCADE` | Xoá user → xoá identity |
-| `AdminIdentity` | `Admin` | N:1 | `adminId` | `CASCADE` | `CASCADE` | Xoá admin → xoá identity |
-| `UserSession` | `User` | N:1 | `userId` | `CASCADE` | `CASCADE` | Xoá user → xoá session |
-| `AdminSession` | `Admin` | N:1 | `adminId` | `CASCADE` | `CASCADE` | Xoá admin → xoá session |
-| `UserAuthToken` | `User` | N:1 | `userId` | `CASCADE` | `CASCADE` | Xoá user → xoá token |
+| Source          | Target  | Loại           | FK column | ON DELETE  | ON UPDATE | Ý nghĩa                                |
+| --------------- | ------- | -------------- | --------- | ---------- | --------- | -------------------------------------- |
+| `Word`          | `Topic` | N:1 (optional) | `topicId` | `SET NULL` | `CASCADE` | Xoá topic → từ mất topic, không mất từ |
+| `UserIdentity`  | `User`  | N:1            | `userId`  | `CASCADE`  | `CASCADE` | Xoá user → xoá identity                |
+| `AdminIdentity` | `Admin` | N:1            | `adminId` | `CASCADE`  | `CASCADE` | Xoá admin → xoá identity               |
+| `UserSession`   | `User`  | N:1            | `userId`  | `CASCADE`  | `CASCADE` | Xoá user → xoá session                 |
+| `AdminSession`  | `Admin` | N:1            | `adminId` | `CASCADE`  | `CASCADE` | Xoá admin → xoá session                |
+| `UserAuthToken` | `User`  | N:1            | `userId`  | `CASCADE`  | `CASCADE` | Xoá user → xoá token                   |
 
 ## 4. Mô tả chi tiết từng model
 
 ### 4.1. Topic
 
-| Cột | Kiểu | Ràng buộc | Min | Max | Ghi chú |
-|---|---|---|---|---|---|
-| `id` | `String` | PK @default(cuid()) | 25 | 25 | cuid() |
-| `slug` | `String` | UNIQUE | 4 | ~30 | URL-friendly, dùng làm route param |
-| `title` | `String` | NOT NULL | 5 | ~30 | Tiếng Việt, hiển thị UI |
+| Cột     | Kiểu     | Ràng buộc           | Min | Max | Ghi chú                            |
+| ------- | -------- | ------------------- | --- | --- | ---------------------------------- |
+| `id`    | `String` | PK @default(cuid()) | 25  | 25  | cuid()                             |
+| `slug`  | `String` | UNIQUE              | 4   | ~30 | URL-friendly, dùng làm route param |
+| `title` | `String` | NOT NULL            | 5   | ~30 | Tiếng Việt, hiển thị UI            |
 
 **Dữ liệu điển hình**: Seed offline (`seed-vocabulary.json`) = **112 từ / 8 topic curated**. Full DB sau `build-dataset` + `seed` = tối đa **~14 topic** (8 curated + 6 extended, xem §6.4).
 **Không có index phụ** ngoài PK + unique(slug).
 
 ### 4.2. Word
 
-| Cột | Kiểu | Ràng buộc | Min | Max | Ghi chú |
-|---|---|---|---|---|---|
-| `id` | `String` | PK @default(cuid()) | 25 | 25 | cuid() |
-| `en` | `String` | NOT NULL | 1 | ~30 | `^[a-z][a-z'-]{0,29}$` |
-| `vi` | `String` | NOT NULL | 1 | 90 | Tối đa `MAX_VI_PARTS=3` nghĩa |
-| `level` | `CefrLevel?` | NULLABLE | — | — | NULL chỉ khi từ curated ép level |
-| `frequency` | `Int` | @default(0) | 0 | 2.147B | Kẹp `Int4` (seed.get('min') clamp) |
-| `pos` | `String?` | NULLABLE | — | ~20 | VD: "danh từ", "động từ" |
-| `ipa` | `String?` | NULLABLE | — | 40 | VD: "/ˈhɛloʊ/" |
-| `example` | `String?` | NULLABLE | 10 | 140 | Một câu, không xuống dòng |
-| `topicId` | `String?` | FK → Topic (SET NULL) | 25 | 25 | null = từ không chủ đề |
-| `source` | `String` | @default | — | ~30 | Phân biệt curated vs. auto |
-| `updatedAt` | `DateTime` | @updatedAt | — | — | Tự động cập nhật |
+| Cột         | Kiểu         | Ràng buộc             | Min | Max    | Ghi chú                            |
+| ----------- | ------------ | --------------------- | --- | ------ | ---------------------------------- |
+| `id`        | `String`     | PK @default(cuid())   | 25  | 25     | cuid()                             |
+| `en`        | `String`     | NOT NULL              | 1   | ~30    | `^[a-z][a-z'-]{0,29}$`             |
+| `vi`        | `String`     | NOT NULL              | 1   | 90     | Tối đa `MAX_VI_PARTS=3` nghĩa      |
+| `level`     | `CefrLevel?` | NULLABLE              | —   | —      | NULL chỉ khi từ curated ép level   |
+| `frequency` | `Int`        | @default(0)           | 0   | 2.147B | Kẹp `Int4` (seed.get('min') clamp) |
+| `pos`       | `String?`    | NULLABLE              | —   | ~20    | VD: "danh từ", "động từ"           |
+| `ipa`       | `String?`    | NULLABLE              | —   | 40     | VD: "/ˈhɛloʊ/"                     |
+| `example`   | `String?`    | NULLABLE              | 10  | 140    | Một câu, không xuống dòng          |
+| `topicId`   | `String?`    | FK → Topic (SET NULL) | 25  | 25     | null = từ không chủ đề             |
+| `source`    | `String`     | @default              | —   | ~30    | Phân biệt curated vs. auto         |
+| `updatedAt` | `DateTime`   | @updatedAt            | —   | —      | Tự động cập nhật                   |
 
 **Index**:
 | Index | Type | Columns | Mục đích |
@@ -196,80 +198,80 @@
 
 **Query pattern & index sử dụng**:
 
-| Query | SQL (minh họa) | Index dùng |
-|---|---|---|
-| Lấy từ theo level | `SELECT * FROM "Word" WHERE "level" = 'A1'` | `Word_level_idx` |
-| Lấy từ theo topic | `SELECT * FROM "Word" WHERE "topicId" = $1` | `Word_topicId_idx` |
-| Lấy từ sắp xếp độ phổ biến | `SELECT * FROM "Word" ORDER BY "frequency" DESC` | `Word_frequency_idx` |
-| Lấy từ duy nhất (en + level) | `SELECT * FROM "Word" WHERE "en"='hello' AND "level"='A1'` | `Word_en_level_key` |
-| Đếm từ theo level | `SELECT "level", COUNT(*) FROM "Word" GROUP BY "level"` | Full scan (không có index covering) |
-| Random từ trong level | `SELECT * FROM "Word" WHERE "level"='A1' ORDER BY RANDOM() LIMIT 10` | `Word_level_idx` (filter) + sort |
+| Query                        | SQL (minh họa)                                                       | Index dùng                          |
+| ---------------------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| Lấy từ theo level            | `SELECT * FROM "Word" WHERE "level" = 'A1'`                          | `Word_level_idx`                    |
+| Lấy từ theo topic            | `SELECT * FROM "Word" WHERE "topicId" = $1`                          | `Word_topicId_idx`                  |
+| Lấy từ sắp xếp độ phổ biến   | `SELECT * FROM "Word" ORDER BY "frequency" DESC`                     | `Word_frequency_idx`                |
+| Lấy từ duy nhất (en + level) | `SELECT * FROM "Word" WHERE "en"='hello' AND "level"='A1'`           | `Word_en_level_key`                 |
+| Đếm từ theo level            | `SELECT "level", COUNT(*) FROM "Word" GROUP BY "level"`              | Full scan (không có index covering) |
+| Random từ trong level        | `SELECT * FROM "Word" WHERE "level"='A1' ORDER BY RANDOM() LIMIT 10` | `Word_level_idx` (filter) + sort    |
 
 ### 4.3. User
 
-| Cột | Kiểu | Ràng buộc | Ghi chú |
-|---|---|---|---|
-| `id` | `String` | PK @default(cuid()) | cuid |
-| `email` | `String` | UNIQUE | Email gốc |
-| `emailNormalized` | `String` | UNIQUE | `lower(trim(email))` — unique của normalization |
-| `displayName` | `String?` | NULLABLE | Tên hiển thị |
-| `avatarUrl` | `String?` | NULLABLE | URL avatar |
-| `status` | `UserStatus` | @default(ACTIVE) | ACTIVE / DISABLED / DELETED |
-| `deletedAt` | `DateTime?` | NULLABLE | Soft-delete timestamp |
+| Cột               | Kiểu         | Ràng buộc           | Ghi chú                                         |
+| ----------------- | ------------ | ------------------- | ----------------------------------------------- |
+| `id`              | `String`     | PK @default(cuid()) | cuid                                            |
+| `email`           | `String`     | UNIQUE              | Email gốc                                       |
+| `emailNormalized` | `String`     | UNIQUE              | `lower(trim(email))` — unique của normalization |
+| `displayName`     | `String?`    | NULLABLE            | Tên hiển thị                                    |
+| `avatarUrl`       | `String?`    | NULLABLE            | URL avatar                                      |
+| `status`          | `UserStatus` | @default(ACTIVE)    | ACTIVE / DISABLED / DELETED                     |
+| `deletedAt`       | `DateTime?`  | NULLABLE            | Soft-delete timestamp                           |
 
 **Quan hệ**: `identities`, `sessions`, `tokens` (1-n).
 **Dữ liệu điển hình**: ~100 user (giai đoạn MVP).
 
 ### 4.4. UserIdentity
 
-| Cột | Kiểu | Ràng buộc | Ghi chú |
-|---|---|---|---|
-| `id` | `String` | PK @default(cuid()) | |
-| `userId` | `String` | FK → User (CASCADE) | |
-| `provider` | `AuthProvider` | @default(PASSWORD) | Chỉ PASSWORD |
-| `providerId` | `String` | = emailNormalized | Dùng để lookup identity |
-| `passwordHash` | `String` | NOT NULL | Argon2id hash |
+| Cột            | Kiểu           | Ràng buộc           | Ghi chú                 |
+| -------------- | -------------- | ------------------- | ----------------------- |
+| `id`           | `String`       | PK @default(cuid()) |                         |
+| `userId`       | `String`       | FK → User (CASCADE) |                         |
+| `provider`     | `AuthProvider` | @default(PASSWORD)  | Chỉ PASSWORD            |
+| `providerId`   | `String`       | = emailNormalized   | Dùng để lookup identity |
+| `passwordHash` | `String`       | NOT NULL            | Argon2id hash           |
 
 **Unique**: `@@unique([provider, providerId])` — mỗi identity chỉ 1 record.
 **Index**: `@@index([userId])` — JOIN từ User.
 
 ### 4.5. UserSession
 
-| Cột | Kiểu | Ràng buộc | Ghi chú |
-|---|---|---|---|
-| `id` | `String` | PK @default(cuid()) | |
-| `userId` | `String` | FK → User (CASCADE) | |
-| `tokenHash` | `String` | UNIQUE | `HMAC-SHA256(token, pepper)` — không lưu token plaintext |
-| `userAgent` | `String?` | NULLABLE | UA string, chỉ logging |
-| `ipHash` | `String?` | NULLABLE | `HMAC-SHA256(ip, pepper)` — không lưu IP thô |
-| `expiresAt` | `DateTime` | NOT NULL | TTL = 30 ngày (user) / 12 giờ (admin) |
-| `revokedAt` | `DateTime?` | NULLABLE | Set khi logout |
+| Cột         | Kiểu        | Ràng buộc           | Ghi chú                                                  |
+| ----------- | ----------- | ------------------- | -------------------------------------------------------- |
+| `id`        | `String`    | PK @default(cuid()) |                                                          |
+| `userId`    | `String`    | FK → User (CASCADE) |                                                          |
+| `tokenHash` | `String`    | UNIQUE              | `HMAC-SHA256(token, pepper)` — không lưu token plaintext |
+| `userAgent` | `String?`   | NULLABLE            | UA string, chỉ logging                                   |
+| `ipHash`    | `String?`   | NULLABLE            | `HMAC-SHA256(ip, pepper)` — không lưu IP thô             |
+| `expiresAt` | `DateTime`  | NOT NULL            | TTL = 30 ngày (user) / 12 giờ (admin)                    |
+| `revokedAt` | `DateTime?` | NULLABLE            | Set khi logout                                           |
 
 **Index**: `userId`, `expiresAt` (cleanup job), `revokedAt` (filter revoked).
 **Token rotation**: Mỗi refresh tạo session mới, revoke session cũ. `tokenHash` unique đảm bảo không trùng.
 
 ### 4.6. UserAuthToken
 
-| Cột | Kiểu | Ràng buộc | Ghi chú |
-|---|---|---|---|
-| `id` | `String` | PK @default(cuid()) | |
-| `userId` | `String` | FK → User (CASCADE) | |
-| `purpose` | `String` | NOT NULL | VD: `"password-reset"` |
-| `tokenHash` | `String` | UNIQUE | One-time token hash |
-| `expiresAt` | `DateTime` | NOT NULL | 2 giờ cho reset |
-| `usedAt` | `DateTime?` | NULLABLE | Mark khi dùng rồi |
+| Cột         | Kiểu        | Ràng buộc           | Ghi chú                |
+| ----------- | ----------- | ------------------- | ---------------------- |
+| `id`        | `String`    | PK @default(cuid()) |                        |
+| `userId`    | `String`    | FK → User (CASCADE) |                        |
+| `purpose`   | `String`    | NOT NULL            | VD: `"password-reset"` |
+| `tokenHash` | `String`    | UNIQUE              | One-time token hash    |
+| `expiresAt` | `DateTime`  | NOT NULL            | 2 giờ cho reset        |
+| `usedAt`    | `DateTime?` | NULLABLE            | Mark khi dùng rồi      |
 
 **Index**: `@@index([userId, purpose])` — tìm kiếm các token của user theo purpose.
 Token là one-time: `usedAt != null` = đã dùng, không validate lại.
 
 ### 4.7. Admin (tương tự User)
 
-| Cột | Kiểu | Ràng buộc | Ghi chú |
-|---|---|---|---|
-| `id` | `String` | PK @default(cuid()) | |
-| `username` | `String` | UNIQUE | Username thô |
-| `usernameNormalized` | `String` | UNIQUE | `lower(username)` |
-| `passwordChangedAt` | `DateTime?` | NULLABLE | Audit — buộc re-login nếu admin change password |
+| Cột                  | Kiểu        | Ràng buộc           | Ghi chú                                         |
+| -------------------- | ----------- | ------------------- | ----------------------------------------------- |
+| `id`                 | `String`    | PK @default(cuid()) |                                                 |
+| `username`           | `String`    | UNIQUE              | Username thô                                    |
+| `usernameNormalized` | `String`    | UNIQUE              | `lower(username)`                               |
+| `passwordChangedAt`  | `DateTime?` | NULLABLE            | Audit — buộc re-login nếu admin change password |
 
 **Không có soft-delete** — Admin hiếm, xoá hẳn hoặc disable ở tầng ứng dụng.
 
@@ -280,11 +282,11 @@ TTL session mặc định: **12 giờ** (ngắn hơn user 30 ngày).
 
 ### 4.9. TrafficHourly
 
-| Cột | Kiểu | Ràng buộc | Ghi chú |
-|---|---|---|---|
-| `hour` | `DateTime` | PK | `date_trunc('hour', now())` — unique hour |
-| `count` | `Int` | @default(0) | Upsert: `++1` |
-| `updatedAt` | `DateTime` | @updatedAt | |
+| Cột         | Kiểu       | Ràng buộc   | Ghi chú                                   |
+| ----------- | ---------- | ----------- | ----------------------------------------- |
+| `hour`      | `DateTime` | PK          | `date_trunc('hour', now())` — unique hour |
+| `count`     | `Int`      | @default(0) | Upsert: `++1`                             |
+| `updatedAt` | `DateTime` | @updatedAt  |                                           |
 
 **Thiết kế**: Ghi dồn (aggregate-on-write) — không lưu raw event.
 24 rows/ngày × 365 = ~8,760 rows/năm — bảng vĩnh viễn nhỏ.
@@ -292,12 +294,12 @@ Không cần TTL/cleanup.
 
 ## 5. Migration History
 
-| # | Migration | Thời gian | Nội dung |
-|---|---|---|---|
-| 1 | `20260610135124_keylish` | 2026-06-10 | Schema gốc: Topic + Word (vocabulary), toàn bộ bảng auth (User, Admin, UserIdentity, AdminIdentity, UserSession, AdminSession, UserAuthToken) |
-| 2 | `20260614000100_v2_auth` | 2026-06-14 | V2 auth: Thêm enum UserStatus, AuthProvider; thêm cột `User.deletedAt`, `Admin.passwordChangedAt`; restructure identity/session |
-| 3 | `20260614010000_drop_session_csrf_secret` | 2026-06-14 | Xoá `csrfSecretHash` khỏi `UserSession` + `AdminSession` — CSRF chuyển sang stateless (double-submit cookie + Origin check) |
-| 4 | `20260615120000_traffic_hourly` | 2026-06-15 | Thêm `TrafficHourly` — aggregate-on-write page-view counters |
+| #   | Migration                                 | Thời gian  | Nội dung                                                                                                                                      |
+| --- | ----------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `20260610135124_keylish`                  | 2026-06-10 | Schema gốc: Topic + Word (vocabulary), toàn bộ bảng auth (User, Admin, UserIdentity, AdminIdentity, UserSession, AdminSession, UserAuthToken) |
+| 2   | `20260614000100_v2_auth`                  | 2026-06-14 | V2 auth: Thêm enum UserStatus, AuthProvider; thêm cột `User.deletedAt`, `Admin.passwordChangedAt`; restructure identity/session               |
+| 3   | `20260614010000_drop_session_csrf_secret` | 2026-06-14 | Xoá `csrfSecretHash` khỏi `UserSession` + `AdminSession` — CSRF chuyển sang stateless (double-submit cookie + Origin check)                   |
+| 4   | `20260615120000_traffic_hourly`           | 2026-06-15 | Thêm `TrafficHourly` — aggregate-on-write page-view counters                                                                                  |
 
 **Lưu ý**: Mỗi migration là tăng dần, không có migration rollback hay squash.
 
@@ -343,53 +345,54 @@ Không cần TTL/cleanup.
 
 ### 6.2. Nguồn dữ liệu
 
-| Nguồn | License | Cung cấp |
-|---|---|---|
-| [Maximax67/Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset) (CSV) | MIT | ~172k từ EN + CEFR level + frequency + POS |
-| [kaikki.org — English Wiktionary](https://kaikki.org/dictionary/English/) (JSONL.gz) | CC BY-SA + GFDL | Nghĩa EN→VI + IPA + ví dụ |
+| Nguồn                                                                                 | License         | Cung cấp                                   |
+| ------------------------------------------------------------------------------------- | --------------- | ------------------------------------------ |
+| [Maximax67/Words-CEFR-Dataset](https://github.com/Maximax67/Words-CEFR-Dataset) (CSV) | MIT             | ~172k từ EN + CEFR level + frequency + POS |
+| [kaikki.org — English Wiktionary](https://kaikki.org/dictionary/English/) (JSONL.gz)  | CC BY-SA + GFDL | Nghĩa EN→VI + IPA + ví dụ                  |
 
 ### 6.3. 112 từ curated (seed fallback)
 
 Định nghĩa tại `scripts/vocab-shared.mjs:125` (`export const VI`):
 
-| Chủ đề | Số từ curated | Ví dụ |
-|---|---|---|
-| Giao tiếp | 14 | hello, goodbye, please, sorry, friend, talk, listen, question, answer, name, meet, language, thank, help |
-| Du lịch | 14 | travel, airport, ticket, hotel, map, beach, mountain, city, passport, luggage, journey, river, country, road |
-| Công sở | 14 | office, meeting, manager, email, report, project, colleague, salary, desk, busy, work, money, plan, sign |
-| Học thuật | 14 | student, teacher, lesson, study, library, exam, knowledge, research, subject, example, dictionary, science, book, read |
-| Ẩm thực | 14 | apple, bread, water, rice, coffee, vegetable, chicken, delicious, breakfast, restaurant, sugar, hungry, fish, milk |
-| Công nghệ | 14 | computer, phone, internet, software, keyboard, screen, password, file, download, device, battery, message, data, screenshot |
-| Sức khỏe | 14 | doctor, medicine, healthy, hospital, sick, exercise, sleep, pain, fever, nurse, tired, body, eat, drink |
-| Mua sắm | 14 | shop, price, buy, sell, cheap, expensive, customer, market, discount, clothes, wallet, pay, size, bag |
-| **Tổng** | **112** | |
+| Chủ đề    | Số từ curated | Ví dụ                                                                                                                       |
+| --------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Giao tiếp | 14            | hello, goodbye, please, sorry, friend, talk, listen, question, answer, name, meet, language, thank, help                    |
+| Du lịch   | 14            | travel, airport, ticket, hotel, map, beach, mountain, city, passport, luggage, journey, river, country, road                |
+| Công sở   | 14            | office, meeting, manager, email, report, project, colleague, salary, desk, busy, work, money, plan, sign                    |
+| Học thuật | 14            | student, teacher, lesson, study, library, exam, knowledge, research, subject, example, dictionary, science, book, read      |
+| Ẩm thực   | 14            | apple, bread, water, rice, coffee, vegetable, chicken, delicious, breakfast, restaurant, sugar, hungry, fish, milk          |
+| Công nghệ | 14            | computer, phone, internet, software, keyboard, screen, password, file, download, device, battery, message, data, screenshot |
+| Sức khỏe  | 14            | doctor, medicine, healthy, hospital, sick, exercise, sleep, pain, fever, nurse, tired, body, eat, drink                     |
+| Mua sắm   | 14            | shop, price, buy, sell, cheap, expensive, customer, market, discount, clothes, wallet, pay, size, bag                       |
+| **Tổng**  | **112**       |                                                                                                                             |
 
 ### 6.4. ~14 topic của full DB (8 curated + 6 extended)
 
 > Áp dụng cho **full DB** (sau `build-dataset` + `seed` vào Postgres). **Seed offline** đóng gói trong web (`seed-vocabulary.json`) chỉ có **8 topic curated** / 112 từ.
 
-| # | Slug | Title | Loại | Nguồn |
-|---|---|---|---|---|
-| 1 | `giao-tiep` | Giao tiếp | Curated | 112 curated |
-| 2 | `du-lich` | Du lịch | Curated | 112 curated |
-| 3 | `cong-so` | Công sở | Curated | 112 curated |
-| 4 | `hoc-thuat` | Học thuật | Curated | 112 curated |
-| 5 | `am-thuc` | Ẩm thực | Curated | 112 curated |
-| 6 | `cong-nghe` | Công nghệ | Curated | 112 curated |
-| 7 | `suc-khoe` | Sức khỏe | Curated | 112 curated |
-| 8 | `mua-sam` | Mua sắm | Curated | 112 curated |
-| 9 | `the-thao-tro-choi` | Thể thao & Trò chơi | Extended | kaikki topic label |
-| 10 | `nghe-thuat-giai-tri` | Nghệ thuật & Giải trí | Extended | kaikki topic label |
-| 11 | `phap-luat-nha-nuoc` | Pháp luật & Nhà nước | Extended | kaikki topic label |
-| 12 | `ton-giao-tin-nguong` | Tôn giáo & Tín ngưỡng | Extended | kaikki topic label |
-| 13 | `khoa-hoc-ky-thuat` | Khoa học & Kỹ thuật | Extended | kaikki topic label |
-| 14 | `doi-song` | Đời sống | Extended | kaikki topic label |
+| #   | Slug                  | Title                 | Loại     | Nguồn              |
+| --- | --------------------- | --------------------- | -------- | ------------------ |
+| 1   | `giao-tiep`           | Giao tiếp             | Curated  | 112 curated        |
+| 2   | `du-lich`             | Du lịch               | Curated  | 112 curated        |
+| 3   | `cong-so`             | Công sở               | Curated  | 112 curated        |
+| 4   | `hoc-thuat`           | Học thuật             | Curated  | 112 curated        |
+| 5   | `am-thuc`             | Ẩm thực               | Curated  | 112 curated        |
+| 6   | `cong-nghe`           | Công nghệ             | Curated  | 112 curated        |
+| 7   | `suc-khoe`            | Sức khỏe              | Curated  | 112 curated        |
+| 8   | `mua-sam`             | Mua sắm               | Curated  | 112 curated        |
+| 9   | `the-thao-tro-choi`   | Thể thao & Trò chơi   | Extended | kaikki topic label |
+| 10  | `nghe-thuat-giai-tri` | Nghệ thuật & Giải trí | Extended | kaikki topic label |
+| 11  | `phap-luat-nha-nuoc`  | Pháp luật & Nhà nước  | Extended | kaikki topic label |
+| 12  | `ton-giao-tin-nguong` | Tôn giáo & Tín ngưỡng | Extended | kaikki topic label |
+| 13  | `khoa-hoc-ky-thuat`   | Khoa học & Kỹ thuật   | Extended | kaikki topic label |
+| 14  | `doi-song`            | Đời sống              | Extended | kaikki topic label |
 
 > **Note**: Chủ đề extended chỉ được tạo nếu có ≥10 từ được gán (threshold trong build-dataset.mjs `MIN_TOPIC_WORDS = 10`).
 
 ### 6.5. Gán chủ đề từ (topic assignment)
 
 Thuật toán `topicFromVotes()` tại `build-dataset.mjs:201`:
+
 1. Mỗi nghĩa (sense) của từ trong kaikki chứa 0+ topic labels (vd. `["computing", "sciences"]`)
 2. Mỗi label được map sang 1 trong 14 slug theo `TOPIC_RULES` (thứ tự ưu tiên: cụ thể trước, ô dù sau)
 3. Mỗi sense bỏ 1 phiếu cho slug tìm được
@@ -400,38 +403,38 @@ Thuật toán `topicFromVotes()` tại `build-dataset.mjs:201`:
 
 ### 6.6. Seed số liệu ước lượng
 
-| Kịch bản | Số topic | Số từ | Ghi chú |
-|---|---|---|---|
-| Full dataset (kaikki + Maximax67) | ~14 | ~80k–120k | Phụ thuộc chất lượng kaikki scan |
-| Fallback (112 curated) | 8 | 112 | Dùng khi không có kaikki file |
-| Batch size | — | 1.000 | `BATCH_SIZE` trong seed.ts |
+| Kịch bản                          | Số topic | Số từ     | Ghi chú                          |
+| --------------------------------- | -------- | --------- | -------------------------------- |
+| Full dataset (kaikki + Maximax67) | ~14      | ~80k–120k | Phụ thuộc chất lượng kaikki scan |
+| Fallback (112 curated)            | 8        | 112       | Dùng khi không có kaikki file    |
+| Batch size                        | —        | 1.000     | `BATCH_SIZE` trong seed.ts       |
 
 ## 7. Data Volume Estimates
 
-| Bảng | Ước lượng rows (MVP) | Ước lượng rows (1 năm) | Tốc độ tăng |
-|---|---|---|---|
-| `Topic` | 14 | 14 | Không đổi |
-| `Word` | 80k–120k | 80k–120k | Chỉ đổi khi có pipeline mới |
-| `User` | ~100 | ~1k | Linear với user đăng ký |
-| `UserIdentity` | ~100 | ~1k | 1:1 với user |
-| `UserSession` | ~200 | ~5k | ~5 session/user active |
-| `UserAuthToken` | ~50/tháng | ~600 | Reset token |
-| `Admin` | 1–3 | 1–5 | Rất ít |
-| `AdminIdentity` | 1–3 | 1–5 | 1:1 |
-| `AdminSession` | 1–5 | 1–10 | ~1 session/admin |
-| `TrafficHourly` | ~720 (30 ngày) | ~8.760 | 24 rows/ngày |
+| Bảng            | Ước lượng rows (MVP) | Ước lượng rows (1 năm) | Tốc độ tăng                 |
+| --------------- | -------------------- | ---------------------- | --------------------------- |
+| `Topic`         | 14                   | 14                     | Không đổi                   |
+| `Word`          | 80k–120k             | 80k–120k               | Chỉ đổi khi có pipeline mới |
+| `User`          | ~100                 | ~1k                    | Linear với user đăng ký     |
+| `UserIdentity`  | ~100                 | ~1k                    | 1:1 với user                |
+| `UserSession`   | ~200                 | ~5k                    | ~5 session/user active      |
+| `UserAuthToken` | ~50/tháng            | ~600                   | Reset token                 |
+| `Admin`         | 1–3                  | 1–5                    | Rất ít                      |
+| `AdminIdentity` | 1–3                  | 1–5                    | 1:1                         |
+| `AdminSession`  | 1–5                  | 1–10                   | ~1 session/admin            |
+| `TrafficHourly` | ~720 (30 ngày)       | ~8.760                 | 24 rows/ngày                |
 
 ## 8. X. Cross-cutting Concerns
 
 ### 8.1. Security
 
-| Biện pháp | Áp dụng tại |
-|---|---|
-| Password hash Argon2id | `UserIdentity.passwordHash`, `AdminIdentity.passwordHash` |
-| Token hash HMAC-SHA256 | `UserSession.tokenHash`, `UserAuthToken.tokenHash` |
-| IP hash HMAC-SHA256 | `UserSession.ipHash`, `AdminSession.ipHash` — không lưu IP thô |
-| PK cuid (non-sequential) | Tránh leaker số lượng bản ghi |
-| Soft-delete user | `User.deletedAt`, `User.status = DELETED` |
+| Biện pháp                | Áp dụng tại                                                    |
+| ------------------------ | -------------------------------------------------------------- |
+| Password hash Argon2id   | `UserIdentity.passwordHash`, `AdminIdentity.passwordHash`      |
+| Token hash HMAC-SHA256   | `UserSession.tokenHash`, `UserAuthToken.tokenHash`             |
+| IP hash HMAC-SHA256      | `UserSession.ipHash`, `AdminSession.ipHash` — không lưu IP thô |
+| PK cuid (non-sequential) | Tránh leaker số lượng bản ghi                                  |
+| Soft-delete user         | `User.deletedAt`, `User.status = DELETED`                      |
 
 ### 8.2. Data Lifecycle
 
@@ -462,7 +465,7 @@ Không cần VACUUM đặc biệt ngoài autovacuum mặc định.
 ```typescript
 // packages/db/src/index.ts
 import { Pool } from "pg";
-const pool = new Pool({ connectionString });  // pool size default = 10
+const pool = new Pool({ connectionString }); // pool size default = 10
 const adapter = new PrismaPg(pool);
 const client = new PrismaClient({ adapter });
 return { client, pool };
@@ -473,33 +476,33 @@ Khi seed xong hoặc app shutdown: `await client.$disconnect(); await pool.end()
 
 ### 8.5. RISK & OQ
 
-| ID | Mô tả | Loại |
-|---|---|---|
-| R-5 | Dùng `cuid()` cho PK — không chống được collision nếu migrate lên shard | RISK (thấp) |
-| — | `TrafficHourly` dùng `hour` làm PK (DateTime) — upsert an toàn | — |
-| — | `UserAuthToken` không có composite unique cho (userId, purpose, tokenHash) — không cần vì hash đã unique | — |
-| — | Index rate-limit in-memory, không có bảng rate-limit trong DB | — |
-| — | Không có index covering cho query `GROUP BY level` — scan toàn bảng (chấp nhận với dataset ~100k) | — |
+| ID  | Mô tả                                                                                                    | Loại        |
+| --- | -------------------------------------------------------------------------------------------------------- | ----------- |
+| R-5 | Dùng `cuid()` cho PK — không chống được collision nếu migrate lên shard                                  | RISK (thấp) |
+| —   | `TrafficHourly` dùng `hour` làm PK (DateTime) — upsert an toàn                                           | —           |
+| —   | `UserAuthToken` không có composite unique cho (userId, purpose, tokenHash) — không cần vì hash đã unique | —           |
+| —   | Index rate-limit in-memory, không có bảng rate-limit trong DB                                            | —           |
+| —   | Không có index covering cho query `GROUP BY level` — scan toàn bảng (chấp nhận với dataset ~100k)        | —           |
 
 ## 9. BR Trace
 
-| BR | Mô tả | Thể hiện trong DB |
-|---|---|---|
-| BR-01 | Mỗi từ chỉ xuất hiện 1 lần ở mỗi level | `@@unique([en, level])` trên Word |
-| BR-02 | Email không trùng | `User.emailNormalized @unique` |
-| BR-02 | Username admin không trùng | `Admin.usernameNormalized @unique` |
+| BR    | Mô tả                                  | Thể hiện trong DB                  |
+| ----- | -------------------------------------- | ---------------------------------- |
+| BR-01 | Mỗi từ chỉ xuất hiện 1 lần ở mỗi level | `@@unique([en, level])` trên Word  |
+| BR-02 | Email không trùng                      | `User.emailNormalized @unique`     |
+| BR-02 | Username admin không trùng             | `Admin.usernameNormalized @unique` |
 
-## 10. (V2.1 ⬜ — đang thiết kế) Kho từ vựng cá nhân — `UserVocabEntry`
+## 10. (V2.1 DONE DB as-built) Kho từ vựng cá nhân — `UserVocabEntry`
 
-> Planned (chưa code). Căn cứ ADR-019, D-08..D-11. Kho hệ thống `Word` giữ nguyên.
+Đã có trong [schema.prisma](../../packages/db/prisma/schema.prisma) và migration `20260616090000_add_user_vocab_entry`. Căn cứ ADR-019, D-08..D-11. Kho hệ thống `Word` giữ nguyên.
 
-### 10.1. Model (Prisma — dự kiến)
+### 10.1. Model (Prisma — as-built)
 
 ```prisma
 enum VocabEntrySource {
   system
   custom
-  ai // ⬜ V2.2
+  ai // TODO V2.2
 }
 
 model UserVocabEntry {
@@ -514,32 +517,36 @@ model UserVocabEntry {
   customVi     String?
   customExample String?
   customLevel  CefrLevel?
+  customTopicId String?
   note         String?
 
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  word Word? @relation(fields: [wordId], references: [id], onDelete: SetNull)
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word        Word?  @relation(fields: [wordId], references: [id], onDelete: SetNull)
+  customTopic Topic? @relation("UserVocabCustomTopic", fields: [customTopicId], references: [id], onDelete: SetNull)
 
   @@unique([userId, wordId])       // không thêm trùng 1 từ hệ thống (BR-09)
   @@unique([userId, normalizedEn]) // không tạo trùng 1 custom
   @@index([userId])
+  @@index([customTopicId])
+  @@index([userId, customLevel])
 }
 ```
 
-(+ thêm quan hệ `vocabEntries UserVocabEntry[]` vào `User`; `userEntries UserVocabEntry[]` vào `Word`.)
+(+ thêm quan hệ `vocabEntries UserVocabEntry[]` vào `User`; `userEntries UserVocabEntry[]` vào `Word`; `userVocabEntries UserVocabEntry[] @relation("UserVocabCustomTopic")` vào `Topic`.)
 
 ### 10.2. Ràng buộc & ngữ nghĩa
 
 - Entry **tham chiếu**: `wordId` set, `customEn`/`normalizedEn` null → `@@unique([userId, wordId])` chặn trùng.
-- Entry **custom**: `wordId` null, `customEn`/`normalizedEn` set → `@@unique([userId, normalizedEn])` chặn trùng. (Với `wordId` null, unique `(userId, wordId)` không ràng buộc — Postgres coi NULL khác nhau — nên dùng `normalizedEn` cho custom.)
-- `onDelete`: User xóa → cascade xóa entries; Word xóa → `SetNull` (giữ entry, mất tham chiếu).
+- Entry **custom**: `wordId` null, `customEn`/`normalizedEn` set → `@@unique([userId, normalizedEn])` chặn trùng. `customLevel/customTopicId` phục vụ filter trong kho cá nhân. (Với `wordId` null, unique `(userId, wordId)` không ràng buộc — Postgres coi NULL khác nhau — nên dùng `normalizedEn` cho custom.)
+- `onDelete`: User xóa → cascade xóa entries; Word xóa → `SetNull` (giữ entry, mất tham chiếu); Topic xóa → `SetNull` cho custom topic.
 - Override: entry tham chiếu vẫn có thể điền `customVi/customExample/note` → UI hiển thị override khi có.
 
 ### 10.3. Migration & storage
 
-- Migration mới `add_user_vocab_entry` (tạo enum + bảng + index). Không đụng bảng hiện có.
+- Migration `20260616090000_add_user_vocab_entry` (tạo enum + bảng + index). Migration `20260620093000_add_user_vocab_custom_topic` thêm `customTopicId` + FK/index để lọc custom theo chủ đề.
 - Ước lượng ~180–230 B/tham chiếu, ~350–450 B/custom (kèm index) → **~0.05–0.1 MB / 200 từ / user** (R-14, NFR-PER-03). Free tier 0.5 GB → ~3–4k user kịch trần.
 
 ### 10.4. Lemmatization (D-11)

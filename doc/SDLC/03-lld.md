@@ -4,33 +4,33 @@
 
 ### 1.1. Metadata
 
-| Trường | Giá trị |
-|---|---|
-| Tên | Thiết kế Mức Chi tiết (Low-Level Design) |
-| Mã tài liệu | `03-lld` |
-| Dự án | KeyLish |
-| Phiên bản | 0.2.1 |
-| Trạng thái | Draft |
-| Người viết | AI Agent (soạn thảo SDLC) |
-| Người duyệt | Nguyễn Hồng Khanh |
-| Ngày tạo | 2026-06-15 |
+| Trường      | Giá trị                                  |
+| ----------- | ---------------------------------------- |
+| Tên         | Thiết kế Mức Chi tiết (Low-Level Design) |
+| Mã tài liệu | `03-lld`                                 |
+| Dự án       | KeyLish                                  |
+| Phiên bản   | 0.2.1                                    |
+| Trạng thái  | Draft                                    |
+| Người viết  | AI Agent (soạn thảo SDLC)                |
+| Người duyệt | Nguyễn Hồng Khanh                        |
+| Ngày tạo    | 2026-06-15                               |
 
 ### 1.2. Lịch sử thay đổi
 
-| Phiên bản | Ngày | Người cập nhật | Nội dung |
-|---|---|---|---|
-| 0.1.0 | 2026-06-15 | AI Agent | Bản Draft đầu. |
-| 0.2.0 | 2026-06-15 | AI Agent | Nâng cấp: sequence diagram cho auth flows; state machine typing engine; component tree user-web; file map; chi tiết guard chain, practice settings, seed data. |
-| 0.2.1 | 2026-06-15 | AI Agent | G-4: gom RISK ID (R-7a→R-9, R-7b→R-13, R-7c→R-7, bỏ R-10 cũ) về PROJECT-STATE. |
+| Phiên bản | Ngày       | Người cập nhật | Nội dung                                                                                                                                                       |
+| --------- | ---------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1.0     | 2026-06-15 | AI Agent       | Bản Draft đầu.                                                                                                                                                 |
+| 0.2.0     | 2026-06-15 | AI Agent       | Nâng cấp: sequence diagram cho auth flows; state machine typing engine; component tree user-web; file map; chi tiết guard chain, practice settings, seed data. |
+| 0.2.1     | 2026-06-15 | AI Agent       | G-4: gom RISK ID (R-7a→R-9, R-7b→R-13, R-7c→R-7, bỏ R-10 cũ) về PROJECT-STATE.                                                                                 |
 
 ### 1.3. Tham chiếu
 
-| Tài liệu | Nội dung |
-|---|---|
-| `02-hld` | Kiến trúc tổng thể, module dependency |
-| `01-srs` | FR, UC trace — FR-AUT, FR-PRC, FR-VOC, FR-ADM, FR-TRF |
-| `07-security` | Auth, CSRF, session chi tiết |
-| `04-database` | ERD, Prisma model |
+| Tài liệu      | Nội dung                                              |
+| ------------- | ----------------------------------------------------- |
+| `02-hld`      | Kiến trúc tổng thể, module dependency                 |
+| `01-srs`      | FR, UC trace — FR-AUT, FR-PRC, FR-VOC, FR-ADM, FR-TRF |
+| `07-security` | Auth, CSRF, session chi tiết                          |
+| `04-database` | ERD, Prisma model                                     |
 
 ## 2. File map tổng quan
 
@@ -93,23 +93,23 @@ auth.dto.ts        → Zod schemas + TypeScript types
 
 ### 3.2. Endpoint map
 
-| Method | Path | Guard | Service method | Input schema | Trace FR |
-|---|---|---|---|---|---|
-| `GET` | `/user/csrf` | — | `issueCsrfToken` | — | FR-AUT-10 |
-| `POST` | `/user/register` | CsrfGuard | `registerUser` | `UserRegisterSchema` | FR-AUT-01 |
-| `POST` | `/user/login` | CsrfGuard | `loginUser` | `UserLoginSchema` | FR-AUT-02 |
-| `POST` | `/user/logout` | UserGuard + CsrfGuard | `logoutUser` | — | FR-AUT-04 |
-| `POST` | `/user/logout-all` | UserGuard + CsrfGuard | `logoutAllUserSessions` | — | FR-AUT-04 |
-| `GET` | `/user/profile` | UserGuard | `getUserProfile` | — | FR-AUT-05 |
-| `PATCH` | `/user/profile` | UserGuard + CsrfGuard | `updateUserProfile` | `UpdateProfileSchema` | FR-AUT-05 |
-| `POST` | `/user/change-password` | UserGuard + CsrfGuard | `changeUserPassword` | `PasswordChangeSchema` | FR-AUT-06 |
-| `POST` | `/user/forgot-password` | CsrfGuard | `forgotPassword` | `ForgotPasswordSchema` | FR-AUT-07 |
-| `POST` | `/user/reset-password` | CsrfGuard | `resetPassword` | `ResetPasswordSchema` | FR-AUT-08 |
-| `GET` | `/admin/csrf` | — | `issueCsrfToken` | — | FR-ADM-01 |
-| `POST` | `/admin/login` | CsrfGuard | `loginAdmin` | `AdminLoginSchema` | FR-ADM-01 |
-| `POST` | `/admin/logout` | AdminGuard + CsrfGuard | `logoutAdmin` | — | — |
-| `POST` | `/admin/logout-all` | AdminGuard + CsrfGuard | `logoutAllAdminSessions` | — | — |
-| `POST` | `/admin/change-password` | AdminGuard + CsrfGuard | `changeAdminPassword` | `PasswordChangeSchema` | — |
+| Method  | Path                     | Guard                  | Service method           | Input schema           | Trace FR  |
+| ------- | ------------------------ | ---------------------- | ------------------------ | ---------------------- | --------- |
+| `GET`   | `/user/csrf`             | —                      | `issueCsrfToken`         | —                      | FR-AUT-10 |
+| `POST`  | `/user/register`         | CsrfGuard              | `registerUser`           | `UserRegisterSchema`   | FR-AUT-01 |
+| `POST`  | `/user/login`            | CsrfGuard              | `loginUser`              | `UserLoginSchema`      | FR-AUT-02 |
+| `POST`  | `/user/logout`           | UserGuard + CsrfGuard  | `logoutUser`             | —                      | FR-AUT-04 |
+| `POST`  | `/user/logout-all`       | UserGuard + CsrfGuard  | `logoutAllUserSessions`  | —                      | FR-AUT-04 |
+| `GET`   | `/user/profile`          | UserGuard              | `getUserProfile`         | —                      | FR-AUT-05 |
+| `PATCH` | `/user/profile`          | UserGuard + CsrfGuard  | `updateUserProfile`      | `UpdateProfileSchema`  | FR-AUT-05 |
+| `POST`  | `/user/change-password`  | UserGuard + CsrfGuard  | `changeUserPassword`     | `PasswordChangeSchema` | FR-AUT-06 |
+| `POST`  | `/user/forgot-password`  | CsrfGuard              | `forgotPassword`         | `ForgotPasswordSchema` | FR-AUT-07 |
+| `POST`  | `/user/reset-password`   | CsrfGuard              | `resetPassword`          | `ResetPasswordSchema`  | FR-AUT-08 |
+| `GET`   | `/admin/csrf`            | —                      | `issueCsrfToken`         | —                      | FR-ADM-01 |
+| `POST`  | `/admin/login`           | CsrfGuard              | `loginAdmin`             | `AdminLoginSchema`     | FR-ADM-01 |
+| `POST`  | `/admin/logout`          | AdminGuard + CsrfGuard | `logoutAdmin`            | —                      | —         |
+| `POST`  | `/admin/logout-all`      | AdminGuard + CsrfGuard | `logoutAllAdminSessions` | —                      | —         |
+| `POST`  | `/admin/change-password` | AdminGuard + CsrfGuard | `changeAdminPassword`    | `PasswordChangeSchema` | —         |
 
 ### 3.3. Schema validation (Zod)
 
@@ -355,6 +355,7 @@ ipHash(request): string | null {
 ## 4. Module API: Admin
 
 **Files**: `apps/api/src/admin/`
+
 - `admin-gate.guard.ts` (38 dòng) — global gate
 - `admin.controller.ts` (38 dòng) — dashboard + user management
 - `admin.service.ts` (186 dòng) — business logic
@@ -378,12 +379,12 @@ isAdminApiEnabled():
 
 ### 4.2. Admin endpoints
 
-| Method | Path | Guard | Service method | Logic |
-|---|---|---|---|---|
-| `GET` | `/admin/dashboard/summary` | AdminGuard | `getAdminSummary` | 3 count queries trong $transaction: user (active), topic, word |
-| `GET` | `/admin/users` | AdminGuard | `listUsers` | Search+status filter, phân trang (default 20, max 100) |
-| `GET` | `/admin/users/:id` | AdminGuard | `getUserById` | FindUnique, 404 nếu không có |
-| `PATCH` | `/admin/users/:id` | AdminGuard+CsrfGuard | `updateUserById` | Chỉ update status (UpdateUserStatusSchema) |
+| Method  | Path                       | Guard                | Service method    | Logic                                                          |
+| ------- | -------------------------- | -------------------- | ----------------- | -------------------------------------------------------------- |
+| `GET`   | `/admin/dashboard/summary` | AdminGuard           | `getAdminSummary` | 3 count queries trong $transaction: user (active), topic, word |
+| `GET`   | `/admin/users`             | AdminGuard           | `listUsers`       | Search+status filter, phân trang (default 20, max 100)         |
+| `GET`   | `/admin/users/:id`         | AdminGuard           | `getUserById`     | FindUnique, 404 nếu không có                                   |
+| `PATCH` | `/admin/users/:id`         | AdminGuard+CsrfGuard | `updateUserById`  | Chỉ update status (UpdateUserStatusSchema)                     |
 
 ```typescript
 AdminSummaryDto = { users: number, topics: number, vocab: number, api: { status: "ok" } }
@@ -560,6 +561,7 @@ currentHourBucket(now = Date.now()): Date {
 ```
 
 **Client-side**: `TrafficBeacon.tsx`
+
 ```typescript
 function TrafficBeacon():
   useEffect:
@@ -796,10 +798,10 @@ TypingFlow.tsx (state machine):
 
 ```typescript
 interface SessionEngineConfig {
-  reveal: boolean;          // lộ ký tự đích (M1=false, M2 tùy drill)
-  repeat: RepeatMode;       // "none" | "once" | "until"
-  wrongAdvanceMs?: number;  // tự chuyển sau Nms khi sai (test mode)
-  trimToTarget?: boolean;   // cắt input = target.length (mặc định true)
+  reveal: boolean; // lộ ký tự đích (M1=false, M2 tùy drill)
+  repeat: RepeatMode; // "none" | "once" | "until"
+  wrongAdvanceMs?: number; // tự chuyển sau Nms khi sai (test mode)
+  trimToTarget?: boolean; // cắt input = target.length (mặc định true)
 }
 ```
 
@@ -879,13 +881,15 @@ function computeCells(target: string, typed: string, reveal: boolean): Cell[] {
     if (i < typed.length) {
       state = typed[i] === tch ? "ok" : "bad";
     } else if (i === typed.length) {
-      state = "cur";                       // cursor position
+      state = "cur"; // cursor position
     } else {
       state = "todo";
     }
     const ch = reveal
-      ? tch                                 // show target char
-      : i < typed.length ? typed[i] : "";   // show typed only
+      ? tch // show target char
+      : i < typed.length
+        ? typed[i]
+        : ""; // show typed only
     return { ch, state };
   });
 }
@@ -927,13 +931,13 @@ const clean = (s: string) => s.toLowerCase().replace(/[^a-z'-]/g, "");
 
 ```typescript
 interface SessionResult {
-  correct: number;         // số từ đúng
-  wrong: number;           // số từ sai
-  wpm: number;             // correctChars / 5 / minutes
-  accuracyPct: number;     // correctChars / totalChars * 100
-  correctChars: number;    // tổng ký tự đúng (match position)
-  totalChars: number;      // tổng ký tự target
-  durationMs: number;      // thời gian phiên
+  correct: number; // số từ đúng
+  wrong: number; // số từ sai
+  wpm: number; // correctChars / 5 / minutes
+  accuracyPct: number; // correctChars / totalChars * 100
+  correctChars: number; // tổng ký tự đúng (match position)
+  totalChars: number; // tổng ký tự target
+  durationMs: number; // thời gian phiên
   wrongWords: VocabWord[]; // danh sách từ sai (không trùng)
 }
 
@@ -946,12 +950,12 @@ interface SessionResult {
 ```typescript
 // finalize() khi sai:
 const willRequeue =
-  repeat === "until"                                   // lặp đến khi đúng
-  || (repeat === "once" && !requeued.current.has(target));  // 1 lần duy nhất
+  repeat === "until" || // lặp đến khi đúng
+  (repeat === "once" && !requeued.current.has(target)); // 1 lần duy nhất
 
 if (willRequeue) {
-  if (repeat === "once") requeued.current.add(target);  // đánh dấu đã requeue
-  setQueue((q) => [...q, word]);                         // thêm cuối queue
+  if (repeat === "once") requeued.current.add(target); // đánh dấu đã requeue
+  setQueue((q) => [...q, word]); // thêm cuối queue
 }
 // Queue dài ra → index vẫn tăng → từ sai sẽ gặp lại khi tới cuối
 ```
@@ -967,18 +971,24 @@ type RepeatMode = "none" | "once" | "until";
 type LiveMode = "on" | "off";
 
 interface PracticeSettings {
-  hint: HintLevel;       // mức gợi ý
-  example: ExampleMode;  // câu ví dụ
-  feedback: FeedbackMode;// báo lỗi
-  repeat: RepeatMode;    // lặp từ sai (dùng trong useTypingSession)
-  live: LiveMode;        // tô màu real-time
+  hint: HintLevel; // mức gợi ý
+  example: ExampleMode; // câu ví dụ
+  feedback: FeedbackMode; // báo lỗi
+  repeat: RepeatMode; // lặp từ sai (dùng trong useTypingSession)
+  live: LiveMode; // tô màu real-time
 }
 
 // Mặc định Luyện tập (practice):
-DEFAULT_PRACTICE = { hint: "underline", example: "show", feedback: "char", repeat: "once", live: "on" }
+DEFAULT_PRACTICE = {
+  hint: "underline",
+  example: "show",
+  feedback: "char",
+  repeat: "once",
+  live: "on",
+};
 
 // Bị khoá khi Kiểm tra (test):
-TEST_SETTINGS = { hint: "off", example: "off", feedback: "mark", repeat: "none", live: "off" }
+TEST_SETTINGS = { hint: "off", example: "off", feedback: "mark", repeat: "none", live: "off" };
 // → ẩn mọi phao, chấm một lần, không gợi ý
 ```
 
@@ -1083,26 +1093,26 @@ export async function loadTopicsAwait(isAborted, attempts=30, delayMs=3500):
 
 **File**: `apps/user-web/src/components/vocab/typing/primitives.tsx` (369 dòng)
 
-| Component | Props | Mô tả |
-|---|---|---|
-| `Cell` | `{ state: "ok"|"bad"|"cur"|"todo", ch: string }` | Ký tự trong ô — màu + icon check/x |
-| `Icon` | `{ name: IconName, size?, stroke?, fill? }` | 18 SVG icon (arrow, check, x, volume, star, ...) |
-| `Star` | `{ size?, fill?, spin? }` | Ngôi sao trang trí neo-brutalism |
-| `StatPill` | `{ icon, value, label?, bg? }` | Thẻ thống kê viền đen + shadow |
-| `ProgressStrip` | `{ idx, total, ctx?, bg? }` | Thanh tiến trình "Từ X / Y" |
-| `KeyboardMini` | `{ nextKey?, done[]? }` | Bàn phím mini gợi ý phím tiếp theo |
-| `Logo` | `{ scale? }` | Logo KeyLish + keycap icon |
-| `Mark` | `{ kind: "ok"|"bad" }` | Icon checkmark/x |
+| Component       | Props                                       | Mô tả                                             |
+| --------------- | ------------------------------------------- | ------------------------------------------------- | ---------------------- | --------------------- | -------------------------------------------- |
+| `Cell`          | `{ state: "ok"                              | "bad"                                             | "cur"                  | "todo", ch: string }` | Ký tự trong ô — màu + nhãn trạng thái ok/bad |
+| `Icon`          | `{ name: IconName, size?, stroke?, fill? }` | 18 SVG glyph (arrow, check, x, volume, star, ...) |
+| `Star`          | `{ size?, fill?, spin? }`                   | Ngôi sao trang trí neo-brutalism                  |
+| `StatPill`      | `{ icon, value, label?, bg? }`              | Thẻ thống kê viền đen + shadow                    |
+| `ProgressStrip` | `{ idx, total, ctx?, bg? }`                 | Thanh tiến trình "Từ X / Y"                       |
+| `KeyboardMini`  | `{ nextKey?, done[]? }`                     | Bàn phím mini gợi ý phím tiếp theo                |
+| `Logo`          | `{ scale? }`                                | Logo KeyLish + keycap mark                        |
+| `Mark`          | `{ kind: "ok"                               | "bad" }`                                          | Trạng thái checkmark/x |
 
 ## 17. Scripts & Pipeline
 
-| Script | File | Mô tả |
-|---|---|---|
-| `build-dataset` | `scripts/build-dataset.mjs` | Stream kaikki JSONL.gz → lọc entry VI → JOIN Maximax67 CSV → gán topic → `.data-tmp/dataset.json` |
-| `build-vocab` | `scripts/build-vocab.mjs` | 112 từ curated → `user-web/src/data/seed/seed-vocabulary.json` |
-| `vocab-shared` | `scripts/vocab-shared.mjs` | Dữ liệu 112 từ (biên soạn tay) |
-| `seed` | `apps/api/scripts/seed.ts` | Đọc dataset.json → XÓA SẠCH → batch 1000 từ → Prisma |
-| `seed-admin` | `apps/api/scripts/seed-admin.ts` | Tạo admin account mặc định |
+| Script          | File                             | Mô tả                                                                                             |
+| --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `build-dataset` | `scripts/build-dataset.mjs`      | Stream kaikki JSONL.gz → lọc entry VI → JOIN Maximax67 CSV → gán topic → `.data-tmp/dataset.json` |
+| `build-vocab`   | `scripts/build-vocab.mjs`        | 112 từ curated → `user-web/src/data/seed/seed-vocabulary.json`                                    |
+| `vocab-shared`  | `scripts/vocab-shared.mjs`       | Dữ liệu 112 từ (biên soạn tay)                                                                    |
+| `seed`          | `apps/api/scripts/seed.ts`       | Đọc dataset.json → XÓA SẠCH → batch 1000 từ → Prisma                                              |
+| `seed-admin`    | `apps/api/scripts/seed-admin.ts` | Tạo admin account mặc định                                                                        |
 
 ## 18. user-web: Infra/userApi
 
@@ -1117,12 +1127,12 @@ Các hàm gọi API phía user (auth, profile, ...):
 
 ## 19. RISK / Technical Debt
 
-| Mã | Mô tả | Mức | Ảnh hưởng |
-|---|---|---|---|
-| R-5 | Logic gõ nằm ở `components/` thay vì `domain/` — `computeCells`, `clean`, `finalize` là pure function nhưng gắn với React hook | Trung bình | Khó unit-test riêng; khó tái sử dụng ở non-React context |
-| R-9 | AuthService ~963 dòng — đảm nhận: rate-limit, token, session, password, CSRF, cookie, seed, purge. Nên tách provider | Thấp | Khó bảo trì, vi phạm SRP |
-| R-13 | Rate-limit in-memory — mất khi restart server | Thấp | Scale nhỏ chấp nhận được (task T-08) |
-| R-7 | Chưa có test cho engine gõ (vùng dễ lỗi nhất) — thuộc coverage thấp | Cao | `--passWithNoTests` che giấu |
-| R-11 | Admin-web scaffold chưa kết nối `@keylish/shared` — có thể định nghĩa type trùng | Trung bình | Lệch contract khi hoàn thiện |
+| Mã   | Mô tả                                                                                                                          | Mức        | Ảnh hưởng                                                |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------------------------------------------------------- |
+| R-5  | Logic gõ nằm ở `components/` thay vì `domain/` — `computeCells`, `clean`, `finalize` là pure function nhưng gắn với React hook | Trung bình | Khó unit-test riêng; khó tái sử dụng ở non-React context |
+| R-9  | AuthService ~963 dòng — đảm nhận: rate-limit, token, session, password, CSRF, cookie, seed, purge. Nên tách provider           | Thấp       | Khó bảo trì, vi phạm SRP                                 |
+| R-13 | Rate-limit in-memory — mất khi restart server                                                                                  | Thấp       | Scale nhỏ chấp nhận được (task T-08)                     |
+| R-7  | Chưa có test cho engine gõ (vùng dễ lỗi nhất) — thuộc coverage thấp                                                            | Cao        | `--passWithNoTests` che giấu                             |
+| R-11 | Admin-web scaffold chưa kết nối `@keylish/shared` — có thể định nghĩa type trùng                                               | Trung bình | Lệch contract khi hoàn thiện                             |
 
 > RISK ID chuẩn ở `context/PROJECT-STATE.md` §2.
