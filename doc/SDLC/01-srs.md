@@ -9,7 +9,7 @@
 | Tên           | Đặc tả Yêu cầu Phần mềm (Software Requirements Specification)  |
 | Mã tài liệu   | `01-srs`                                                       |
 | Dự án         | KeyLish                                                        |
-| Phiên bản     | 0.2.3                                                          |
+| Phiên bản     | 0.2.4                                                          |
 | Trạng thái    | Draft                                                          |
 | Người viết    | AI Agent (soạn thảo SDLC), Nguyễn Hồng Khanh                   |
 | Người duyệt   | Nguyễn Hồng Khanh                                              |
@@ -25,6 +25,7 @@
 | 0.2.1     | 2026-06-15 | AI Agent       | Hoàn thiện 01: phân bổ V2.1 vào mục sẵn có (§3 enum, §4.8 FR-PVOC, §5 BR, §6 NFR, §7 UC-07/08, §9 trace); gỡ §10 annex. |
 | 0.2.2     | 2026-06-20 | AI Agent       | Sync V2.1 theo code hiện tại: kho cá nhân đã có schema/API/shared/UI quản lý ở mức partial; FR-PVOC-08 còn mở.          |
 | 0.2.3     | 2026-06-20 | AI Agent       | Bổ sung filter cấp độ/chủ đề cho kho cá nhân; custom word có topic tùy chọn.                                            |
+| 0.2.4     | 2026-06-22 | AI Agent       | FR-PVOC-07 (sửa/override) + FR-PVOC-08 đợt 1 (luyện theo kho qua tách route) → DONE; đợt 2 custom options = T-13.       |
 
 ### 1.3. Mục đích
 
@@ -187,8 +188,8 @@ Quy tắc validation từ [auth.dto.ts](../../apps/api/src/auth/auth.dto.ts): em
 | FR-PVOC-04 | `en` **khớp chính xác** (chuẩn hóa) từ kho hệ thống → **BẮT BUỘC** tự liên kết tham chiếu + báo "đã có trong kho hệ thống", không tạo bản sao. | DONE       | `normalizeEn`, `UserVocabService.create`        |
 | FR-PVOC-05 | `en` khớp một **biến thể** (lemmatization Mức 1) → **NÊN** gợi ý từ gốc cho người học chọn (dùng gốc / giữ biến thể riêng); **KHÔNG** tự gộp.  | DONE       | `lemmaCandidates`, `CreateWordForm`             |
 | FR-PVOC-06 | Hệ thống **BẮT BUỘC** chặn trùng: không thêm 2 lần cùng từ hệ thống (`@@unique(userId, wordId)`); không tạo 2 custom cùng `normalizedEn`.      | DONE       | schema.prisma, P2002 → 409                      |
-| FR-PVOC-07 | Người học **BẮT BUỘC** sửa/xóa entry; với từ tham chiếu, lưu **override** (`customVi`/`customExample`/`note`) không đổi từ gốc.                | PARTIAL    | API update/delete đã có; UI hiện mới nối delete |
-| FR-PVOC-08 | Người học **BẮT BUỘC** chọn luyện gõ theo **kho cá nhân**; engine gõ tái dùng FR-PRC-\*.                                                       | TODO       | D-08                                            |
+| FR-PVOC-07 | Người học **BẮT BUỘC** sửa/xóa entry; với từ tham chiếu, lưu **override** (`customVi`/`customExample`/`note`) không đổi từ gốc.                | DONE       | EditWordForm sửa/override + xóa; toDto ưu tiên custom |
+| FR-PVOC-08 | Người học **BẮT BUỘC** chọn luyện gõ theo **kho cá nhân**; engine gõ tái dùng FR-PRC-\*.                                                       | DONE       | D-08; ADR-020 tách route đợt 1; đợt 2 = T-13                                            |
 | FR-PVOC-09 | Kho cá nhân **BẮT BUỘC** chỉ truy cập bởi chủ sở hữu (yêu cầu phiên đăng nhập; lọc theo `userId`).                                             | DONE       | UserGuard + query `userId`, `assertOwned`       |
 | FR-PVOC-10 | Lemmatization (luật đuôi + ~200 bất quy tắc) **BẮT BUỘC** đặt ở `@keylish/shared` để web (offline) + API dùng chung.                           | DONE       | `packages/shared/src/lemmatize.ts`              |
 

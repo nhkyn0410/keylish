@@ -74,13 +74,19 @@ export class UserVocabService {
             source: e.word.source,
           }
         : null,
+      // Trả `custom` khi có từ tự tạo HOẶC override trên từ tham chiếu
+      // (customVi/customExample) — để override hiển thị được (FR-PVOC-07).
       custom:
-        e.customEn != null
+        e.customEn != null ||
+        e.customVi != null ||
+        e.customExample != null ||
+        e.customLevel != null ||
+        e.customTopic != null
           ? {
-              en: e.customEn,
-              vi: e.customVi ?? "",
-              example: e.customExample,
-              level: e.customLevel,
+              en: e.customEn ?? e.word?.en ?? "",
+              vi: e.customVi ?? e.word?.vi ?? "",
+              example: e.customExample ?? null,
+              level: e.customLevel ?? null,
               topic: e.customTopic?.slug ?? null,
             }
           : null,

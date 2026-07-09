@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Icon, ProgressStrip, Star, StatPill } from "./primitives";
 import { useTypingSession, type SessionResult, type VocabWord } from "./useTypingSession";
@@ -8,6 +9,7 @@ import {
   type PracticeSettings,
   type RepeatMode,
 } from "./practiceSettings";
+import { PracticeSettingsPanel } from "./practiceSettingsPanel";
 
 function firstMismatch(target: string, typed: string) {
   let i = 0;
@@ -286,6 +288,8 @@ export function TypingScreen({
   onExit,
   settings = DEFAULT_PRACTICE_SETTINGS,
   drill = "practice",
+  onForwardChange,
+  onStructuralChange,
 }: {
   words: VocabWord[];
   contextLabel: string;
@@ -293,6 +297,8 @@ export function TypingScreen({
   onExit: () => void;
   settings?: PracticeSettings;
   drill?: "practice" | "test";
+  onForwardChange?: (next: PracticeSettings) => void; // forward-only: áp ngay
+  onStructuralChange?: (next: PracticeSettings) => void; // repeat: luyện lại cùng bộ
 }) {
   const isTestMode = drill === "test";
   const { hint, example: exampleMode, feedback, live } = settings;
@@ -309,6 +315,7 @@ export function TypingScreen({
     inputHandlers,
     focusInput,
     continueNext,
+    setPaused,
   } = useTypingSession(
     words,
     {
@@ -320,11 +327,40 @@ export function TypingScreen({
     onComplete
   );
 
+  const [panelOpen, setPanelOpen] = useState(false);
+  useEffect(() => {
+    setPaused(panelOpen); // tạm dừng đồng hồ khi mở drawer tuỳ chọn (D-14)
+  }, [panelOpen, setPaused]);
+
   if (!word) return null;
 
   const repeatMode = settings.repeat !== "none" ? settings.repeat : undefined;
   const strictCheck = isTestMode;
   const showLiveCorrection = live !== "off";
+
+  // D-14: Luyện tập cho chỉnh giữa phiên. forward-only áp ngay; `repeat` = luyện lại cùng bộ.
+  function applySetting(key: keyof PracticeSettings, value: string) {
+    if (isTestMode) return;
+    if (key === "repeat" && value !== settings.repeat) {
+      if (window.confirm("Đổi cách lặp sẽ luyện lại từ đầu (cùng bộ từ). Tiếp tục?")) {
+        setPanelOpen(false);
+        onStructuralChange?.({ ...settings, repeat: value as RepeatMode });
+      }
+      return;
+    }
+    onForwardChange?.({ ...settings, [key]: value } as PracticeSettings);
+  }
+  function resetSettings() {
+    if (isTestMode) return;
+    if (DEFAULT_PRACTICE_SETTINGS.repeat !== settings.repeat) {
+      if (window.confirm("Đặt lại mặc định sẽ luyện lại từ đầu (cùng bộ từ). Tiếp tục?")) {
+        setPanelOpen(false);
+        onStructuralChange?.(DEFAULT_PRACTICE_SETTINGS);
+      }
+      return;
+    }
+    onForwardChange?.(DEFAULT_PRACTICE_SETTINGS);
+  }
 
   const practiceCardWidth = "min(100%, 720px)";
   const answerBoxWidth = hideLength
@@ -343,7 +379,7 @@ export function TypingScreen({
       : Array.from(target);
 
   return (
-    <div className="k-screen">
+    <div className="k-screen" style={{ position: "relative" }}>
       <AppHeader>
         {!isTestMode && (
           <>
@@ -357,6 +393,15 @@ export function TypingScreen({
           </>
         )}
         <StatPill icon="clock" value={stats.elapsedStr} />
+        <button
+          type="button"
+          className="k-btn k-btn--sm k-btn--ghost k-b2"
+          onClick={() => setPanelOpen(true)}
+          aria-label="Tuỳ chọn"
+          title="Tuỳ chọn"
+        >
+          <Icon name="gear" size={16} stroke={2.6} />
+        </button>
         <button type="button" className="k-btn k-btn--sm k-btn--ghost k-b2" onClick={onExit}>
           Thoát
         </button>
@@ -611,6 +656,23 @@ export function TypingScreen({
           ) : null}
         </div>
       </div>
+
+      {panelOpen && (
+        <PracticeSettingsPanel
+          settings={settings}
+          locked={isTestMode}
+          onSelect={applySetting}
+          onReset={resetSettings}
+          onClose={() => setPanelOpen(false)}
+          title="Tuỳ chọn · đang luyện"
+          note={
+            <>
+              Đổi <strong>lặp lại</strong> = luyện lại từ đầu (cùng bộ từ). Tuỳ chọn khác áp dụng
+              ngay từ từ kế tiếp.
+            </>
+          }
+        />
+      )}
     </div>
   );
 }

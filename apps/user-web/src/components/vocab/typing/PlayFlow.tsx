@@ -15,7 +15,8 @@ import { Summary } from "./Summary";
 import { Icon } from "./primitives";
 import { ctxFrom, LoadingSession, shuffle } from "./typingFlowParts";
 import { loadWordsForSpec, parsePracticeSpec } from "./practiceSpec";
-import { settingsForDrill } from "./practiceSettings";
+import { DEFAULT_PRACTICE_SETTINGS, settingsForDrill, type PracticeSettings } from "./practiceSettings";
+import { PracticeSettingsPanel } from "./practiceSettingsPanel";
 import { fetchTopics } from "@/infra/vocab/vocabApi";
 import type { VocabLoadState } from "./SetupMethod";
 import type { SessionResult, VocabWord } from "./useTypingSession";
@@ -37,6 +38,8 @@ export function PlayFlow() {
   const [runId, setRunId] = useState(0);
   const [loadState, setLoadState] = useState<VocabLoadState>({ loading: true, source: "seed" });
   const [topicList, setTopicList] = useState<TopicDTO[]>([]);
+  const [liveSettings, setLiveSettings] = useState<PracticeSettings>(DEFAULT_PRACTICE_SETTINGS);
+  const [edited, setEdited] = useState(false); // đã chỉnh tuỳ chọn giữa phiên (LIVE) — D-14
 
   useEffect(() => {
     let active = true;
@@ -57,6 +60,7 @@ export function PlayFlow() {
     }
     let aborted = false;
     setPhase("resolving");
+    setLiveSettings(settingsForDrill(spec.drill, spec.settings));
     setLoadState({ loading: true, source: "seed" });
     loadWordsForSpec(spec).then((res) => {
       if (aborted) return;
@@ -84,16 +88,18 @@ export function PlayFlow() {
   function begin(source: VocabWord[]) {
     setWords(shuffle(source));
     setRunId((x) => x + 1);
+    setEdited(false);
     setPhase("play");
   }
   function complete(r: SessionResult) {
-    setResult(r);
+    setResult({ ...r, editedMidSession: edited });
     setPhase("summary");
   }
   function reviewWrong() {
     if (result && result.wrongWords.length) {
       setWords(result.wrongWords);
       setRunId((x) => x + 1);
+      setEdited(false);
       setPhase("play");
     }
   }
@@ -153,6 +159,8 @@ export function PlayFlow() {
           drill={spec.drill}
           count={pool.length}
           source={spec.source === "personal" ? "Kho của tôi" : "Kho hệ thống"}
+          settings={liveSettings}
+          onSettingsChange={setLiveSettings}
           onStart={() => begin(pool)}
           onBack={backToSetup}
         />
@@ -185,8 +193,16 @@ export function PlayFlow() {
       contextLabel={drillCtx}
       onComplete={complete}
       onExit={backToSetup}
-      settings={settingsForDrill(spec.drill, spec.settings)}
+      settings={liveSettings}
       drill={spec.drill}
+      onForwardChange={(next) => {
+        setLiveSettings(next);
+        setEdited(true);
+      }}
+      onStructuralChange={(next) => {
+        setLiveSettings(next);
+        begin(pool);
+      }}
     />
   ) : (
     <ListenScreen
@@ -204,6 +220,8 @@ function ReadyCard({
   drill,
   count,
   source,
+  settings,
+  onSettingsChange,
   onStart,
   onBack,
 }: {
@@ -211,11 +229,15 @@ function ReadyCard({
   drill: "practice" | "test";
   count: number;
   source: string;
+  settings: PracticeSettings;
+  onSettingsChange: (next: PracticeSettings) => void;
   onStart: () => void;
   onBack: () => void;
 }) {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const isTest = drill === "test";
   return (
-    <div className="k-screen">
+    <div className="k-screen" style={{ position: "relative" }}>
       <div
         style={{
           flex: 1,
@@ -230,7 +252,7 @@ function ReadyCard({
             Sẵn sàng luyện
           </div>
           <h1 className="k-display" style={{ fontSize: 30, lineHeight: 1, marginBottom: 16 }}>
-            {count} từ · {drill === "test" ? "Kiểm tra" : "Luyện tập"}
+            {count} từ · {isTest ? "Kiểm tra" : "Luyện tập"}
           </h1>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
             <span className="k-badge k-badge--white" style={{ boxShadow: "none" }}>
@@ -240,6 +262,15 @@ function ReadyCard({
               {METHOD_LABEL[method]}
             </span>
           </div>
+          <button
+            type="button"
+            className="k-btn k-btn--sm k-b2"
+            onClick={() => setPanelOpen(true)}
+            style={{ width: "100%", marginBottom: 10 }}
+          >
+            <Icon name="gear" size={16} stroke={2.6} />{" "}
+            {isTest ? "Xem tuỳ chọn (khoá)" : "Đổi tuỳ chọn"}
+          </button>
           <div style={{ display: "flex", gap: 10 }}>
             <button className="k-btn k-btn--primary" onClick={onStart} style={{ flex: 1 }}>
               Bắt đầu gõ <Icon name="arrow" size={20} />
@@ -250,6 +281,19 @@ function ReadyCard({
           </div>
         </div>
       </div>
+
+      {panelOpen && (
+        <PracticeSettingsPanel
+          settings={settings}
+          locked={isTest}
+          onSelect={(key, value) =>
+            onSettingsChange({ ...settings, [key]: value } as PracticeSettings)
+          }
+          onReset={() => onSettingsChange(DEFAULT_PRACTICE_SETTINGS)}
+          onClose={() => setPanelOpen(false)}
+          title="Tuỳ chọn phiên"
+        />
+      )}
     </div>
   );
 }

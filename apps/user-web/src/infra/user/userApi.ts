@@ -2,6 +2,7 @@ import type {
   AddVocabResult,
   CefrLevel,
   CreateUserVocabDto,
+  UpdateUserVocabDto,
   UserVocabEntryDto,
 } from "@keylish/shared";
 
@@ -207,6 +208,17 @@ export async function fetchUserVocab(
 export async function createUserVocab(input: CreateUserVocabDto): Promise<AddVocabResult> {
   return requestWithCsrf<AddVocabResult>("/api/user/vocab", {
     method: "POST",
+    ...jsonBody(input),
+  });
+}
+
+/** FR-PVOC-07: sửa/override một mục kho cá nhân (customVi/customExample/note). */
+export async function updateUserVocab(
+  id: string,
+  input: UpdateUserVocabDto
+): Promise<UserVocabEntryDto> {
+  return requestWithCsrf<UserVocabEntryDto>("/api/user/vocab/" + encodeURIComponent(id), {
+    method: "PATCH",
     ...jsonBody(input),
   });
 }

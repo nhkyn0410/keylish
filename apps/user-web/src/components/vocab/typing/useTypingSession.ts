@@ -33,6 +33,7 @@ export interface SessionResult {
   totalChars: number;
   durationMs: number;
   wrongWords: VocabWord[];
+  editedMidSession?: boolean; // đợt 2 / D-14: đã chỉnh tuỳ chọn giữa phiên (Luyện tập)
 }
 
 export type SessionStatus = "typing" | "wrong" | "correct";
@@ -80,17 +81,39 @@ export function useTypingSession(
   const requeued = useRef<Set<string>>(new Set());
   const wrongWords = useRef<VocabWord[]>([]);
   const originalCount = useRef(words.length);
+  const pausedRef = useRef(false);
+  const pauseStartRef = useRef(0);
+  const pausedAccumRef = useRef(0);
 
   const word = queue[index];
   const target = word ? clean(word.en) : "";
   const total = queue.length;
 
+  // Thời gian "chạy thật" = trừ các khoảng tạm dừng (mở drawer tuỳ chọn giữa phiên).
+  function activeElapsedMs() {
+    const now = performance.now();
+    const inPause = pausedRef.current ? now - pauseStartRef.current : 0;
+    return now - startRef.current - pausedAccumRef.current - inPause;
+  }
+
+  function setPaused(on: boolean) {
+    if (on === pausedRef.current) return;
+    if (on) {
+      pausedRef.current = true;
+      pauseStartRef.current = performance.now();
+    } else {
+      pausedAccumRef.current += performance.now() - pauseStartRef.current;
+      pausedRef.current = false;
+    }
+  }
+
   useEffect(() => {
     startRef.current = performance.now();
-    const id = window.setInterval(
-      () => setElapsed(Math.floor((performance.now() - startRef.current) / 1000)),
-      1000
-    );
+    const id = window.setInterval(() => {
+      const now = performance.now();
+      const inPause = pausedRef.current ? now - pauseStartRef.current : 0;
+      setElapsed(Math.floor((now - startRef.current - pausedAccumRef.current - inPause) / 1000));
+    }, 1000);
     return () => {
       window.clearInterval(id);
       if (timerRef.current) window.clearTimeout(timerRef.current);
@@ -106,7 +129,7 @@ export function useTypingSession(
     if (done.current) return;
     done.current = true;
     const c = counters.current;
-    const durationMs = Math.max(1, performance.now() - startRef.current);
+    const durationMs = Math.max(1, activeElapsedMs());
     const minutes = durationMs / 60000;
     onComplete({
       correct: c.correct,
@@ -187,7 +210,7 @@ export function useTypingSession(
   }
 
   function applyValue(raw: string) {
-    if (locked.current || status !== "typing" || !word) return;
+    if (pausedRef.current || locked.current || status !== "typing" || !word) return;
     let v = clean(raw);
     if (trimToTarget) v = v.slice(0, target.length);
     setTyped(v);
@@ -206,6 +229,7 @@ export function useTypingSession(
       applyValue(e.currentTarget.value);
     },
     onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
+      if (pausedRef.current) return;
       if (e.key !== "Enter" || composing.current || e.nativeEvent.isComposing) return;
       e.preventDefault();
       if (status === "wrong") {
@@ -241,5 +265,6 @@ export function useTypingSession(
     inputHandlers,
     focusInput,
     continueNext,
+    setPaused,
   };
 }

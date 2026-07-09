@@ -9,7 +9,7 @@
 | Tên         | Thiết kế UI/UX và Design System |
 | Mã tài liệu | `06-ui-ux`                      |
 | Dự án       | KeyLish                         |
-| Phiên bản   | 0.1.7                           |
+| Phiên bản   | 0.1.10                          |
 | Trạng thái  | Draft                           |
 | Người viết  | AI Agent (soạn thảo SDLC)       |
 | Người duyệt | Nguyễn Hồng Khanh               |
@@ -27,6 +27,9 @@
 | 0.1.5     | 2026-06-20 | AI Agent       | Sắp xếp lại đề mục: §3 Bản đồ màn hình & điều hướng · §4 Luồng người dùng (viết lại, có sơ đồ trạng thái) · §5 primitives · §6 Anatomy 3 màn (theo luồng xử lý giao diện: thiết lập phiên / kho hệ thống / kho của tôi) · §7 RISK.                      |
 | 0.1.6     | 2026-06-20 | AI Agent       | Thiết kế lại §4: phân tầng **as-built** (§4.1–4.5) vs **định hướng** §4.6 — tách route `/typing/setup` + `/typing/play` (session-spec trên query), lifecycle 4 pha, ma trận quyền custom theo pha; mở FR-PVOC-08, chờ ADR-020 + APPROVER (OQ-13/OQ-14). |
 | 0.1.7     | 2026-06-22 | AI Agent       | Chốt **đợt 1 tách route** `/typing/setup` + `/typing/play` (ADR-020 Accepted, OQ-13 đóng → D-13); tách **đợt 2 custom-options** thành DEFERRED (OQ-14); §4.6 chia 2 đợt + lifecycle play tối giản. |
+| 0.1.8     | 2026-06-22 | AI Agent       | §6.3: thêm UI **sửa/override** kho cá nhân (`EditWordForm` → PATCH; `toDto` ưu tiên override cho từ tham chiếu) — **FR-PVOC-07** done; sửa nhãn nhầm FR-PVOC-06→07 ở §6.3/§7. |
+| 0.1.9     | 2026-06-22 | AI Agent       | §4.6 đợt 2: **DEFERRED → APPROVED** (D-14) — cho phép chỉnh giữa phiên **Luyện tập** (Kiểm tra khoá), `result` gắn cờ "đã chỉnh giữa phiên"; `seed` hoãn. Mở **T-13**. |
+| 0.1.10    | 2026-06-22 | AI Agent       | §4.6 đợt 2 **ĐÃ CODE** (DONE-18): pre-commit + in-play panel + pause đồng hồ + cờ result; ghi chú hiện thực (chỉ `repeat` là cấu trúc). |
 
 ### 1.3. Tham chiếu
 
@@ -168,7 +171,7 @@ Sidebar  (Logo → /)
 
 ## 4. Luồng người dùng (User Flow)
 
-> §4.1–§4.5 = luồng **hiện tại (as-built)**. §4.6 = tách route `setup`/`play`: **đợt 1 (route split) ĐÃ DUYỆT** — ADR-020 (Accepted); **đợt 2 (custom options) HOÃN** — OQ-14. **Chưa code** (task T-11).
+> §4.1–§4.5 = luồng **hiện tại (as-built)**. §4.6 = tách route `setup`/`play`: **đợt 1 (route split) ĐÃ XONG** — ADR-020 · DONE-16; **đợt 2 (custom options) ĐÃ CODE** — D-14 · DONE-18.
 
 ### 4.1. UC-01 — Luyện gõ (as-built)
 
@@ -259,7 +262,7 @@ Dòng chảy dữ liệu giữa 2 kho:
 
 ### 4.6. Tách route `setup` / `play` (ADR-020)
 
-> **Đợt 1 — route split: ĐÃ DUYỆT (ADR-020, Accepted) · chưa code** (task T-11). Mục tiêu: mở **FR-PVOC-08** (luyện từ kho hệ thống/cá nhân **không** qua `setup`). **Đợt 2 — custom-options lifecycle: HOÃN (OQ-14)** — đánh dấu DEFERRED bên dưới.
+> **Đợt 1 — route split: ĐÃ XONG (DONE-16)** — mở **FR-PVOC-08** (luyện từ kho **không** qua `setup`). **Đợt 2 — custom-options lifecycle: ĐÃ CODE (DONE-18)** — thiết kế bên dưới.
 
 #### Đợt 1 — Tách route + session-spec (ĐÃ DUYỆT)
 
@@ -305,9 +308,11 @@ D. DONE        Summary (state nội bộ): Luyện lại · Luyện lại từ s
 | Deep-link / F5 trên `/typing/play`  | từ URL                                 | A → B → C |
 | `retry` / review-wrong              | nội bộ, cùng pool                      | thẳng C   |
 
-#### Đợt 2 — Custom options khi vào play (DEFERRED — OQ-14)
+#### Đợt 2 — Custom options khi vào play (DONE — D-14 · DONE-18)
 
-> **Chưa duyệt.** Khi mở: pha **B READY** cho sửa tuỳ chọn **tự do** trước khi gõ; pha **C LIVE** cho sửa **có điều kiện** theo ma trận dưới; thêm "Áp dụng & luyện lại", cờ chỉnh-giữa-phiên, `seed` tái lập mẫu từ.
+> **Đã code (DONE-18):** cho phép chỉnh tuỳ chọn **giữa phiên Luyện tập** (Kiểm tra **vẫn khoá**). Pha **B READY** sửa tự do trước khi gõ; pha **C LIVE** mở ⚙ → **tạm dừng đồng hồ**, sửa theo ma trận dưới; `result` **gắn cờ "đã chỉnh giữa phiên"** → Summary hiện nhãn. `seed` deep-link **hoãn**.
+>
+> _Hiện thực_: in-play chỉ `repeat` là **cấu trúc** (→ luyện lại cùng bộ, cùng pool); `example:cloze` áp tới như hiển thị (forward-only).
 
 **Ma trận quyền custom (đợt 2)**
 
@@ -453,6 +458,7 @@ MOUNT
 CHỌN TỪ ──► panel Chi tiết (badge nguồn + topic)
 TẢI THÊM ──► fetchUserVocab(page+1) ──► nối, lọc trùng theo id
 XÓA (FR-PVOC-07) ──► deleteUserVocab(id) ──► bỏ khỏi list, total--
+SỬA (FR-PVOC-07) ──► modal EditWordForm ──► updateUserVocab(id, { customVi, customExample, note }) ──► thay entry (override hiển thị)
 
 + TẠO TỪ MỚI ──► modal CreateWordForm ──► createUserVocab({ en, vi, example, level, topic, allowVariant })
      ├─ status "linked"  → trùng từ hệ thống sau normalizeEn → liên kết wordId → đóng + reload
@@ -470,8 +476,8 @@ XÓA (FR-PVOC-07) ──► deleteUserVocab(id) ──► bỏ khỏi list, tota
 | --------- | ------------------------------------------------------------------------------------------------- |
 | Rail      | Ô tìm "Tìm trong kho…" + Cấp độ + Chủ đề + nút **+ Tạo từ mới** + đáy đếm `total / đang hiển thị` |
 | Danh sách | Eyebrow "Kho của tôi · N"; mỗi entry có **badge nguồn** Tự tạo (violet) / Hệ thống                |
-| Chi tiết  | Badge nguồn + topic; hành động **Xóa** (danger) + **Luyện từ này**                                |
-| Modal     | `CreateWordForm` — dedup-on-add (linked / created / suggest)                                      |
+| Chi tiết  | Badge nguồn + topic + **ghi chú**; hành động **Xóa** · **Sửa** (override VI/ví dụ/ghi chú) · **Luyện từ này** |
+| Modal     | `CreateWordForm` (dedup-on-add) · `EditWordForm` (sửa/override → `PATCH`)                         |
 
 **Trạng thái**
 
@@ -482,7 +488,7 @@ XÓA (FR-PVOC-07) ──► deleteUserVocab(id) ──► bỏ khỏi list, tota
 | Empty                | _"Không có từ nào khớp bộ lọc. Thêm từ ở **Kho hệ thống**, bấm **Tạo từ mới**, hoặc bỏ bớt cấp độ / chủ đề."_ |
 | Error                | Card đỏ thông báo lỗi                                                                                         |
 
-**Gap** — (1) **FR-PVOC-08**: nút "Luyện từ này" chỉ mở `/typing`, chưa truyền nguồn kho cá nhân. (2) **FR-PVOC-06 (sửa/override)**: mới có **tạo/xóa**, chưa có UI chỉnh sửa entry (`PATCH /api/user/vocab/:id`).
+**Đã đóng** — **FR-PVOC-08** (đợt 1): nút "Luyện…" truyền nguồn vào `/typing/play` (§4.6). **FR-PVOC-07**: `EditWordForm` sửa/override (override trên từ tham chiếu hiển thị nhờ `toDto` ưu tiên custom). **Còn lại**: custom-options lifecycle khi vào play = đợt 2 (T-13, §4.6).
 
 ## 7. RISK
 
@@ -490,4 +496,4 @@ XÓA (FR-PVOC-07) ──► deleteUserVocab(id) ──► bỏ khỏi list, tota
 
 - `design.md` chỉ đánh số `## 8.x`, thiếu mục 1–7. File gốc giữ nguyên — tài liệu này đã sắp xếp lại.
 - Một số component neo (`NeoCard`, `NeoButton`, `NeoBadge`) còn ở dạng primitive — chưa có design token centralized đầy đủ trong CSS variables.
-- **V2.1 — kho cá nhân còn gap UI**: luyện gõ từ kho cá nhân (**FR-PVOC-08**) và sửa/override entry (**FR-PVOC-06**) chưa có giao diện. Xem `08-test` T-PVOC-07 và PROJECT-STATE §2.
+- **V2.1 — kho cá nhân**: luyện gõ từ kho (**FR-PVOC-08** đợt 1) và sửa/override entry (**FR-PVOC-07**) đã có UI. Còn custom-options lifecycle khi vào play (đợt 2 — T-13). Xem `08-test` T-PVOC-07 và PROJECT-STATE.

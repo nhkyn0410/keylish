@@ -1,7 +1,7 @@
 # PROJECT-STATE — Trạng thái sống của KeyLish
 
 > File LIVE, giữ LEAN. Đây là nguồn duy nhất cho trạng thái dự án, RISK, OPEN QUESTION và DECISION đang có tác động.
-> Cập nhật lần cuối: 2026-06-22 (v0.3.7).
+> Cập nhật lần cuối: 2026-06-22 (v0.3.10).
 
 ## 0. Current Snapshot
 
@@ -12,7 +12,7 @@
 | Trạng thái repo         | Có thay đổi chưa commit; chạy `git status --short --branch` trước khi làm tiếp                     |
 | Sản phẩm chính          | Web luyện gõ từ vựng tiếng Anh, local-first                                                        |
 | V1 đã có                | Luyện gõ char-by-char, IME-safe, vocab public, auth user, admin API, traffic analytics             |
-| V2.1 đang dở            | Kho từ vựng cá nhân: API/UI quản lý đã partial; **FR-PVOC-08** đợt 1 (luyện từ kho qua tách route) đã xong; đợt 2 custom options (T-13) chờ |
+| V2.1 đang dở            | Kho từ vựng cá nhân V2.1 hoàn tất: quản lý + sửa/override (FR-PVOC-07) + luyện từ kho (FR-PVOC-08 đợt 1) + custom options khi luyện (đợt 2, D-14) |
 | Không mở scope          | AI feedback/BYOK, flashcard/quiz, OAuth ngoài password — deferred theo D-04                        |
 
 ## 1. Bắt Đầu Từ Đây
@@ -30,12 +30,12 @@
 | —   | `README.md`             | DONE       | —         | Refreshed; khớp as-built                         |
 | —   | `doc/README.md`         | DONE       | —         | New; cửa vào tài liệu                            |
 | 00  | Coding Standard         | In Review  | 0.2.2     | Thêm hard gate docs-first + approval-before-code |
-| 01  | SRS                     | Draft      | 0.2.3     | Kho cá nhân partial; FR-PVOC-08 mở               |
+| 01  | SRS                     | Draft      | 0.2.4     | FR-PVOC-07 + 08 đợt 1 DONE; đợt 2 = T-13          |
 | 02  | HLD                     | Draft      | 0.2.1     | As-built architecture                            |
 | 03  | LLD                     | Draft      | 0.2.1     | Module/API/engine detail                         |
 | 04  | Database Design         | Draft      | 0.2.4     | `UserVocabEntry`, `customTopicId`                |
 | 05  | API Specification       | Draft      | 0.2.4     | 38 endpoint, user vocab partial                  |
-| 06  | UI/UX + Design System   | Draft      | 0.1.7     | As-built flow + tách route typing (đợt 1, ADR-020) |
+| 06  | UI/UX + Design System   | Draft      | 0.1.8     | Tách route typing đợt 1 + UI sửa/override (07)   |
 | 07  | Security & Permission   | Draft      | 0.2.3     | UserGuard/CSRF/userId isolation                  |
 | 08  | Test Plan & Acceptance  | Draft      | 0.1.3     | Test gap còn cao                                 |
 | 09  | Deployment & Operation  | Draft      | 0.1.1     | Docker local, Supabase prod                      |
@@ -71,7 +71,6 @@ Rủi ro đã xử lý trong refresh 2026-06-21: README mô tả API read-only, 
 | ----- | -------------------------------------------------------------------------------------------------- | ------------------------------------- | -------- |
 | OQ-11 | Cơ chế đề cử từ custom phổ biến lên kho hệ thống, có admin duyệt không?                            | Phạm vi admin/data                    | APPROVER |
 | OQ-12 | Khi nào nâng lemmatization lên Mức 2 (`WordForm` từ kaikki, +~35 MB)?                              | Độ chính xác/storage                  | APPROVER |
-| OQ-14 | Có gắn cờ "đã chỉnh tuỳ chọn giữa phiên" vào result và deep-link `/typing/play` thêm `seed` không? | Thống kê/chia sẻ phiên                | APPROVER |
 
 ## 5. DECISION Đã Chốt
 
@@ -90,11 +89,15 @@ Rủi ro đã xử lý trong refresh 2026-06-21: README mô tả API read-only, 
 | D-11 | Lemmatization Mức 1 đặt ở `@keylish/shared`; Mức 2 để dành theo OQ-12.                                                 | 2026-06-15 |
 | D-12 | Local/dev DB mặc định là Docker Postgres; production DB trên dashboard; live admin cần env riêng có chủ ý.             | 2026-06-19 |
 | D-13 | (V2.1) Tách route luyện gõ `/typing/setup` + `/typing/play` qua session-spec (path=hoạt động, query=nguồn) để mở FR-PVOC-08 — ADR-020. Custom-options lifecycle (pre-commit/in-play matrix/seed) HOÃN sang OQ-14/T-13. | 2026-06-22 |
+| D-14 | (V2.1 đợt 2) Cho phép chỉnh tuỳ chọn **giữa phiên Luyện tập**: forward-only áp từ từ kế tiếp; cấu trúc (`repeat/size/example:cloze`) = luyện lại cùng bộ (reset thống kê). **Kiểm tra vẫn khoá** (`TEST_SETTINGS`). `result` gắn cờ "đã chỉnh giữa phiên" (thống kê trung thực). `seed` deep-link để hoãn. | 2026-06-22 |
 
 ## 6. Lịch Sử Gần Nhất
 
 | Ngày       | Việc                                                                                                                                                                                |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-22 | **Code FR-PVOC-08 đợt 2 (T-13 → DONE-18)**: custom options khi luyện (D-14) — tách `PracticeSettingsPanel`; engine `useTypingSession` thêm pause + cờ `editedMidSession`; `PlayFlow` liveSettings + pre-commit ⚙ ở ReadyCard; `TypingScreen` ⚙ in-play (forward-only áp tới · `repeat` = luyện lại cùng bộ · Kiểm tra khoá); Summary nhãn "đã chỉnh giữa phiên". Verify: `pnpm check` 7/7 + preview (pre-commit/in-play panel, pause đồng hồ, 0 console error).                                                                                            |
+| 2026-06-22 | **Chốt OQ-14 → D-14** (APPROVER): cho phép chỉnh tuỳ chọn giữa phiên **Luyện tập** (forward-only áp tới; cấu trúc = luyện lại cùng bộ); **Kiểm tra khoá**; `result` gắn cờ "đã chỉnh giữa phiên"; `seed` hoãn. Mở **đợt 2 (T-13)**; 06 §4.6 DEFERRED→APPROVED. Docs-only.                                                                                            |
+| 2026-06-22 | **Code FR-PVOC-07 (T-14 → DONE-17)**: UI sửa/override kho cá nhân — `EditWordForm` (VI/ví dụ/ghi chú) → `updateUserVocab` (PATCH); `MyVocabSplit` nút Sửa + hiển thị ghi chú + accessor ưu tiên override; backend `toDto` trả `custom` cho override từ tham chiếu (hiển thị được). Verify: `pnpm check` 7/7, api test 23/23.                                                                                            |
 | 2026-06-22 | **Code FR-PVOC-08 đợt 1 (T-11 → DONE-16)**: tách `/typing` → `/typing/setup` (`SetupFlow`) + `/typing/play` (`PlayFlow`) qua session-spec (`practiceSpec.ts`); play tự nạp kho hệ thống/cá nhân (resolving→ready→play→summary); nút "Luyện bộ này/từ này/kho này" điều hướng `/typing/play?source=…`; xoá `TypingFlow.tsx`. Verify: `pnpm check` 7/7 + preview (redirect, setup 200, play ReadyCard→engine, library→play), 0 console error. Custom options = đợt 2 (T-13). |
 | 2026-06-22 | Chốt **đợt 1 tách route** luyện gõ: APPROVER duyệt `/typing/setup` + `/typing/play` qua session-spec; viết **ADR-020** (Accepted), cập nhật `06` §4.6 (chia 2 đợt + lifecycle play tối giản, v0.1.7), `10` v0.2.6, `11` (T-11 → APPROVED/READY, thêm **T-13** đợt 2 DEFERRED, DONE-15). Đóng **OQ-13 → D-13**; **OQ-14** (đợt 2 custom options) còn mở. Docs-only, chưa code.                                                                                            |
 | 2026-06-22 | Viết lại `11-tasks` v0.3.0 thành task register: bỏ ma trận/quy trình dài, giữ gate ngắn, thêm bảng chi tiết task đã thực hiện và backlog còn mở.                                    |

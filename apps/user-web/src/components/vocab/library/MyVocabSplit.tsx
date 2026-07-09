@@ -18,6 +18,7 @@ import {
   fetchUserVocab,
   getErrorMessage,
   pickSystemWord,
+  updateUserVocab,
 } from "@/infra/user/userApi";
 import { LvBadge, SearchGlyph, speak } from "./VocabLibrarySplit";
 
@@ -26,9 +27,10 @@ const HARD_SHADOW = "3px 3px 0 0 #000";
 const PAGE_SIZE = 100;
 
 const enOf = (e: UserVocabEntryDto) => e.word?.en ?? e.custom?.en ?? "";
-const viOf = (e: UserVocabEntryDto) => e.word?.vi ?? e.custom?.vi ?? "";
+// Ưu tiên override cá nhân (custom) rồi mới tới giá trị hệ thống (word) — FR-PVOC-07.
+const viOf = (e: UserVocabEntryDto) => e.custom?.vi || e.word?.vi || "";
 const lvlOf = (e: UserVocabEntryDto) => e.word?.level ?? e.custom?.level ?? null;
-const exOf = (e: UserVocabEntryDto) => e.word?.example ?? e.custom?.example ?? null;
+const exOf = (e: UserVocabEntryDto) => e.custom?.example ?? e.word?.example ?? null;
 const topicOf = (e: UserVocabEntryDto) => e.word?.topic ?? e.custom?.topic ?? null;
 
 export function MyVocabSplit() {
@@ -46,6 +48,7 @@ export function MyVocabSplit() {
   const [page, setPage] = useState(1);
   const [selId, setSelId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [editEntry, setEditEntry] = useState<UserVocabEntryDto | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -546,6 +549,15 @@ export function MyVocabSplit() {
                 </div>
               ) : null}
 
+              {sel.note ? (
+                <div className="k-card" style={{ padding: "12px 14px", position: "relative", zIndex: 1 }}>
+                  <div className="k-h-eyebrow" style={{ fontSize: 11, marginBottom: 6 }}>
+                    Ghi chú
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.45 }}>{sel.note}</div>
+                </div>
+              ) : null}
+
               <div style={{ flex: 1 }} />
               <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 1 }}>
                 <button
@@ -554,6 +566,13 @@ export function MyVocabSplit() {
                   aria-label="Xóa khỏi kho"
                 >
                   <Icon name="x" size={16} stroke={3.5} /> Xóa
+                </button>
+                <button
+                  className="k-btn k-btn--sm k-b2"
+                  onClick={() => setEditEntry(sel)}
+                  aria-label="Sửa mục"
+                >
+                  Sửa
                 </button>
                 <button
                   className="k-btn k-btn--sm k-btn--primary"
@@ -589,6 +608,150 @@ export function MyVocabSplit() {
           }}
         />
       ) : null}
+
+      {editEntry ? (
+        <EditWordForm
+          entry={editEntry}
+          onClose={() => setEditEntry(null)}
+          onSaved={(updated) => {
+            setEntries((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+            setEditEntry(null);
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function EditWordForm({
+  entry,
+  onClose,
+  onSaved,
+}: {
+  entry: UserVocabEntryDto;
+  onClose: () => void;
+  onSaved: (updated: UserVocabEntryDto) => void;
+}) {
+  const isRef = entry.source !== "custom";
+  const [vi, setVi] = useState(viOf(entry));
+  const [example, setExample] = useState(exOf(entry) ?? "");
+  const [note, setNote] = useState(entry.note ?? "");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save() {
+    if (!vi.trim()) {
+      setError("Nghĩa tiếng Việt không được để trống.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const updated = await updateUserVocab(entry.id, {
+        customVi: vi.trim(),
+        customExample: example.trim() ? example.trim() : null,
+        note: note.trim() ? note.trim() : null,
+      });
+      onSaved(updated);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) setError("Đăng nhập để lưu thay đổi.");
+      else setError(getErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const inputStyle = {
+    fontFamily: "var(--font)",
+    fontWeight: 700,
+    fontSize: 15,
+    padding: "10px 12px",
+    background: "var(--neo-white)",
+    outline: "none",
+    width: "100%",
+  } as const;
+  const labelStyle = {
+    display: "grid",
+    gap: 5,
+    fontSize: 12,
+    fontWeight: 900,
+    textTransform: "uppercase",
+  } as const;
+
+  return (
+    <div className="k-welcome-backdrop" onClick={onClose}>
+      <div
+        className="k-card"
+        onClick={(e) => e.stopPropagation()}
+        style={{ width: "min(440px, 100%)", padding: "24px 24px 22px", background: "var(--neo-bg)" }}
+      >
+        <div className="k-badge k-badge--violet" style={{ marginBottom: 6 }}>
+          Sửa mục
+        </div>
+        <div style={{ fontWeight: 900, fontSize: 20, marginBottom: 14 }}>{enOf(entry)}</div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <label style={labelStyle}>
+            {isRef ? "Nghĩa tiếng Việt (override)" : "Nghĩa tiếng Việt"}
+            <input
+              className="k-b2"
+              style={inputStyle}
+              value={vi}
+              maxLength={240}
+              onChange={(e) => setVi(e.target.value)}
+              autoFocus
+            />
+          </label>
+          <label style={labelStyle}>
+            {isRef ? "Ví dụ (override)" : "Ví dụ"}
+            <input
+              className="k-b2"
+              style={inputStyle}
+              value={example}
+              maxLength={500}
+              onChange={(e) => setExample(e.target.value)}
+            />
+          </label>
+          <label style={labelStyle}>
+            Ghi chú
+            <input
+              className="k-b2"
+              style={inputStyle}
+              value={note}
+              maxLength={500}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </label>
+
+          {isRef ? (
+            <p style={{ fontSize: 11.5, fontWeight: 700, opacity: 0.6, lineHeight: 1.4 }}>
+              Từ hệ thống — thay đổi chỉ lưu cho kho của bạn, không đổi từ gốc.
+            </p>
+          ) : null}
+
+          {error ? (
+            <p style={{ fontSize: 12, fontWeight: 800, color: "var(--neo-red)" }}>{error}</p>
+          ) : null}
+
+          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+            <button
+              className="k-btn k-btn--sm k-btn--primary"
+              onClick={save}
+              disabled={submitting}
+              style={{ flex: 1 }}
+            >
+              {submitting ? "Đang lưu…" : "Lưu"}
+            </button>
+            <button
+              className="k-btn k-btn--sm k-btn--ghost k-b2"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

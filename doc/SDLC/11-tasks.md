@@ -9,7 +9,7 @@
 | Tên         | Task Register                                     |
 | Mã tài liệu | `11-tasks`                                        |
 | Dự án       | KeyLish                                           |
-| Phiên bản   | 0.3.2                                             |
+| Phiên bản   | 0.3.5                                             |
 | Trạng thái  | Draft                                             |
 | Người viết  | AI Agent (soạn thảo SDLC)                         |
 | Người duyệt | Nguyễn Hồng Khanh                                 |
@@ -27,6 +27,9 @@
 | 0.3.0     | 2026-06-22 | AI Agent       | Tinh gọn thành task register; bỏ phần governance dài; thêm chi tiết các task đã thực hiện.                          |
 | 0.3.1     | 2026-06-22 | AI Agent       | Chốt đợt 1 tách route (ADR-020): T-11 → APPROVED/READY (đợt 1 — tách route), tách T-13 (custom options, DEFERRED); thêm DONE-15. |
 | 0.3.2     | 2026-06-22 | AI Agent       | T-11 (FR-PVOC-08 đợt 1) → DONE (DONE-16): tách route /typing/setup + /typing/play đã code & verify. |
+| 0.3.3     | 2026-06-22 | AI Agent       | T-14 (FR-PVOC-07 UI sửa/override) → DONE (DONE-17): EditWordForm + toDto override; check 7/7, api test 23/23. |
+| 0.3.4     | 2026-06-22 | AI Agent       | OQ-14 → D-14 (chỉnh giữa phiên Luyện tập; Kiểm tra khoá; result gắn cờ): T-13 → APPROVED/READY; 06 §4.6 đợt 2 APPROVED. |
+| 0.3.5     | 2026-06-22 | AI Agent       | T-13 (FR-PVOC-08 đợt 2 custom options) → DONE (DONE-18): pre-commit + in-play panel + pause + cờ result; check 7/7, preview OK. |
 
 ## 2. Rule tối thiểu trước khi code
 
@@ -75,6 +78,8 @@ Rule chi tiết nằm ở `00-coding-standard.md` §12.0. File này chỉ giữ 
 | DONE-14 | 2026-06-22 | Gỡ trạng thái tạm dừng docs                 | `PROJECT-STATE` chuyển sang ACTIVE; README/doc entrypoint đổi từ resume checklist sang checklist bắt đầu làm việc; release note cập nhật.                                                                  | Prettier check pass; còn “tạm dừng đồng hồ” trong `06-ui-ux` là hành vi UI, không phải trạng thái dự án.              |
 | DONE-15 | 2026-06-22 | Chốt thiết kế tách route typing (đợt 1)     | APPROVER duyệt tách route `/typing/setup` + `/typing/play`; viết ADR-020 (Accepted), `06` §4.6 chia 2 đợt, đóng OQ-13 → D-13, mở T-11 sang APPROVED/READY (đợt 1) và tách T-13 (custom options, DEFERRED).                                            | Docs-only; `06` v0.1.7, `10` v0.2.6, `PROJECT-STATE` cập nhật.                                                         |
 | DONE-16 | 2026-06-22 | FR-PVOC-08 đợt 1: tách route luyện gõ        | Tách `/typing` → `/typing/setup` (`SetupFlow`) + `/typing/play` (`PlayFlow`) qua session-spec (`practiceSpec.ts`: build/parse query + `loadWordsForSpec`); play tự nạp kho hệ thống (`fetchVocab`) / cá nhân (`fetchUserVocab`), vòng đời resolving→ready→play→summary; nút "Luyện bộ này/từ này/kho này" ở `VocabLibrarySplit`/`MyVocabSplit` điều hướng `/typing/play?source=…`; xoá `TypingFlow.tsx`. Custom options = đợt 2 (T-13). | `pnpm check` 7/7 pass; preview verify: /typing redirect, /typing/setup 200, /typing/play?source=system&n=5 → ReadyCard → engine (TỪ 1/5 · LUYỆN TẬP · A1–A2), /vocabulary "Luyện bộ này" → /typing/play?source=system…, 0 console error. |
+| DONE-17 | 2026-06-22 | FR-PVOC-07 UI sửa/override kho cá nhân       | `EditWordForm` (VI/ví dụ/ghi chú) → `updateUserVocab` PATCH; `MyVocabSplit` thêm nút **Sửa** + hiển thị ghi chú; accessor ưu tiên override; backend `toDto` trả `custom` khi có override để hiển thị được. | `pnpm check` 7/7; api test 23/23; render form cần auth+DB nên verify tĩnh + đối chiếu `CreateWordForm`. |
+| DONE-18 | 2026-06-22 | FR-PVOC-08 đợt 2: custom options khi luyện (D-14) | Tách `PracticeSettingsPanel` dùng chung; `useTypingSession` thêm **pause** + cờ `editedMidSession`; `PlayFlow` giữ `liveSettings`+`edited`, pre-commit ⚙ ở ReadyCard; `TypingScreen` ⚙ in-play (forward-only áp tới · `repeat` = luyện lại cùng bộ · Kiểm tra khoá); `Summary` hiện nhãn "đã chỉnh giữa phiên". | `pnpm check` 7/7; preview: pre-commit panel, in-play panel + **pause** (đồng hồ đứng 0:14→0:14 khi mở, 0:15 khi đóng), forward-only áp, 0 console error. |
 
 ## 4. Task còn mở
 
@@ -92,7 +97,8 @@ Rule chi tiết nằm ở `00-coding-standard.md` §12.0. File này chỉ giữ 
 | T-09 | TODO    | PENDING  | TODO     | Thấp     | Pre-commit hook                                  | R-10                | `00-coding-standard.md`, `08-test.md`            | Hook lint/typecheck hoặc cảnh báo rõ trước commit.                                                                        |
 | T-10 | TODO    | PENDING  | TODO     | Trung    | CI pipeline                                      | R-7                 | `08-test.md`, `09-deployment.md`                 | GitHub Actions chạy `pnpm install -> pnpm check -> pnpm test`.                                                            |
 | T-11 | DONE    | APPROVED | READY    | Cao      | FR-PVOC-08 đợt 1 — hoàn tất (xem DONE-16)            | R-16, ADR-020, D-13 | `01-srs.md`, `06-ui-ux.md`, ADR-020              | Chốt route/session spec; nút "Luyện..." truyền nguồn/từ; engine tái dùng FR-PRC-\*.                                       |
-| T-13 | TODO | PENDING | TODO | Trung | FR-PVOC-08 đợt 2: custom-options lifecycle khi vào play | OQ-14, 06 §4.6 (DEFERRED) | `06-ui-ux.md` §4.6 đợt 2 | Pre-commit sửa tự do; ma trận forward-only/cấu trúc khi LIVE; cờ chỉnh-giữa-phiên/seed theo OQ-14. |
+| T-13 | DONE | APPROVED | READY | Trung | FR-PVOC-08 đợt 2: custom-options lifecycle khi vào play | D-14, 06 §4.6 | `06-ui-ux.md` §4.6 đợt 2 | Pre-commit (B READY) sửa tự do; C LIVE: forward-only áp tới / cấu trúc = luyện lại cùng bộ; **Kiểm tra khoá**; `result` gắn cờ "đã chỉnh giữa phiên" (D-14); `seed` hoãn. |
+| T-14 | DONE | APPROVED | READY | Trung | FR-PVOC-07 UI sửa/override entry kho cá nhân (xem DONE-17) | R-7, FR-PVOC-07 | `06-ui-ux.md` §6.3, `05-api.md` §13 | Form sửa VI/ví dụ/ghi chú → `PATCH /api/user/vocab/:id`; override trên từ tham chiếu hiển thị được; `pnpm check` + api test pass. |
 | T-12 | TODO    | PENDING  | N/A      | Thấp     | Dọn pointer tài liệu/code còn treo               | R-2                 | N/A                                              | Comment/link cũ trỏ file không tồn tại được sửa về `09-deployment.md` hoặc `doc/README.md`.                               |
 
 ## 5. Ưu tiên đề xuất

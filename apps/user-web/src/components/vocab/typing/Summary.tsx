@@ -89,6 +89,15 @@ export function Summary({
               <span className="k-h-eyebrow" style={{ color: "#7a6a00" }}>
                 {contextLabel}
               </span>
+              {result.editedMidSession ? (
+                <span
+                  className="k-badge k-badge--white"
+                  style={{ boxShadow: "none", fontSize: 11 }}
+                  title="Đã chỉnh tuỳ chọn giữa phiên Luyện tập"
+                >
+                  Đã chỉnh tuỳ chọn giữa phiên
+                </span>
+              ) : null}
             </div>
             <h1 className="k-display" style={{ fontSize: 56 }}>
               Tổng kết phiên
