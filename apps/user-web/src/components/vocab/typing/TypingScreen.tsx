@@ -458,6 +458,15 @@ export function TypingScreen({
           >
             {word.vi}
           </span>
+          {word.pos ? (
+            <span
+              className="k-badge k-badge--white"
+              style={{ boxShadow: "none", fontSize: 11 }}
+              title="Từ loại"
+            >
+              {word.pos}
+            </span>
+          ) : null}
         </div>
 
         {/* EN hero on a pedestal */}

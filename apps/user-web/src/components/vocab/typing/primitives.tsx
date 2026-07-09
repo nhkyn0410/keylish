@@ -1,30 +1,93 @@
 /* Neo-brutalist shared primitives for KeyLish F-009 screens.
    Ported from the Claude Design bundle (neo-primitives.jsx) to typed TSX. */
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
+import {
+  AlignLeft,
+  ArrowLeftRight,
+  ArrowRight,
+  BookOpen,
+  Check,
+  ChevronRight,
+  Clock,
+  Compass,
+  Filter,
+  Flame,
+  Home,
+  Keyboard,
+  KeyRound,
+  ListChecks,
+  Lock,
+  MessageSquare,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  Settings,
+  Star as LucideStar,
+  Target,
+  Volume2,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 
 export type IconName =
   | "arrow"
-  | "check"
-  | "x"
-  | "lock"
-  | "volume"
-  | "play"
-  | "replay"
-  | "star"
-  | "flame"
-  | "target"
-  | "clock"
-  | "keyboard"
-  | "swap"
-  | "refresh"
   | "book"
-  | "filter"
+  | "chat"
+  | "check"
   | "chevright"
-  | "gear";
+  | "clock"
+  | "compass"
+  | "filter"
+  | "flame"
+  | "gear"
+  | "home"
+  | "keyboard"
+  | "key"
+  | "list"
+  | "lock"
+  | "play"
+  | "refresh"
+  | "replay"
+  | "search"
+  | "sentence"
+  | "star"
+  | "swap"
+  | "target"
+  | "volume"
+  | "x";
 
 export type CharState = "ok" | "bad" | "cur" | "todo";
 
-export function Icon({
+const ICONS: Record<IconName, LucideIcon> = {
+  arrow: ArrowRight,
+  book: BookOpen,
+  chat: MessageSquare,
+  check: Check,
+  chevright: ChevronRight,
+  clock: Clock,
+  compass: Compass,
+  filter: Filter,
+  flame: Flame,
+  gear: Settings,
+  home: Home,
+  keyboard: Keyboard,
+  key: KeyRound,
+  list: ListChecks,
+  lock: Lock,
+  play: Play,
+  refresh: RefreshCw,
+  replay: RotateCcw,
+  search: Search,
+  sentence: AlignLeft,
+  star: LucideStar,
+  swap: ArrowLeftRight,
+  target: Target,
+  volume: Volume2,
+  x: X,
+};
+
+export function KeylishIcon({
   name,
   size = 24,
   stroke = 3,
@@ -37,126 +100,20 @@ export function Icon({
   fill?: string;
   style?: CSSProperties;
 }) {
-  const p = {
-    fill,
-    stroke: "currentColor",
-    strokeWidth: stroke,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
-  const paths: Record<IconName, ReactNode> = {
-    arrow: (
-      <g {...p}>
-        <path d="M4 12h15" />
-        <path d="M13 6l7 6-7 6" />
-      </g>
-    ),
-    check: (
-      <g {...p}>
-        <path d="M4 12l5 6L20 5" />
-      </g>
-    ),
-    x: (
-      <g {...p}>
-        <path d="M5 5l14 14M19 5L5 19" />
-      </g>
-    ),
-    lock: (
-      <g {...p}>
-        <rect x="4.5" y="11" width="15" height="9.5" />
-        <path d="M7.5 11V8a4.5 4.5 0 0 1 9 0v3" />
-      </g>
-    ),
-    volume: (
-      <g {...p}>
-        <path d="M4 9v6h4l5 4V5L8 9H4z" />
-        <path d="M16.5 8.5a5 5 0 0 1 0 7" />
-        <path d="M19.5 6a9 9 0 0 1 0 12" />
-      </g>
-    ),
-    play: (
-      <g {...p} fill="currentColor">
-        <path d="M7 5l12 7-12 7V5z" />
-      </g>
-    ),
-    replay: (
-      <g {...p}>
-        <path d="M4 12a8 8 0 1 1 2.3 5.6" />
-        <path d="M4 20v-5h5" />
-      </g>
-    ),
-    star: (
-      <g {...p} fill="currentColor">
-        <path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17.9 6.5 19.8l1.1-6.1L3.1 9.4l6.1-.8L12 3z" />
-      </g>
-    ),
-    flame: (
-      <g {...p}>
-        <path d="M12 3c1 3-1.5 4-1.5 6.5A2.5 2.5 0 0 0 13 12c.5-1.5 0-2.5 0-2.5 2 1.5 4 4 4 7a5.5 5.5 0 0 1-11 0c0-3 2.5-5 3.5-7C10.5 6.5 11 4.5 12 3z" />
-      </g>
-    ),
-    target: (
-      <g {...p}>
-        <circle cx="12" cy="12" r="8.5" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="12" cy="12" r="0.6" fill="currentColor" />
-      </g>
-    ),
-    clock: (
-      <g {...p}>
-        <circle cx="12" cy="12" r="8.5" />
-        <path d="M12 7.5V12l3 2" />
-      </g>
-    ),
-    keyboard: (
-      <g {...p}>
-        <rect x="2.5" y="6" width="19" height="12" />
-        <path d="M6 9.5h0M9 9.5h0M12 9.5h0M15 9.5h0M18 9.5h0M7 13h10" />
-      </g>
-    ),
-    swap: (
-      <g {...p}>
-        <path d="M7 4L3 8l4 4" />
-        <path d="M3 8h12" />
-        <path d="M17 20l4-4-4-4" />
-        <path d="M21 16H9" />
-      </g>
-    ),
-    refresh: (
-      <g {...p}>
-        <path d="M20 11a8 8 0 1 0-1 5" />
-        <path d="M20 4v5h-5" />
-      </g>
-    ),
-    book: (
-      <g {...p}>
-        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v14H6.5A2.5 2.5 0 0 0 4 19.5V5.5z" />
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      </g>
-    ),
-    filter: (
-      <g {...p}>
-        <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z" />
-      </g>
-    ),
-    chevright: (
-      <g {...p}>
-        <path d="M9 5l7 7-7 7" />
-      </g>
-    ),
-    gear: (
-      <g {...p}>
-        <circle cx="12" cy="12" r="3.2" />
-        <path d="M12 3.2v2.4M12 18.4v2.4M3.2 12h2.4M18.4 12h2.4M5.8 5.8l1.7 1.7M16.5 16.5l1.7 1.7M18.2 5.8l-1.7 1.7M7.5 16.5l-1.7 1.7" />
-      </g>
-    ),
-  };
+  const Glyph = ICONS[name];
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" style={style} aria-hidden="true">
-      {paths[name] ?? null}
-    </svg>
+    <Glyph
+      aria-hidden="true"
+      absoluteStrokeWidth
+      fill={fill}
+      size={size}
+      strokeWidth={stroke}
+      style={style}
+    />
   );
 }
+
+export const Icon = KeylishIcon;
 
 export function Star({
   size = 64,
@@ -170,22 +127,16 @@ export function Star({
   style?: CSSProperties;
 }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      className={spin ? "k-spin" : ""}
-      style={style}
+    <LucideStar
       aria-hidden="true"
-    >
-      <path
-        d="M50 4l11 26 28 2-21 19 7 28-25-15-25 15 7-28L11 32l28-2z"
-        fill={fill}
-        stroke="#000"
-        strokeWidth="5"
-        strokeLinejoin="round"
-      />
-    </svg>
+      absoluteStrokeWidth
+      className={spin ? "k-spin" : ""}
+      fill={fill}
+      size={size}
+      stroke="#000"
+      strokeWidth={5}
+      style={style}
+    />
   );
 }
 
@@ -235,12 +186,7 @@ export function Logo({ scale = 1 }: { scale?: number }) {
           flex: "0 0 auto",
         }}
       >
-        <svg width={26 * scale} height={26 * scale} viewBox="0 0 24 24" aria-hidden="true">
-          <g fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="8" cy="8" r="4.5" fill="#000" />
-            <path d="M11 11l8 8M16 16l2-2M19 19l2-2" />
-          </g>
-        </svg>
+        <Icon name="key" size={26 * scale} stroke={3} style={{ color: "#000" }} />
       </div>
       <span
         style={{

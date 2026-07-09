@@ -138,6 +138,7 @@ const entryToVocabWord = (entry: UserVocabEntryDto): VocabWord => ({
   vi: entry.word?.vi ?? entry.custom?.vi ?? "",
   level: entry.word?.level ?? entry.custom?.level ?? null,
   topic: entry.word?.topic ?? entry.custom?.topic ?? null,
+  pos: entry.word?.pos ?? null,
   ipa: entry.word?.ipa ?? null,
   example: entry.word?.example ?? entry.custom?.example ?? null,
 });

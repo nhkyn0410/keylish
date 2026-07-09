@@ -32,20 +32,7 @@ export function SearchGlyph({
   stroke?: number;
   style?: CSSProperties;
 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={style}>
-      <g
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={stroke}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="10.5" cy="10.5" r="6.5" />
-        <path d="M15.5 15.5L21 21" />
-      </g>
-    </svg>
-  );
+  return <Icon name="search" size={size} stroke={stroke} style={style} />;
 }
 
 export function LvBadge({ lv }: { lv: WordDTO["level"] }) {
@@ -493,6 +480,14 @@ export function VocabLibrarySplit() {
                   }}
                 >
                   <LvBadge lv={sel.level} />
+                  {sel.pos ? (
+                    <span
+                      className="k-badge k-badge--white"
+                      style={{ boxShadow: "none", fontSize: 10 }}
+                    >
+                      {sel.pos}
+                    </span>
+                  ) : null}
                   {sel.topic ? (
                     <span
                       className="k-badge k-badge--white"

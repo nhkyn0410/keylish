@@ -32,6 +32,7 @@ const viOf = (e: UserVocabEntryDto) => e.custom?.vi || e.word?.vi || "";
 const lvlOf = (e: UserVocabEntryDto) => e.word?.level ?? e.custom?.level ?? null;
 const exOf = (e: UserVocabEntryDto) => e.custom?.example ?? e.word?.example ?? null;
 const topicOf = (e: UserVocabEntryDto) => e.word?.topic ?? e.custom?.topic ?? null;
+const posOf = (e: UserVocabEntryDto) => e.word?.pos ?? null;
 
 export function MyVocabSplit() {
   const router = useRouter();
@@ -505,6 +506,14 @@ export function MyVocabSplit() {
                   }}
                 >
                   <LvBadge lv={lvlOf(sel)} />
+                  {posOf(sel) ? (
+                    <span
+                      className="k-badge k-badge--white"
+                      style={{ boxShadow: "none", fontSize: 10 }}
+                    >
+                      {posOf(sel)}
+                    </span>
+                  ) : null}
                   <span
                     className="k-badge k-badge--white"
                     style={{ boxShadow: "none", fontSize: 10 }}

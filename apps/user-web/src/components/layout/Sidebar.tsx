@@ -1,70 +1,14 @@
 "use client";
 
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserSessionActions } from "@/components/auth/UserSessionActions";
 import { Icon, Logo, type IconName } from "@/components/vocab/typing/primitives";
 
-/* Icon đậm nét bổ sung không có trong primitives (port từ design navbar.jsx). */
-function NavIcon({
-  name,
-  size = 20,
-  stroke = 3,
-}: {
-  name: string;
-  size?: number;
-  stroke?: number;
-}) {
-  const p = {
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: stroke,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
-  const paths: Record<string, ReactNode> = {
-    home: (
-      <g {...p}>
-        <path d="M4 11l8-7 8 7" />
-        <path d="M6 10v9h12v-9" />
-      </g>
-    ),
-    compass: (
-      <g {...p}>
-        <circle cx="12" cy="12" r="8.5" />
-        <path d="M15.5 8.5l-2.2 5.3-5.3 2.2 2.2-5.3z" />
-      </g>
-    ),
-    sentence: (
-      <g {...p}>
-        <path d="M4 6h16M4 11h16M4 16h9" />
-      </g>
-    ),
-    list: (
-      <g {...p}>
-        <path d="M9 6h11M9 12h11M9 18h11" />
-        <path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeWidth={stroke + 1} />
-      </g>
-    ),
-    chat: (
-      <g {...p}>
-        <path d="M4 5h16v11H9l-4 4v-4H4z" />
-        <path d="M8 9.5h8M8 12.5h5" />
-      </g>
-    ),
-  };
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      {paths[name] ?? null}
-    </svg>
-  );
-}
-
-function ItemIcon({ name, custom }: { name: string; custom?: boolean }) {
+function ItemIcon({ name }: { name: IconName }) {
   return (
     <span className="k-side-icon">
-      {custom ? <NavIcon name={name} /> : <Icon name={name as IconName} size={20} stroke={3} />}
+      <Icon name={name} size={20} stroke={3} />
     </span>
   );
 }
@@ -73,13 +17,11 @@ function SideLink({
   href,
   label,
   icon,
-  custom,
   active,
 }: {
   href: string;
   label: string;
-  icon: string;
-  custom?: boolean;
+  icon: IconName;
   active: boolean;
 }) {
   return (
@@ -88,7 +30,7 @@ function SideLink({
       className={"k-side-item " + (active ? "k-side-item--active" : "k-side-item--idle")}
       aria-current={active ? "page" : undefined}
     >
-      <ItemIcon name={icon} custom={custom} />
+      <ItemIcon name={icon} />
       <span className="k-side-label">{label}</span>
     </Link>
   );
@@ -124,12 +66,11 @@ export function Sidebar() {
       </div>
 
       <nav className="k-side-nav" aria-label="Điều hướng chính">
-        <SideLink href="/" label="Trang chủ" icon="home" custom active={isActive("/")} />
+        <SideLink href="/" label="Trang chủ" icon="home" active={isActive("/")} />
         <SideLink
           href={exploreHref}
           label="Khám phá"
           icon="compass"
-          custom
           active={isActive(exploreHref)}
         />
         <div className="k-side-divider" />
@@ -139,7 +80,6 @@ export function Sidebar() {
           href={sentenceHref}
           label="Luyện câu"
           icon="sentence"
-          custom
           active={isActive(sentenceHref)}
         />
         <div className="k-side-divider" />
@@ -153,7 +93,6 @@ export function Sidebar() {
           href={lessonsHref}
           label="Quản lý bài"
           icon="list"
-          custom
           active={isActive(lessonsHref)}
         />
         <div className="k-side-divider" />
@@ -163,7 +102,7 @@ export function Sidebar() {
           rel="noopener noreferrer"
           className="k-side-item k-side-item--idle"
         >
-          <ItemIcon name="chat" custom />
+          <ItemIcon name="chat" />
           <span className="k-side-label">Góp ý</span>
         </a>
       </nav>

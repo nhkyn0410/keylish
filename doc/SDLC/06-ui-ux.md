@@ -9,7 +9,7 @@
 | Tên         | Thiết kế UI/UX và Design System |
 | Mã tài liệu | `06-ui-ux`                      |
 | Dự án       | KeyLish                         |
-| Phiên bản   | 0.1.10                          |
+| Phiên bản   | 0.1.12                          |
 | Trạng thái  | Draft                           |
 | Người viết  | AI Agent (soạn thảo SDLC)       |
 | Người duyệt | Nguyễn Hồng Khanh               |
@@ -26,10 +26,12 @@
 | 0.1.4     | 2026-06-20 | AI Agent       | Bổ sung filter cấp độ/chủ đề và topic tùy chọn khi tạo từ mới trong Kho của tôi.                                                                                                                                                                        |
 | 0.1.5     | 2026-06-20 | AI Agent       | Sắp xếp lại đề mục: §3 Bản đồ màn hình & điều hướng · §4 Luồng người dùng (viết lại, có sơ đồ trạng thái) · §5 primitives · §6 Anatomy 3 màn (theo luồng xử lý giao diện: thiết lập phiên / kho hệ thống / kho của tôi) · §7 RISK.                      |
 | 0.1.6     | 2026-06-20 | AI Agent       | Thiết kế lại §4: phân tầng **as-built** (§4.1–4.5) vs **định hướng** §4.6 — tách route `/typing/setup` + `/typing/play` (session-spec trên query), lifecycle 4 pha, ma trận quyền custom theo pha; mở FR-PVOC-08, chờ ADR-020 + APPROVER (OQ-13/OQ-14). |
-| 0.1.7     | 2026-06-22 | AI Agent       | Chốt **đợt 1 tách route** `/typing/setup` + `/typing/play` (ADR-020 Accepted, OQ-13 đóng → D-13); tách **đợt 2 custom-options** thành DEFERRED (OQ-14); §4.6 chia 2 đợt + lifecycle play tối giản. |
-| 0.1.8     | 2026-06-22 | AI Agent       | §6.3: thêm UI **sửa/override** kho cá nhân (`EditWordForm` → PATCH; `toDto` ưu tiên override cho từ tham chiếu) — **FR-PVOC-07** done; sửa nhãn nhầm FR-PVOC-06→07 ở §6.3/§7. |
-| 0.1.9     | 2026-06-22 | AI Agent       | §4.6 đợt 2: **DEFERRED → APPROVED** (D-14) — cho phép chỉnh giữa phiên **Luyện tập** (Kiểm tra khoá), `result` gắn cờ "đã chỉnh giữa phiên"; `seed` hoãn. Mở **T-13**. |
-| 0.1.10    | 2026-06-22 | AI Agent       | §4.6 đợt 2 **ĐÃ CODE** (DONE-18): pre-commit + in-play panel + pause đồng hồ + cờ result; ghi chú hiện thực (chỉ `repeat` là cấu trúc). |
+| 0.1.7     | 2026-06-22 | AI Agent       | Chốt **đợt 1 tách route** `/typing/setup` + `/typing/play` (ADR-020 Accepted, OQ-13 đóng → D-13); tách **đợt 2 custom-options** thành DEFERRED (OQ-14); §4.6 chia 2 đợt + lifecycle play tối giản.                                                      |
+| 0.1.8     | 2026-06-22 | AI Agent       | §6.3: thêm UI **sửa/override** kho cá nhân (`EditWordForm` → PATCH; `toDto` ưu tiên override cho từ tham chiếu) — **FR-PVOC-07** done; sửa nhãn nhầm FR-PVOC-06→07 ở §6.3/§7.                                                                           |
+| 0.1.9     | 2026-06-22 | AI Agent       | §4.6 đợt 2: **DEFERRED → APPROVED** (D-14) — cho phép chỉnh giữa phiên **Luyện tập** (Kiểm tra khoá), `result` gắn cờ "đã chỉnh giữa phiên"; `seed` hoãn. Mở **T-13**.                                                                                  |
+| 0.1.10    | 2026-06-22 | AI Agent       | §4.6 đợt 2 **ĐÃ CODE** (DONE-18): pre-commit + in-play panel + pause đồng hồ + cờ result; ghi chú hiện thực (chỉ `repeat` là cấu trúc).                                                                                                                 |
+| 0.1.11    | 2026-06-22 | AI Agent       | Hiển thị **từ loại (`pos`)**: badge cạnh nghĩa ở màn gõ + panel chi tiết 2 kho (T-15) — trước đó `pos` mang end-to-end nhưng UI bỏ.                                                                                                                     |
+| 0.1.12    | 2026-07-09 | AI Agent       | Chuẩn hoá icon user-web: chọn `lucide-react` qua adapter `KeylishIcon`/`Icon`, stroke dày cố định, bỏ icon tự vẽ rải rác (T-16).                                                                                                                        |
 
 ### 1.3. Tham chiếu
 
@@ -89,6 +91,13 @@ WARNING: Đỏ không còn là CTA (CTA chính = vàng).
 **Card:** `bg-white border-4 shadow-[8px→12px]`, hover lift `hover:-translate-y-1 shadow-[12px_12px_0px_0px_#000]`
 
 **Input/Textarea:** `border-4 bg-white font-bold`, violet nền khi focus (`focus-visible:bg-neo-violet shadow-[4px_4px_0px_0px_#000]`)
+
+### 2.4.1. Iconography
+
+- Icon hệ thống user-web dùng `lucide-react` qua adapter `KeylishIcon`/`Icon`; không vẽ SVG riêng trong từng component.
+- Preset neo: `strokeWidth` khoảng 3, `absoluteStrokeWidth`, `currentColor`; kích thước 18-20 cho nút/sidebar, 24-32 cho minh hoạ nhỏ.
+- Nút hành động dùng icon thật (`ArrowRight`, `ChevronRight`, ...), không dùng ký tự mũi tên thay cho icon; ký tự `→` chỉ giữ trong nhãn mô tả luồng như "Nghĩa VI → Gõ EN".
+- Logo KeyLish được phép giữ chữ/khung thương hiệu, nhưng glyph key đi qua icon set để đồng bộ nét.
 
 ### 2.5. KeyLish-specific Components
 
@@ -204,6 +213,8 @@ Sidebar  (Logo → /)
    └─ Đổi phương pháp  → [setup]
 ```
 
+> Màn gõ (`TypingScreen`, pha play) hiện **từ loại (`pos`)** ngay cạnh nghĩa VI — badge trắng, ẩn nếu từ không có `pos`.
+
 ### 4.2. UC-02/03 — Đăng ký / Đăng nhập
 
 `AuthFrame` (route group `(auth)`). Validation Zod client-side; submit kèm CSRF double-submit.
@@ -303,7 +314,7 @@ D. DONE        Summary (state nội bộ): Luyện lại · Luyện lại từ s
 
 | Vào từ                              | Spec                                   | Đáp       |
 | ----------------------------------- | -------------------------------------- | --------- |
-| `/typing/setup` (đã cấu hình)       | đầy đủ                                  | B → C     |
+| `/typing/setup` (đã cấu hình)       | đầy đủ                                 | B → C     |
 | Kho từ vựng "Luyện bộ này / từ này" | source + filter, method/drill mặc định | A → B → C |
 | Deep-link / F5 trên `/typing/play`  | từ URL                                 | A → B → C |
 | `retry` / review-wrong              | nội bộ, cùng pool                      | thẳng C   |
@@ -421,11 +432,11 @@ PHÁT ÂM (TTS) ──► speak(en)
 
 **Vùng & nguồn dữ liệu**
 
-| Vùng      | Nội dung                                                                                                                                                                             | Nguồn           |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
-| Rail      | Ô tìm (nền violet khi có chữ) · chips **Cấp độ** A1–C2 · chips **Chủ đề** (count + trạng thái chọn, chỉ render khi có topic) · nút **Luyện bộ này** (đáy, disabled khi chưa chọn từ) | `fetchTopics()` |
-| Danh sách | Mỗi từ = 1 nút: EN (124px, w900) · VI (ellipsis) · `LvBadge` · `PICKED` nếu đã pick · chevron. Từ chọn: nền vàng + `sh-md` + nhô `translate(-2,-2)`                                  | `fetchVocab`    |
-| Chi tiết  | Card **Chi tiết từ** (EN 32px + nút TTS + IPA + VI + `LvBadge` + topic) · card **Ví dụ** (vàng nhạt `k-focus`, ẩn nếu trống) · card **Kho cá nhân** · nút **Luyện từ này**           | mục đang chọn   |
+| Vùng      | Nội dung                                                                                                                                                                                       | Nguồn           |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Rail      | Ô tìm (nền violet khi có chữ) · chips **Cấp độ** A1–C2 · chips **Chủ đề** (count + trạng thái chọn, chỉ render khi có topic) · nút **Luyện bộ này** (đáy, disabled khi chưa chọn từ)           | `fetchTopics()` |
+| Danh sách | Mỗi từ = 1 nút: EN (124px, w900) · VI (ellipsis) · `LvBadge` · `PICKED` nếu đã pick · chevron. Từ chọn: nền vàng + `sh-md` + nhô `translate(-2,-2)`                                            | `fetchVocab`    |
+| Chi tiết  | Card **Chi tiết từ** (EN 32px + nút TTS + IPA + VI + `LvBadge` + **từ loại `pos`** + topic) · card **Ví dụ** (vàng nhạt `k-focus`, ẩn nếu trống) · card **Kho cá nhân** · nút **Luyện từ này** | mục đang chọn   |
 
 **Trạng thái**
 
@@ -472,12 +483,12 @@ SỬA (FR-PVOC-07) ──► modal EditWordForm ──► updateUserVocab(id, { 
 
 **Khác biệt so với §6.2**
 
-| Vùng      | Kho của tôi                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------------- |
-| Rail      | Ô tìm "Tìm trong kho…" + Cấp độ + Chủ đề + nút **+ Tạo từ mới** + đáy đếm `total / đang hiển thị` |
-| Danh sách | Eyebrow "Kho của tôi · N"; mỗi entry có **badge nguồn** Tự tạo (violet) / Hệ thống                |
-| Chi tiết  | Badge nguồn + topic + **ghi chú**; hành động **Xóa** · **Sửa** (override VI/ví dụ/ghi chú) · **Luyện từ này** |
-| Modal     | `CreateWordForm` (dedup-on-add) · `EditWordForm` (sửa/override → `PATCH`)                         |
+| Vùng      | Kho của tôi                                                                                                                       |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Rail      | Ô tìm "Tìm trong kho…" + Cấp độ + Chủ đề + nút **+ Tạo từ mới** + đáy đếm `total / đang hiển thị`                                 |
+| Danh sách | Eyebrow "Kho của tôi · N"; mỗi entry có **badge nguồn** Tự tạo (violet) / Hệ thống                                                |
+| Chi tiết  | Badge nguồn + **từ loại `pos`** + topic + **ghi chú**; hành động **Xóa** · **Sửa** (override VI/ví dụ/ghi chú) · **Luyện từ này** |
+| Modal     | `CreateWordForm` (dedup-on-add) · `EditWordForm` (sửa/override → `PATCH`)                                                         |
 
 **Trạng thái**
 

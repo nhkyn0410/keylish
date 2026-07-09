@@ -1,26 +1,26 @@
 # PROJECT-STATE — Trạng thái sống của KeyLish
 
 > File LIVE, giữ LEAN. Đây là nguồn duy nhất cho trạng thái dự án, RISK, OPEN QUESTION và DECISION đang có tác động.
-> Cập nhật lần cuối: 2026-06-22 (v0.3.10).
+> Cập nhật lần cuối: 2026-07-09 (v0.3.12).
 
 ## 0. Current Snapshot
 
-| Mục                     | Trạng thái                                                                                         |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| Tình trạng dự án        | **ACTIVE** — tài liệu đang mở để tiếp tục phát triển                                               |
-| Nhánh làm việc gần nhất | `feature/kho-tu-vung`                                                                              |
-| Trạng thái repo         | Có thay đổi chưa commit; chạy `git status --short --branch` trước khi làm tiếp                     |
-| Sản phẩm chính          | Web luyện gõ từ vựng tiếng Anh, local-first                                                        |
-| V1 đã có                | Luyện gõ char-by-char, IME-safe, vocab public, auth user, admin API, traffic analytics             |
-| V2.1 đang dở            | Kho từ vựng cá nhân V2.1 hoàn tất: quản lý + sửa/override (FR-PVOC-07) + luyện từ kho (FR-PVOC-08 đợt 1) + custom options khi luyện (đợt 2, D-14) |
-| Không mở scope          | AI feedback/BYOK, flashcard/quiz, OAuth ngoài password — deferred theo D-04                        |
+| Mục                     | Trạng thái                                                                                                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tình trạng dự án        | **ACTIVE** — tài liệu đang mở để tiếp tục phát triển                                                                                                                                                    |
+| Nhánh làm việc gần nhất | `feature/kho-tu-vung`                                                                                                                                                                                   |
+| Trạng thái repo         | Có thay đổi chưa commit; chạy `git status --short --branch` trước khi làm tiếp                                                                                                                          |
+| Sản phẩm chính          | Web luyện gõ từ vựng tiếng Anh, local-first                                                                                                                                                             |
+| V1 đã có                | Luyện gõ char-by-char, IME-safe, vocab public, auth user, admin API, traffic analytics                                                                                                                  |
+| V2.1 hiện tại           | Kho từ vựng cá nhân V2.1 hoàn tất: quản lý + sửa/override (FR-PVOC-07) + luyện từ kho (FR-PVOC-08 đợt 1) + custom options khi luyện (đợt 2, D-14); user-web đã có badge `pos` và icon Lucide thống nhất |
+| Không mở scope          | AI feedback/BYOK, flashcard/quiz, OAuth ngoài password — deferred theo D-04                                                                                                                             |
 
 ## 1. Bắt Đầu Từ Đây
 
 1. Đọc `doc/README.md`, file này, rồi `SDLC/11-tasks.md`.
 2. Chạy baseline: `pnpm install`, `pnpm docker:up`, `pnpm db:generate`, `pnpm db:migrate`, `pnpm check`, `pnpm test`.
 3. Kiểm tra DB local đã có migration `20260620093000_add_user_vocab_custom_topic`.
-4. Nếu tiếp tục V2.1: T-11 (FR-PVOC-08 đợt 1 — tách route) đã APPROVED/READY → code được; OQ-14 (đợt 2 custom options) còn chờ.
+4. Nếu tiếp tục ổn định UI user-web: đọc `06-ui-ux.md` §2.4.1; icon mới phải đi qua `KeylishIcon`/`Icon` (`lucide-react`).
 5. Nếu chỉ ổn định V1, ưu tiên test engine gõ (R-7/T-03) và CI (T-10).
 
 ## 2. Trạng Thái Tài Liệu
@@ -30,17 +30,17 @@
 | —   | `README.md`             | DONE       | —         | Refreshed; khớp as-built                         |
 | —   | `doc/README.md`         | DONE       | —         | New; cửa vào tài liệu                            |
 | 00  | Coding Standard         | In Review  | 0.2.2     | Thêm hard gate docs-first + approval-before-code |
-| 01  | SRS                     | Draft      | 0.2.4     | FR-PVOC-07 + 08 đợt 1 DONE; đợt 2 = T-13          |
+| 01  | SRS                     | Draft      | 0.2.4     | FR-PVOC-07 + 08 đợt 1 DONE; đợt 2 = T-13         |
 | 02  | HLD                     | Draft      | 0.2.1     | As-built architecture                            |
 | 03  | LLD                     | Draft      | 0.2.1     | Module/API/engine detail                         |
 | 04  | Database Design         | Draft      | 0.2.4     | `UserVocabEntry`, `customTopicId`                |
 | 05  | API Specification       | Draft      | 0.2.4     | 38 endpoint, user vocab partial                  |
-| 06  | UI/UX + Design System   | Draft      | 0.1.8     | Tách route typing đợt 1 + UI sửa/override (07)   |
+| 06  | UI/UX + Design System   | Draft      | 0.1.12    | `pos` badge + iconography Lucide/KeylishIcon     |
 | 07  | Security & Permission   | Draft      | 0.2.3     | UserGuard/CSRF/userId isolation                  |
 | 08  | Test Plan & Acceptance  | Draft      | 0.1.3     | Test gap còn cao                                 |
 | 09  | Deployment & Operation  | Draft      | 0.1.1     | Docker local, Supabase prod                      |
 | 10  | ADR                     | Draft      | 0.2.6     | ADR-019; + ADR-020 tách route typing             |
-| 11  | Task Register           | Draft      | 0.3.1     | T-11 đợt 1 APPROVED/READY; T-13 (đợt 2) DEFERRED  |
+| 11  | Task Register           | Draft      | 0.3.8     | T-16 icon user-web DONE (DONE-20)                |
 | 12  | Release Notes           | Draft      | 0.1.3     | Ghi nhận docs refresh + ACTIVE state             |
 | —   | `context/DOMAIN-MAP.md` | DONE       | —         | Module/entity/state map                          |
 | —   | `context/GLOSSARY.md`   | DONE       | —         | Thuật ngữ                                        |
@@ -59,7 +59,6 @@ Quy ước status: Draft → In Review → Approved. Chỉ APPROVER (Nguyễn H�
 | R-11 | `admin-web` chưa nối `@keylish/shared`, dễ lệch contract.                                                                       | Trung bình | T-07.                                                             |
 | R-13 | Rate-limit đang in-memory, mất khi restart.                                                                                     | Thấp       | T-08 trước khi public rộng.                                       |
 | R-14 | Free tier DB: kho cá nhân không phải nút thắt; full catalog/WordForm mới là lever chính.                                        | Thấp       | Theo dõi khi seed full catalog hoặc mở OQ-12.                     |
-| R-16 | FR-PVOC-08 đợt 1 (tách route, nút "Luyện..." truyền nguồn) đã xong & verify; còn đợt 2 custom options khi vào play.                                      | Trung bình | Đợt 1 xong (DONE-16). Đợt 2 = T-13, chờ APPROVER chốt OQ-14.  |
 | R-17 | Worktree còn thay đổi chưa commit từ các phiên trước.                                                                           | Trung bình | Khi làm tiếp, kiểm tra `git status`, đọc diff trước khi sửa tiếp. |
 | R-18 | Swagger/OpenAPI description trong `apps/api/src/main.ts` vẫn ghi "read-only vocabulary API" dù API đã có auth/admin/user-vocab. | Thấp       | T-02: cập nhật description khi chạm API docs/code.                |
 
@@ -67,46 +66,49 @@ Rủi ro đã xử lý trong refresh 2026-06-21: README mô tả API read-only, 
 
 ## 4. OPEN QUESTION Đang Mở
 
-| Mã    | Mô tả                                                                                              | Ảnh hưởng                             | Ai quyết |
-| ----- | -------------------------------------------------------------------------------------------------- | ------------------------------------- | -------- |
-| OQ-11 | Cơ chế đề cử từ custom phổ biến lên kho hệ thống, có admin duyệt không?                            | Phạm vi admin/data                    | APPROVER |
-| OQ-12 | Khi nào nâng lemmatization lên Mức 2 (`WordForm` từ kaikki, +~35 MB)?                              | Độ chính xác/storage                  | APPROVER |
+| Mã    | Mô tả                                                                   | Ảnh hưởng            | Ai quyết |
+| ----- | ----------------------------------------------------------------------- | -------------------- | -------- |
+| OQ-11 | Cơ chế đề cử từ custom phổ biến lên kho hệ thống, có admin duyệt không? | Phạm vi admin/data   | APPROVER |
+| OQ-12 | Khi nào nâng lemmatization lên Mức 2 (`WordForm` từ kaikki, +~35 MB)?   | Độ chính xác/storage | APPROVER |
 
 ## 5. DECISION Đã Chốt
 
-| Mã   | Quyết định                                                                                                             | Ngày       |
-| ---- | ---------------------------------------------------------------------------------------------------------------------- | ---------- |
-| D-01 | Di chuyển nội dung design/vocab-pipeline vào SDLC; giữ file gốc chỉ trỏ tới SSOT khi cần.                              | 2026-06-15 |
-| D-02 | README được phép sửa để khớp as-built; thực hiện trong refresh 2026-06-21.                                             | 2026-06-15 |
-| D-03 | V1 không lưu lịch sử/tiến độ phiên luyện gõ; chỉ cache vocab response.                                                 | 2026-06-15 |
-| D-04 | AI feedback/BYOK, flashcard/quiz, OAuth ngoài password deferred V2.                                                    | 2026-06-15 |
-| D-05 | Giữ layering as-built, nhưng có task tách engine gõ sang domain.                                                       | 2026-06-15 |
-| D-06 | `admin-web` local-only; production giữ `ADMIN_API_ENABLED=false`.                                                      | 2026-06-15 |
-| D-07 | Auth/admin giữ không version ở V1; chuẩn hóa version khi public/breaking-change kế.                                    | 2026-06-15 |
-| D-08 | Kho cá nhân dùng `UserVocabEntry`: tham chiếu `Word` hoặc custom, không copy nguyên từ hệ thống.                       | 2026-06-15 |
-| D-09 | Dedup-on-add: exact match tự liên kết; biến thể chỉ gợi ý; unique theo `(userId, wordId)` và `(userId, normalizedEn)`. | 2026-06-15 |
-| D-10 | V2.1 scope: kho hệ thống + cá nhân + pick + tự tạo; AI custom hoãn V2.2.                                               | 2026-06-15 |
-| D-11 | Lemmatization Mức 1 đặt ở `@keylish/shared`; Mức 2 để dành theo OQ-12.                                                 | 2026-06-15 |
-| D-12 | Local/dev DB mặc định là Docker Postgres; production DB trên dashboard; live admin cần env riêng có chủ ý.             | 2026-06-19 |
-| D-13 | (V2.1) Tách route luyện gõ `/typing/setup` + `/typing/play` qua session-spec (path=hoạt động, query=nguồn) để mở FR-PVOC-08 — ADR-020. Custom-options lifecycle (pre-commit/in-play matrix/seed) HOÃN sang OQ-14/T-13. | 2026-06-22 |
+| Mã   | Quyết định                                                                                                                                                                                                                                                                                                 | Ngày       |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| D-01 | Di chuyển nội dung design/vocab-pipeline vào SDLC; giữ file gốc chỉ trỏ tới SSOT khi cần.                                                                                                                                                                                                                  | 2026-06-15 |
+| D-02 | README được phép sửa để khớp as-built; thực hiện trong refresh 2026-06-21.                                                                                                                                                                                                                                 | 2026-06-15 |
+| D-03 | V1 không lưu lịch sử/tiến độ phiên luyện gõ; chỉ cache vocab response.                                                                                                                                                                                                                                     | 2026-06-15 |
+| D-04 | AI feedback/BYOK, flashcard/quiz, OAuth ngoài password deferred V2.                                                                                                                                                                                                                                        | 2026-06-15 |
+| D-05 | Giữ layering as-built, nhưng có task tách engine gõ sang domain.                                                                                                                                                                                                                                           | 2026-06-15 |
+| D-06 | `admin-web` local-only; production giữ `ADMIN_API_ENABLED=false`.                                                                                                                                                                                                                                          | 2026-06-15 |
+| D-07 | Auth/admin giữ không version ở V1; chuẩn hóa version khi public/breaking-change kế.                                                                                                                                                                                                                        | 2026-06-15 |
+| D-08 | Kho cá nhân dùng `UserVocabEntry`: tham chiếu `Word` hoặc custom, không copy nguyên từ hệ thống.                                                                                                                                                                                                           | 2026-06-15 |
+| D-09 | Dedup-on-add: exact match tự liên kết; biến thể chỉ gợi ý; unique theo `(userId, wordId)` và `(userId, normalizedEn)`.                                                                                                                                                                                     | 2026-06-15 |
+| D-10 | V2.1 scope: kho hệ thống + cá nhân + pick + tự tạo; AI custom hoãn V2.2.                                                                                                                                                                                                                                   | 2026-06-15 |
+| D-11 | Lemmatization Mức 1 đặt ở `@keylish/shared`; Mức 2 để dành theo OQ-12.                                                                                                                                                                                                                                     | 2026-06-15 |
+| D-12 | Local/dev DB mặc định là Docker Postgres; production DB trên dashboard; live admin cần env riêng có chủ ý.                                                                                                                                                                                                 | 2026-06-19 |
+| D-13 | (V2.1) Tách route luyện gõ `/typing/setup` + `/typing/play` qua session-spec (path=hoạt động, query=nguồn) để mở FR-PVOC-08 — ADR-020. Custom-options lifecycle (pre-commit/in-play matrix/seed) HOÃN sang OQ-14/T-13.                                                                                     | 2026-06-22 |
 | D-14 | (V2.1 đợt 2) Cho phép chỉnh tuỳ chọn **giữa phiên Luyện tập**: forward-only áp từ từ kế tiếp; cấu trúc (`repeat/size/example:cloze`) = luyện lại cùng bộ (reset thống kê). **Kiểm tra vẫn khoá** (`TEST_SETTINGS`). `result` gắn cờ "đã chỉnh giữa phiên" (thống kê trung thực). `seed` deep-link để hoãn. | 2026-06-22 |
+| D-15 | user-web chuẩn hoá icon bằng `lucide-react` qua adapter `KeylishIcon`/`Icon`; không vẽ SVG icon riêng trong component, không thêm icon dependency mới.                                                                                                                                                     | 2026-07-09 |
 
 ## 6. Lịch Sử Gần Nhất
 
-| Ngày       | Việc                                                                                                                                                                                |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-22 | **Code FR-PVOC-08 đợt 2 (T-13 → DONE-18)**: custom options khi luyện (D-14) — tách `PracticeSettingsPanel`; engine `useTypingSession` thêm pause + cờ `editedMidSession`; `PlayFlow` liveSettings + pre-commit ⚙ ở ReadyCard; `TypingScreen` ⚙ in-play (forward-only áp tới · `repeat` = luyện lại cùng bộ · Kiểm tra khoá); Summary nhãn "đã chỉnh giữa phiên". Verify: `pnpm check` 7/7 + preview (pre-commit/in-play panel, pause đồng hồ, 0 console error).                                                                                            |
-| 2026-06-22 | **Chốt OQ-14 → D-14** (APPROVER): cho phép chỉnh tuỳ chọn giữa phiên **Luyện tập** (forward-only áp tới; cấu trúc = luyện lại cùng bộ); **Kiểm tra khoá**; `result` gắn cờ "đã chỉnh giữa phiên"; `seed` hoãn. Mở **đợt 2 (T-13)**; 06 §4.6 DEFERRED→APPROVED. Docs-only.                                                                                            |
-| 2026-06-22 | **Code FR-PVOC-07 (T-14 → DONE-17)**: UI sửa/override kho cá nhân — `EditWordForm` (VI/ví dụ/ghi chú) → `updateUserVocab` (PATCH); `MyVocabSplit` nút Sửa + hiển thị ghi chú + accessor ưu tiên override; backend `toDto` trả `custom` cho override từ tham chiếu (hiển thị được). Verify: `pnpm check` 7/7, api test 23/23.                                                                                            |
+| Ngày       | Việc                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-09 | **Chuẩn hoá icon user-web (T-16 → DONE-20)**: dùng `lucide-react` qua `KeylishIcon`/`Icon`, mở rộng icon cho sidebar/search/logo, bỏ `NavIcon` và SVG path tự vẽ. Verify: `pnpm --filter @keylish/user-web typecheck`, `pnpm check` 7/7, preview desktop `/` + `/vocabulary` 0 console error.                                                                                                                                                                              |
+| 2026-06-22 | **Hiển thị từ loại `pos` (T-15 → DONE-19)**: badge cạnh nghĩa VI ở màn gõ (`TypingScreen`) + panel chi tiết 2 kho; `entryToVocabWord` map `pos`. Trước đó `pos` mang end-to-end (DB/API/DTO) nhưng UI bỏ — nay surface. Verify: `pnpm check` 7/7.                                                                                                                                                                                                                          |
+| 2026-06-22 | **Code FR-PVOC-08 đợt 2 (T-13 → DONE-18)**: custom options khi luyện (D-14) — tách `PracticeSettingsPanel`; engine `useTypingSession` thêm pause + cờ `editedMidSession`; `PlayFlow` liveSettings + pre-commit ⚙ ở ReadyCard; `TypingScreen` ⚙ in-play (forward-only áp tới · `repeat` = luyện lại cùng bộ · Kiểm tra khoá); Summary nhãn "đã chỉnh giữa phiên". Verify: `pnpm check` 7/7 + preview (pre-commit/in-play panel, pause đồng hồ, 0 console error).            |
+| 2026-06-22 | **Chốt OQ-14 → D-14** (APPROVER): cho phép chỉnh tuỳ chọn giữa phiên **Luyện tập** (forward-only áp tới; cấu trúc = luyện lại cùng bộ); **Kiểm tra khoá**; `result` gắn cờ "đã chỉnh giữa phiên"; `seed` hoãn. Mở **đợt 2 (T-13)**; 06 §4.6 DEFERRED→APPROVED. Docs-only.                                                                                                                                                                                                  |
+| 2026-06-22 | **Code FR-PVOC-07 (T-14 → DONE-17)**: UI sửa/override kho cá nhân — `EditWordForm` (VI/ví dụ/ghi chú) → `updateUserVocab` (PATCH); `MyVocabSplit` nút Sửa + hiển thị ghi chú + accessor ưu tiên override; backend `toDto` trả `custom` cho override từ tham chiếu (hiển thị được). Verify: `pnpm check` 7/7, api test 23/23.                                                                                                                                               |
 | 2026-06-22 | **Code FR-PVOC-08 đợt 1 (T-11 → DONE-16)**: tách `/typing` → `/typing/setup` (`SetupFlow`) + `/typing/play` (`PlayFlow`) qua session-spec (`practiceSpec.ts`); play tự nạp kho hệ thống/cá nhân (resolving→ready→play→summary); nút "Luyện bộ này/từ này/kho này" điều hướng `/typing/play?source=…`; xoá `TypingFlow.tsx`. Verify: `pnpm check` 7/7 + preview (redirect, setup 200, play ReadyCard→engine, library→play), 0 console error. Custom options = đợt 2 (T-13). |
-| 2026-06-22 | Chốt **đợt 1 tách route** luyện gõ: APPROVER duyệt `/typing/setup` + `/typing/play` qua session-spec; viết **ADR-020** (Accepted), cập nhật `06` §4.6 (chia 2 đợt + lifecycle play tối giản, v0.1.7), `10` v0.2.6, `11` (T-11 → APPROVED/READY, thêm **T-13** đợt 2 DEFERRED, DONE-15). Đóng **OQ-13 → D-13**; **OQ-14** (đợt 2 custom options) còn mở. Docs-only, chưa code.                                                                                            |
-| 2026-06-22 | Viết lại `11-tasks` v0.3.0 thành task register: bỏ ma trận/quy trình dài, giữ gate ngắn, thêm bảng chi tiết task đã thực hiện và backlog còn mở.                                    |
-| 2026-06-22 | Chuyển `PROJECT-STATE` sang ACTIVE; README/doc entrypoint đổi sang checklist bắt đầu làm việc.                                                                                      |
-| 2026-06-22 | Cập nhật `00-coding-standard` v0.2.2 + `AGENTS.md`/`CLAUDE.md`/`doc/README.md`: rule bắt buộc docs-first, chỉ code khi `Approval = APPROVED` và `Doc gate = READY`.                 |
-| 2026-06-22 | Viết lại `11-tasks` v0.2.0: thêm rule bắt buộc cập nhật docs liên quan trước code, không code task chưa APPROVED, impact matrix, workflow gate và backlog có `Approval`/`Doc gate`. |
-| 2026-06-22 | Chuẩn hoá trạng thái tài liệu: bỏ toàn bộ emoji/icon trạng thái, dùng nhãn chữ `DONE` / `PARTIAL` / `TODO`; Prettier toàn bộ Markdown.                                              |
-| 2026-06-21 | Docs refresh: thêm `doc/README.md`, viết lại README as-built, thu gọn PROJECT-STATE, cập nhật pointer docs/task/release note.                                                       |
-| 2026-06-20 | Thiết kế lại `06-ui-ux` §4: phân tầng as-built vs planned, route `/typing/setup` + `/typing/play`, lifecycle 4 pha, mở OQ-13/OQ-14.                                                 |
-| 2026-06-20 | Bổ sung filter cấp độ/chủ đề cho Kho của tôi; thêm `customTopicId` + migration; docs `01/04/05/06/08/10` cập nhật.                                                                  |
-| 2026-06-20 | Sync V2.1 theo code partial; kho cá nhân chuyển từ planned sang partial/as-built; thêm unit test create/list.                                                                       |
-| 2026-06-19 | Audit V2.1: schema/shared/API/UI/security đã partial; thiếu FR-PVOC-08, UI sửa/override, coverage.                                                                                  |
+| 2026-06-22 | Chốt **đợt 1 tách route** luyện gõ: APPROVER duyệt `/typing/setup` + `/typing/play` qua session-spec; viết **ADR-020** (Accepted), cập nhật `06` §4.6 (chia 2 đợt + lifecycle play tối giản, v0.1.7), `10` v0.2.6, `11` (T-11 → APPROVED/READY, thêm **T-13** đợt 2 DEFERRED, DONE-15). Đóng **OQ-13 → D-13**; **OQ-14** (đợt 2 custom options) còn mở. Docs-only, chưa code.                                                                                              |
+| 2026-06-22 | Viết lại `11-tasks` v0.3.0 thành task register: bỏ ma trận/quy trình dài, giữ gate ngắn, thêm bảng chi tiết task đã thực hiện và backlog còn mở.                                                                                                                                                                                                                                                                                                                           |
+| 2026-06-22 | Chuyển `PROJECT-STATE` sang ACTIVE; README/doc entrypoint đổi sang checklist bắt đầu làm việc.                                                                                                                                                                                                                                                                                                                                                                             |
+| 2026-06-22 | Cập nhật `00-coding-standard` v0.2.2 + `AGENTS.md`/`CLAUDE.md`/`doc/README.md`: rule bắt buộc docs-first, chỉ code khi `Approval = APPROVED` và `Doc gate = READY`.                                                                                                                                                                                                                                                                                                        |
+| 2026-06-22 | Viết lại `11-tasks` v0.2.0: thêm rule bắt buộc cập nhật docs liên quan trước code, không code task chưa APPROVED, impact matrix, workflow gate và backlog có `Approval`/`Doc gate`.                                                                                                                                                                                                                                                                                        |
+| 2026-06-22 | Chuẩn hoá trạng thái tài liệu: bỏ toàn bộ emoji/icon trạng thái, dùng nhãn chữ `DONE` / `PARTIAL` / `TODO`; Prettier toàn bộ Markdown.                                                                                                                                                                                                                                                                                                                                     |
+| 2026-06-21 | Docs refresh: thêm `doc/README.md`, viết lại README as-built, thu gọn PROJECT-STATE, cập nhật pointer docs/task/release note.                                                                                                                                                                                                                                                                                                                                              |
+| 2026-06-20 | Thiết kế lại `06-ui-ux` §4: phân tầng as-built vs planned, route `/typing/setup` + `/typing/play`, lifecycle 4 pha, mở OQ-13/OQ-14.                                                                                                                                                                                                                                                                                                                                        |
+| 2026-06-20 | Bổ sung filter cấp độ/chủ đề cho Kho của tôi; thêm `customTopicId` + migration; docs `01/04/05/06/08/10` cập nhật.                                                                                                                                                                                                                                                                                                                                                         |
+| 2026-06-20 | Sync V2.1 theo code partial; kho cá nhân chuyển từ planned sang partial/as-built; thêm unit test create/list.                                                                                                                                                                                                                                                                                                                                                              |
+| 2026-06-19 | Audit V2.1: schema/shared/API/UI/security đã partial; thiếu FR-PVOC-08, UI sửa/override, coverage.                                                                                                                                                                                                                                                                                                                                                                         |
